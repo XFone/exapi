@@ -1,0 +1,69 @@
+#
+# $Id: $
+#
+# Makefile for utilities
+#
+# Copyright (c) 2004-2006. All rights reserved.
+#
+# $Log: Makefile,v $
+#
+#
+
+BUILD = ../../build
+SUBDIRS = test
+RULESET = ICC
+
+# Makefile rules pre processing
+include $(BUILD)/Makefile.pre
+
+# Build target (TARGET_LIB, TARGET_SHLIB or TARGET_PRG)
+TARGET_LIB = libiutils
+
+# Depended Modules (libraries)
+# MODULES += PTHREAD
+
+# CFLAGS, CXXFLAGS and STDCCFLAGS
+CXXFLAGS += -Wno-deprecated
+
+# CXXFLAGS_GCC, CXXFLAGS_MSVC, JFLAGS
+
+# Host is MSB or LSB (byte) : x86 and arm
+STDCCFLAGS += -DHOST_IS_MSB=0
+
+# LDFLAGS
+
+# Sources to build
+SOURCES = osdeps/osutil.c \
+	  ConConf.c       \
+	  DumpFunc.c      \
+	  DateTime.c      \
+	  TimeType.c      \
+	  Log.c	          \
+	  Trace.c         \
+	  RingBuff.c      \
+	  Cli.c
+
+SOURCES_CXX   = xpp/Cli.cxx
+SOURCES_LINUX = osdeps/linux/ShellUtil.c \
+                osdeps/linux/PidFile.c   \
+                osdeps/linux/debug/Segfault.c
+SOURCES_WIN32 = osdeps/win32/FileCache.c \
+                osdeps/win32/getopt.c    \
+                osdeps/win32/getopt1.c
+
+SOURCES_DARWIN = $(SOURCES_LINUX)
+
+# SOURCES_ANDRIOD
+# SOURCES_ARCH_ARM
+# SOURCES_ARCH_MIPS
+# SOURCES_ARCH_MIPS64
+# SOURCES_ARCH_X64
+# SOURCES_ARCH_IA32
+
+# Other build tag or rules
+# BUILD_WITH_MAKE  = trunk/Makfile
+# BUILD_WITH_SCONS = SConscript
+# BUILD_WITH_ANT   = build.xml
+
+# Makefile rules post processing
+include $(BUILD)/Makefile.post

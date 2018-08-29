@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xredis", "xredis.vcxproj", "{7CBFBE6A-D484-4BC4-B4A7-AD708C00AB93}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libredis", "libredis.vcxproj", "{7D0ABF5E-47C1-4908-9079-9B99600C288D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CBFBE6A-D484-4BC4-B4A7-AD708C00AB93}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7CBFBE6A-D484-4BC4-B4A7-AD708C00AB93}.Debug|Win32.Build.0 = Debug|Win32
+		{7CBFBE6A-D484-4BC4-B4A7-AD708C00AB93}.Release|Win32.ActiveCfg = Release|Win32
+		{7CBFBE6A-D484-4BC4-B4A7-AD708C00AB93}.Release|Win32.Build.0 = Release|Win32
+		{7D0ABF5E-47C1-4908-9079-9B99600C288D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7D0ABF5E-47C1-4908-9079-9B99600C288D}.Debug|Win32.Build.0 = Debug|Win32
+		{7D0ABF5E-47C1-4908-9079-9B99600C288D}.Release|Win32.ActiveCfg = Release|Win32
+		{7D0ABF5E-47C1-4908-9079-9B99600C288D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,99 @@
+                            iUtils README
+                           ---------------
+                                          - Last updated by xiaofeng 2015-03-13
+
+This library contains some C/C++ functions & tools very lightweight for embed 
+system, and is cross-platform (linux/unix/windows):
+
+Base                Base C/C++ macros
+Log                 C/C++ Log tools for stdout/syslog/GUI-callback
+Trace               Trace with level/category and output to stdout/stderr.
+                    All trace codes can be emitted in release version.
+DumpFunc            Dump functions (snprintf) for hex, binary, time, etc.
+DateTime            Simple date-time functions
+ConConf             Config tools using getopt().
+Cli                 Console and command line tools
+RingBuff            A very simple ring-buffer implementation
+
+
+--- Log ---
+
+LOGFILE(level, "format"...)
+-----------------------------
+LOG lines can be (redirect) to logfile, stdout, syslog and GUI win-form callbacks
+
+* Log Level *
+
+LOG_EMERG  (0)      system is unusable
+LOG_ALERT  (1)      action must be taken immediately
+LOG_CRIT   (2)      critical conditions
+LOG_ERROR  (3)      error conditions
+LOG_WARN   (4)      warning conditions
+LOG_NOTICE (5)      normal but significant condition
+LOG_INFO   (6)      informational
+LOG_DEBUG  (7)      debug-level messages
+LOG_DEBUG_STACK     stack debug-level messages
+
+* Log example *
+
+[test-log.c]
+#include "Base.h"
+#include "Log.h"
+
+void test-log()
+{
+    LOGFILE(LOG_WARN, "current log level is %d", g_nLogPriority);
+    return 0;
+}
+
+> make
+> ./testlog -v 7
+20060303-160010.925 NOTC: Log level set to LOG_DEBUG
+20060303-160010.926 WARN: test-log.c:7: current log level is 7
+
+
+--- Trace ---
+
+TRACE(level, "format"...), TRACE_THREAD(level, ...)
+---------------------------------------------------
+
+TRACE is to console(stdout), for unit-testing and debugging only, will be 
+ignored in release version.
+
+* Trace Level *
+
+1:  Main task general event
+2:  Process or task critical event (error)
+3:  Queue / FIFO / Message / Primitive
+4:  I/O Events, (timer events)
+5:  Thread/mutex/semaphore create/destroy event
+6:  Encoder/Decoder events, packet parsing, (timer timeouts)
+7:  Internal state machine / state transition / function callbacks
+8:  Data and stream flow
+9:  Memory management
+
+* (Trace-Level can be customized in diferent application)
+
+TRACE_THREAD is as TRACE, the difference is that TRACE_THREAD can work well
+with thread.
+
+TRACE_IF(lev, cmd) calls the cmd function when the trace level matched. It is 
+used to insert user-defined debug command in source code.
+
+* Trace Example *
+
+[test-trace.c]
+#include "Base.h"
+#include "Trace.h"
+
+void test_trace()
+{
+    set_trace_prefix("UTILTEST");
+    set_trace_level(7, TRUE); // print timestamp
+
+    TRACE(3, "current trace level is %d", g_nTraceLevel);
+}
+
+> make
+> ./testtrace
+160010.926 UTILTEST[3]: current trace level is 7

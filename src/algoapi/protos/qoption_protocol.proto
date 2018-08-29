@@ -1,0 +1,409 @@
+syntax = "proto2"; 
+package autotrade;
+// version: 2016-12-23 dai
+
+// Begin added by xiaofeng 2015-2-20 for C#
+//import "google/protobuf/csharp_options.proto";
+//option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+//option (google.protobuf.csharp_file_options).umbrella_classname = "QOptionProtos";
+
+option optimize_for = SPEED;
+// End added
+
+// For Java
+//option java_package = "libswordfish";
+//option java_outer_classname = "QOptionPB";
+
+//*********************************************
+//账号
+//*********************************************
+//登录
+message OptionLoginReqt
+{
+    optional int32 funcid = 1[default=13000001];
+}
+
+message OptionLoginResp
+{
+    optional int32 funcid = 1[default=13100001];
+    required string fund_account = 2;
+}
+
+//*********************************************
+//交易
+//*********************************************
+//单笔委托
+message OptionOrderReqt
+{
+    optional int32 funcid = 1[default=13001001];
+    required string code = 2;
+    optional string name = 3;
+    required int64 price = 4;
+    required int64 qty = 5;
+    required int64 bsflag = 6; //1-买入 2-卖出 3-申购 4-赎回
+    required int64 market = 7;
+    optional int32 kpcbj = 8; // 0：自动，1：开仓，2：平仓
+    optional int32 order_price_type = 9[default=0];   //order_price_type报单价格类型：0-LIMIT，1-ANY
+    optional int32 covered_flag = 10[default=0];       //covered_flag备兑标志 0-非备兑(naked) 1备兑
+    optional string match_condition=11[default='GFD'];  // match_condition订单有效时间类型GFD-当日有效 FOK-即时成交否则撤销 IOC-即时成交剩余撤销, 默认GFD
+    required string order_id = 12; //OrderID
+    optional string request_id = 13; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string order_type = 14; //委托类型 'General_Order' - 'Automatically_Withdraw'
+    optional string parent_id = 15;  //ParentID
+    optional string parent_type = 16;  //Parent Type
+    optional string robot_id = 17;
+    optional string trader_id = 18;
+    optional int64 request_time = 19[default=0];    //142345231时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 20[default=1000];  //精确到毫秒 1000
+    optional int64 request_date = 21[default=0];    //20141120 精确到毫秒，结合active_interval用于判定时间是否有效
+}
+
+message OptionOrderResp
+{
+    optional int32 funcid = 1[default=13101001];
+    required string order_group= 2;
+    repeated string order_nos = 3;
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 5;  //对应的Order ID
+}
+//批量委托，暂不支持
+message OptionOrdersReqt
+{
+    optional int32 funcid = 1[default=13001002];
+    message SingleOrder
+    {
+        required string code = 1;
+        required int64 price = 2;
+        required int64 qty = 3;
+    }
+    repeated SingleOrder order_list = 2;
+    required int64 bsflag = 3;
+    required int64 market = 4;
+	required string order_id = 5; //OrderID
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string order_type = 7; //委托类型 'General_Order' - 'Automatically_Withdraw'
+    optional string parent_id = 8;  //ParentID
+    optional string parent_type = 9;  //Parent Type
+    optional string robot_id = 10;
+    optional string trader_id = 11;
+    optional int64 request_time = 12[default=0];    //142345231时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 13[default=1000];  //精确到毫秒 1000
+    optional int64 request_date = 14[default=0];    //20141120 精确到毫秒，结合active_interval用于判定时间是否有效    
+}
+message OptionOrdersResp
+{
+    optional int32 funcid = 1[default=13101002];
+    required string order_group= 2;
+	message OrderResult
+    {
+        required int32 ret_code = 1; // 0-委托成功，其他：失败
+        optional string ret_msg = 2; // 错误信息
+        optional string orderno = 3; // 委托合同号（委托成功时有效）
+    }
+    repeated OrderResult results = 3; // 单笔委托结果
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 5;  //对应的Order ID
+}
+
+
+//单笔撤单
+message OptionDeleteReqt
+{
+    optional int32 funcid = 1[default=13001004];
+    required string order_group= 2;
+    required uint32 market = 3; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+message OptionDeleteResp
+{
+    optional int32 funcid = 1[default=13101004];
+	optional string order_group= 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+
+//批量撤单
+message OptionDeletesReqt
+{
+    optional int32 funcid = 1[default=13001005];
+    required string order_group= 2;
+	required uint32 market = 3; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    repeated string order_nos = 5; // 委托合同号列表
+}
+message OptionDeletesResp
+{
+    optional int32 funcid = 1[default=13101005];
+	optional string order_group= 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//
+//*********************************************
+//查询
+//*********************************************
+//单笔委托查询
+message OptionQueryOrderReqt
+{
+    optional int32 funcid = 1[default=13002002];
+    optional string order_group= 2[default='']; //为空则查全部
+    enum QueryType
+    {
+        Type_ONCE = 0;
+        Type_MORE = 1;
+        Type_ALL = 2;
+    }
+    
+    optional QueryType query_type= 3[default=Type_ONCE]; //为空则查全部
+    enum QueryFlag
+    {
+        Type_Query_ALL= 0; //查询全部类型
+        Type_NO_DELETE= 1; //不查撤单
+        Type_DELETE= 2; //只查撤单
+    }
+    optional QueryFlag query_flag = 4[default=Type_NO_DELETE]; //默认不查撤单
+    optional string start_pos = 5[default=''];
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 10[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 11[default=1000];  //精确到毫秒
+}
+
+message OptionQueryOrderResp
+{
+    optional int32 funcid = 1[default=13102002];
+    message OrderDetail
+    {
+    	optional string code = 1;
+    	optional string name = 2;
+    	optional double price = 3;
+    	optional int64 qty = 4;
+    	optional int64 bsflag = 5;
+    	optional int64 market = 6;
+    	optional string policy_id = 7; //策略ID -新版本已废弃
+    	optional string index_id = 8;  //OrderID  -新版本已废弃
+        optional int32 kpcbj = 9; //0:自动,1:开仓,2:平仓
+    	optional int32 order_price_type = 10[default=0];   //order_price_type报单价格类型：0-LIMIT，1-ANY
+    	optional int32 covered_flag = 11[default=0];       //covered_flag备兑标志 0-非备兑(naked) 1备兑
+    	optional string match_condition=12[default='GFD'];  // match_condition订单有效时间类型GFD-当日有效 FOK-即时成交否则撤销 IOC-即时成交剩余撤销, 默认GFD
+    	optional string trader_id = 13; // 交易员ID
+    	optional string orderno = 14; // 委托合同号
+    	optional uint32 order_time = 15; //委托时间
+    	optional int64 match_qty = 16; // 成交数量
+    	optional double match_amt = 17;  //成交金额
+    	optional double match_price = 18;  // 成交均价
+        optional int64 cancel_qty = 19; // 撤单数量
+        optional int32 state = 20; // 委托状态, 0：未报，1：待报，(2：已报)，3：已报待撤，4：部成待撤，(5：部撤)，(6：已撤)，(7：部成)，(8：已成)，(9：废单)
+        optional string info = 21; // 备注
+    	optional string order_id = 22; //报单ID
+    }
+    repeated OrderDetail detail_list = 2;
+    optional string last_pos = 3;
+	optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//批量委托查询，暂时保留
+message OptionQueryOrdersReqt
+{
+    optional int32 funcid = 1[default=13002003];
+    optional string order_group = 2[default='']; //为空则查全部
+	optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+}
+message OptionQueryOrdersResp
+{
+    optional int32 funcid = 1[default=13102003];
+    message OrderDetail
+    {
+        optional string code = 1;
+    	optional string name = 2;
+    	optional double price = 3; 
+    	optional int64 qty = 4;
+    	optional int64 bsflag = 5;
+    	optional int64 market = 6;
+    	optional string policy_id = 7; //策略ID-新版本已废弃
+    	optional string index_id = 8;  //OrderID-新版本已废弃
+    	optional int32 kpcbj = 9; // 0：自动，1：开仓，2：平仓
+    	optional int32 order_price_type = 10[default=0];   //order_price_type报单价格类型
+    	optional int32 covered_flag = 11[default=0];       //covered_flag备兑标志 0-非备兑(naked) 1备兑
+    	optional string match_condition=12[default='GFD'];  // match_condition订单有效时间类型GFD-当日有效 FOK-即时成交否则撤销 IOC-即时成交剩余撤销, 默认GFD
+    	optional string trader_id = 13; // 交易员ID
+    	optional string orderno = 14; // 委托合同号
+    	optional uint32 order_time = 15; //委托时间
+    	optional int64 match_qty = 16; // 成交数量
+    	optional double match_amt = 17;  //成交金额
+    	optional double match_price = 18;  // 成交均价
+        optional int64 cancel_qty = 19; // 撤单数量
+        optional int32 state = 20; // 委托状态, 0：未报，1：待报，(2：已报)，3：已报待撤，4：部成待撤，(5：部撤)，(6：已撤)，(7：部成)，(8：已成)，(9：废单)
+        optional string info = 21; // 备注
+    	optional string order_id = 22; //报单ID
+    }
+    repeated OrderDetail detail_list = 2;
+	optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+//资产查询
+message OptionQueryCaptialReqt
+{
+    optional int32 funcid = 1[default=13002010];
+    optional string moneytype = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+}
+
+message OptionCapital
+{
+    optional int32 funcid = 1[default=13102010];
+    optional string moneytype = 2; // #资金代码 00：人民币 01：美元 02：港币
+    required double fund_bal = 3; // 资金余额
+    required double fund_ava = 4; // 可用资金
+    required double market_value = 5;
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional double deposit = 7; // 保证金
+    optional double equity = 8; // 动态权益
+}
+
+//持仓查询
+message OptionQueryPositionReqt
+{
+    optional int32 funcid = 1[default=13002006];
+    optional string code = 2;
+    optional int64 market = 3;
+    
+    enum QueryType
+    {
+        Type_ONCE = 0;
+        Type_MORE = 1;
+        Type_ALL = 2;
+    }
+    
+    optional uint32 query_count = 4[default=500];
+    optional QueryType query_type = 5[default=Type_ONCE];
+    optional string start_pos = 6[default=''];
+    optional string request_id = 7; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 8[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 9[default=1000];  //精确到毫秒
+}
+
+message OptionPosition
+{
+    optional int32 funcid = 1[default=13102006];
+    message Position
+    {
+    	optional int64 market = 1; // 市场代码：0-未知，1-上海，2-深圳，3-上海B，4-深圳B，5-中金所，6-上期所，7-大商所，8-郑商所，9-特转A，10-特转B，11-三板
+        optional string code = 2; // 期权代码
+        optional string name = 3; // 期权名称
+        optional int64 cp_flag = 4; // 认购认沽标记：1: call, 2: put
+        optional int64 buy_covered = 5; // 备兑，0：否，1:是
+        optional int64 buy_volume = 6; // 持仓数
+        optional double buy_price = 7; // 持仓均价
+        optional double buy_amount = 8; // 持仓金额
+        optional int64 buy_can_close_volume = 9; // 可平仓数
+        optional int64 buy_open_freezed_volume = 10; // 开仓冻结数
+        optional int64 buy_close_freezed_volume = 11; // 平仓冻结数
+        optional double buy_deposit_amount = 12; // 保证金
+        optional int64 sell_covered = 13; // 备兑，0：否，1:是
+        optional int64 sell_volume = 14; // 持仓数
+        optional double sell_price = 15; // 持仓均价
+        optional double sell_amount = 16; // 持仓金额
+        optional int64 sell_can_close_volume = 17; // 可平仓数
+        optional int64 sell_open_freezed_volume = 18; // 开仓冻结数
+        optional int64 sell_close_freezed_volume = 19; // 平仓冻结数
+        optional double sell_deposit_amount = 20; // 保证金
+        optional int64 net_volume = 21; // 净持仓
+        optional string start_pos = 22;
+    }
+    repeated Position positions = 2;
+    optional string last_pos = 3;
+	optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//成交明细查询
+message OptionQueryDealDetailReqt
+{
+    optional int32 funcid = 1[default=13002004];
+    optional string orderno = 2[default=''];
+    enum QueryType
+    {
+        Type_ONCE = 0;
+        Type_MORE = 1;
+        Type_ALL = 2;
+    }
+    
+    optional uint32 query_count = 3[default=500];
+    optional QueryType query_type = 4[default=Type_ONCE];
+    optional string start_pos = 5[default=''];
+	optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 7[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 8[default=1000];  //精确到毫秒
+}
+
+message OptionDealDetail
+{
+    optional int32 funcid = 1[default=13102004];
+	repeated RawOptionKnock knocks = 2;
+    optional string last_pos = 3;
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+
+//-----------------------------------------------------
+//成交回报
+//-----------------------------------------------------
+message RawOptionKnock{
+  optional int32 funcid = 1[default=13003001];
+  required uint64 stamp = 2;                      //成交时间
+  optional string order_group = 3;              //委托批号
+  required string orderno = 4;                   //委托单号
+  optional uint32 market = 5; //0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+  required string code = 6;                         //
+  optional int64 order_price = 7; // 委托价格（扩大10000倍）
+  optional int64 match_qty= 8;
+  optional uint32 order_qty= 9;
+  optional uint32 bsflag = 10;
+  optional int64 open_close_flag = 11; // 开平仓标记
+  optional int32 match_type = 12;          //成交状态 0:未知 1:成交 2:撤单 3: 废单 4:撤单废单
+  optional double clear_amt = 13;
+  optional double match_amt = 14;           //成交金额
+  optional int64 match_price = 15;            //成交价格（扩大10000倍）
+  optional int32 order_type = 16;               //下单类型, 0:未知 1:买卖2:查询3:撤单
+  required string match_id = 17;                //成交id
+  optional string stock_account = 18;        //委托账号
+  optional string oppo_account = 19;         //对手盘账号
+  optional string name = 20;
+  optional string info = 21;
+  optional string start_pos = 22;
+}
+
+//Order下单成功，返回下单编号，这里单笔和批量的报单号都用Order_group来替代
+message OptionOrdersCreateResp
+{
+    optional int32 funcid = 1[default=13101014];
+    optional string request_id = 2;
+    required string order_id = 3;
+    required string order_group = 4;
+    optional string trader_id = 5;
+    optional string robot_id = 6;
+    optional uint32 data_date = 7; // 报单日期，e.g. 20131212
+    optional uint32 data_time = 8; // 报单时间：e.g. 100102001
+    optional string fund_id = 9; // 资金账号 
+    optional int64 market = 10; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional int64 bsflag = 11; // 买卖方向：1:买入，2：卖出，3：申购，4：赎回
+    optional int32 order_price_type = 12[default=0];   //order_price_type报单价格类型
+    optional int32 covered_flag = 13[default=0]; // 备兑标志 0-非备兑(naked) 1备兑
+    optional string match_condition=14[default=''];  // match_condition订单有效时间类型GFD-当日有效 FOK-即时成交否则撤销 IOC-即时成交剩余撤销, 默认GFD
+    message OrderList
+    {
+        required string code = 1;
+        required int64 price = 2;
+        required uint32 qty = 3;
+        optional string orderno = 4;  //内部报单号
+        optional int64 open_close_flag = 5;
+        optional int32 ret_code = 6;
+        optional string ret_message = 7;
+        optional string name = 8;
+    }
+    repeated  OrderList order_list = 15;
+    optional string account_name = 16[default=""];
+}
+

@@ -1,0 +1,30 @@
+syntax = "proto2"; 
+package autotrade;
+//system inner protocol
+//requst from 10,000,000 ~10,099,999
+//response from 10,100,000 ~ 10,199,999
+// general err -1000001 ~ -1099999
+// sepecial err -1
+
+// Begin added by xiaofeng 2015-2-20 for C#
+// import "google/protobuf/csharp_options.proto";
+// option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+// option (google.protobuf.csharp_file_options).umbrella_classname = "QErrorProtos";
+
+option optimize_for = SPEED;
+// End added
+
+message ReqtOK
+{
+    optional int32 funcid = 1[default=1];
+    required int32 ret_code = 2;
+    optional string ret_message = 3;
+    optional string request_id = 4;
+}
+message ReqtErr
+{
+    optional int32 funcid = 1[default=-1];
+    required int32 ret_code = 2;
+    optional string ret_message = 3;
+    optional string request_id = 4;
+}

@@ -1,0 +1,14 @@
+#
+# Utils configuration
+#
+
+menuconfig UTIL_EWUTILS
+        tristate "Common Utilities"
+        ---help---
+          Say Y here if you need common utilities such as LOG, TRACE, and
+          dump functions.
+
+          To compile this package as a shared library, choose M here: the
+          module will be called libewutils.so
+
+endif # UTIL_EWUTILS

@@ -1,0 +1,361 @@
+#
+# $Id: $
+#
+# Makefile post-include file
+#
+# Copyright (c) 2013-2014 @Company. All rights reserved.
+#
+# $Log: $
+#
+# 2010-2-2 xiaofeng: move Module section from where CFLAG to first section,
+#                    since some applications may reference MODULE_PATH in 
+#                    there SOURCE files.
+#
+
+######################################################################
+# common rules
+######################################################################
+
+vpath %.cxx $(VPATH_CXX)
+vpath %.cpp $(VPATH_CXX)
+vpath %.cc  $(VPATH_CXX)
+vpath %.c   $(VPATH_C)
+vpath %.o   $(OBJDIR)
+vpath %.d   $(DEPDIR)
+
+# DEFAULT_GOAL should be 'all'
+.PHONY : all clean opt debug release usage
+
+# $(warning default goal is $(.DEFAULT_GOAL))
+
+# Targets should not check DEPENDS
+NODEPS = clean cleanall cleandist cleandocs docs install release usage
+
+_DO_DEP := 0
+ifeq (, $(MAKECMDGOALS))
+  _DO_DEP := 1
+else
+  ifneq (, $(filter-out $(NODEPS), $(MAKECMDGOALS)))
+    _DO_DEP := 1
+  endif
+endif
+
+#
+# this section adds the appropriate flags, headers, etc. for modules.
+# See the modules.mk for further information about how modules work.
+#
+include $(BUILD)/modules.mk
+
+INCDIRS  += $(foreach module, $(MODULES), $(abspath $($(module)_INCDIRS)))
+LDFLAGS  += $(foreach module, $(MODULES), $($(module)_LDFLAGS))
+LDPATHS  += $(foreach module, $(MODULES), $($(module)_LDPATH))
+LIBDIRS  += $(foreach module, $(MODULES), $(abspath $($(module)_LIBDIRS)))
+LIBNAMES += $(foreach module, $(MODULES), $($(module)_LIBNAME))
+DEFINES  += $(foreach module, $(MODULES), $($(module)_DEFINES))
+MDEPENDS += $(foreach module, $(MODULES), $($(module)_DEPENDS))
+INCLUDES += $(foreach module, $(MODULES), $($(module)_INCLUDES))
+CFLAGS   += $(foreach module, $(MODULES), $($(module)_CFLAGS))
+CXXFLAGS += $(foreach module, $(MODULES), $($(module)_CXXFLAGS))
+
+_LIBDIR_LIST := $(foreach lib, $(LIBDIRS), -L$(lib))
+
+LDLIBS      += $(_LIBDIR_LIST) $(foreach lib, $(LIBNAMES), -l$(lib))
+DEPEND_LIBS += $(strip $(MDEPENDS))
+
+_INCDIR_LIST := $(foreach dir, $(INCDIRS), -I$(dir)) $(INCLUDES)
+_DEFINE_LIST := $(foreach dir, $(DEFINES), -D$(dir))
+_blank :=
+
+CXXFLAGS := $(strip $(CXXFLAGS) $(_INCDIR_LIST) $(_DEFINE_LIST))
+CFLAGS   := $(strip $(CFLAGS) $(_INCDIR_LIST) $(_DEFINE_LIST))
+LDFLAGS  := $(strip $(LDFLAGS))
+LDPATHS  := $(subst $(_black) $(_blank),:, $(strip $(LDPATHS) $(BINDIR)))
+
+#
+# create list of C/C++ headers
+#
+HEADERS  := $(wildcard *.h) $(wildcard *.hxx) $(wildcard *.hpp) $(EXTRA_HEADERS)
+
+#
+# clean whitespace out of source file list
+#
+SOURCES  := $(strip $(SOURCES))
+
+#
+# create a list of objects for target program only
+#
+ifeq (1, $(_DO_DEP))
+  $(foreach prog, $(TARGET_PRG),                                          \
+    $(eval TARGET_OBJS_$(prog) = $(call get_objname, $(SOURCES_$(prog)))) \
+  )
+endif
+
+TARGET_OBJS := $(foreach prog, $(TARGET_PRG), $(TARGET_OBJS_$(prog)))
+TARGET_OBJS := $(strip $(TARGET_OBJS))
+
+# if source file is not in current directory, we need output a rule for it
+ifeq (1, $(_DO_DEP))
+  $(eval $(shell if [ ! -d $(DEPDIR) ] ; then mkdir -p $(DEPDIR) ; fi))
+  $(foreach file, $(SOURCES),                        \
+    $(if $(filter-out $(notdir $(file)), $(file)),   \
+      $(eval $(call generate_dep_rules, $(file)))    \
+    ) \
+  )
+endif
+
+
+#
+# create a list of all object files
+#
+
+#OBJECTS := $(SOURCES) $(TARGET_OBJS) $(EXTRA_OBJS)
+OBJECTS  := $(notdir $(SOURCES)) $(TARGET_OBJS) $(EXTRA_OBJS)
+OBJECTS  := $(call get_objname, $(OBJECTS))
+
+#
+# create list of dependency files according to objects files
+#
+DEPENDS	 := $(patsubst %.o, %.d, $(OBJECTS) $(DEPENDS))
+DEPENDS  += $(DEPDIR)/make.conf.d
+DEPENDS	 := $(strip $(DEPENDS))
+
+#
+# create the target (executable)
+#
+TARGETS  += $(patsubst %, $(BINDIR)/%, $(TARGET_PRG))
+
+#
+# create the target (library)
+#
+STATICLIB := $(patsubst %, $(OBJDIR)/%.a, $(TARGET_LIB))
+STATICLIB := $(strip $(STATICLIB))
+SHAREDLIB := $(patsubst %, $(BINDIR)/%.$(SHLIB_SUFFIX), $(TARGET_LIB))
+SHAREDLIB := $(strip $(SHAREDLIB))
+
+TARGETS  += $(STATICLIB)
+ifeq (1, $(BUILD_SHARED_LIBRARY))
+TARGETS  += $(SHAREDLIB)
+endif
+
+#
+# output CFLAGS/CXXFLAGS/STDCCFLAGS: for user referencing (not for compilation)
+#
+$(OBJDIR)/cflags: Makefile
+	@if [ ! -d $(OBJDIR) ] ; then mkdir -p $(OBJDIR) ; fi
+	@echo '$(CFLAGS)' > $@
+
+$(OBJDIR)/cxxflags: Makefile
+	@if [ ! -d $(OBJDIR) ] ; then mkdir -p $(OBJDIR) ; fi
+	@echo '$(CXXFLAGS)' > $@
+
+$(OBJDIR)/stdccflags: Makefile
+	@if [ ! -d $(OBJDIR) ] ; then mkdir -p $(OBJDIR) ; fi
+	@echo '$(STDCCFLAGS)' > $@
+
+$(OBJDIR)/ldflags: Makefile
+	@echo "[+++]	Linking with ldflags='$(LDFLAGS)'"
+	@if [ ! -d $(OBJDIR) ] ; then mkdir -p $(OBJDIR) ; fi
+	@echo '$(LDFLAGS)' > $@
+
+#
+# define rule for dependancy files: it generate .d files for fast compilation
+# xiaofeng 2010-02-02: to fix, source may reference to other dir, so use $(@F)
+#
+
+$(DEPDIR)/make.conf.d: 
+	$(call make_make_depend)
+
+$(DEPDIR)/%.d: %.c  $(OBJDIR)/cflags $(OBJDIR)/stdccflags
+	$(call make_c_depend)
+
+$(DEPDIR)/%.d: %.cxx $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags
+	$(call make_cxx_depend)
+
+$(DEPDIR)/%.d: %.cpp $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags
+	$(call make_cxx_depend)
+
+$(DEPDIR)/%.d: %.cc $(OBJDIR)/cxxflags  $(OBJDIR)/stdccflags
+	$(call make_cxx_depend)
+
+#
+# define rule for .cxx(.cpp and .cc) and .c files
+#
+$(OBJDIR)/%.o: %.c $(OBJDIR)/cflags $(OBJDIR)/stdccflags
+	$(call make_c_compile)
+
+$(OBJDIR)/%.o: %.cxx $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags
+	$(call make_cxx_compile)
+
+$(OBJDIR)/%.o: %.cpp $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags
+	$(call make_cxx_compile)
+
+$(OBJDIR)/%.o: %.cc  $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags
+	$(call make_cxx_compile)
+
+#
+# define rule for .a and .so (.dylib) files
+#
+
+# static lib archive
+LIB_INPUTS := $(filter-out $(TARGET_OBJS), $(OBJECTS)) $(EXTRALIBS)
+$(OBJDIR)/%.a: $(LIB_INPUTS)
+ifeq (1, $(WITH_DEBUG))
+	@echo -e "\n[+++]	Building static library (DEBUG)..."
+else
+	@echo -e "\n[+++]	Building static library (RELEASE)..."
+endif
+	@rm -rf $@
+ifeq (1, $(USE_REPO))
+	@echo 'int main(){return 0;}' > $(OBJDIR)/closure.cxx
+	@printf '%b	%b\n' $(LD_COLOR)[LINK] $(BIN_COLOR)$@$(NO_COLOR)
+	@$(LINKER) $(LDFLAGS) -o $(OBJDIR)/closure $(OBJDIR)/closure.cxx \
+	$(patsubst %.dependlibs, %, $^) $(LDLIBS)
+endif
+	@printf '%b	%b\n' $(LD_COLOR)[AR] $(BIN_COLOR)$@$(NO_COLOR)
+	@$(AR) $(ARFLAGS) $@ $^ $(TARGET_OBJS_$(@F))
+	@$(RANLIB) $@
+
+# dynamic shared library
+SHLIB_INPUTS := $(filter-out $(TARGET_OBJS), $(OBJECTS)) $(EXTRALIBS)
+$(BINDIR)/%.$(SHLIB_SUFFIX): $(SHLIB_INPUTS) $(OBJDIR)/ldflags
+	@if [ ! -d $(dir $@) ] ; then mkdir -p $(dir $@) ; fi
+ifeq (1, $(WITH_DEBUG))
+	@echo -e "\n[+++]	Building shared library (DEBUG)..."
+else
+	@echo -e "\n[+++]	Building shared library..."
+endif
+	@rm -rf $@
+ifeq (1, $(USE_REPO))
+	@echo 'int main(){return 0;}' > $(OBJDIR)/closure.cxx
+	@printf '%b	%b\n' $(LD_COLOR)[LINK] $(BIN_COLOR)$@$(NO_COLOR)
+	@$(LINKER) $(LDFLAGS) -o $(OBJDIR)/closure $(OBJDIR)/closure.cxx \
+	$(patsubst %.dependlibs, %, $^) $(LDLIBS)
+endif
+	@printf '%b	%b\n' $(LD_COLOR)[LD] $(BIN_COLOR)$@$(NO_COLOR)
+	@$(MKSHLIB) $(LDFLAGS) -o $@ \
+        $(TARGET_OBJS_$(@F)) $(SHLIB_INPUTS) $(LDLIBS)
+#	TODO: using libtool
+
+
+#
+# define rules for .l (lex) and .y (yacc) files
+#
+%.lex.c: %.l %.tab.h
+	@printf '%b	%b\n' $(CC_COLOR)[LEX] $(SRC_COLOR)$@$(NO_COLOR)
+	$(LEX) $<
+	@mv lex.yy.c $@
+
+%.tab.c %.tab.h: %.y
+	@printf '%b	%b\n' $(CC_COLOR)[YACC] $(SRC_COLOR)$@$(NO_COLOR)
+	$(YACC) -d -b $* $<
+
+#
+# build executables
+# 
+TARGET_INPUTS := $(filter-out $(TARGET_OBJS), $(OBJECTS)) \
+	      	 $(EXTRAS) $(DEPEND_LIBS)
+
+# this rule add $(TARGET_OBJS_xxx) into each target's build dependency
+$(foreach prog, $(TARGET_PRG), $(eval $(call target_template, $(BINDIR)/$(prog), $(TARGET_OBJS_$(prog)))))
+
+$(BINDIR)/%: $(TARGET_INPUTS) $(OBJDIR)/ldflags
+	@if [ ! -d $(dir $@) ] ; then mkdir -p $(dir $@) ; fi
+	@printf '%b	%b\n' $(LD_COLOR)[LD] $(BIN_COLOR)$@$(NO_COLOR)
+	@$(LINKER) $(LDFLAGS) -o $@ $(DATESTAMP) \
+	$(TARGET_OBJS_$(@F)) $(TARGET_INPUTS) $(LDLIBS)
+
+#
+# build leaktrace version of executables
+#
+# TODO: moved to Makefile.tools
+
+#
+# add in files to delete
+#
+CLEAN_FILES += $(TARGETS) $(OBJECTS) $(DEPENDS) \
+	       $(OBJDIR)/cflags $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags \
+	       $(OBJDIR)/ldflags $(OBJDIR)/*.d.rule core
+
+TEMP_DIRS = $(BINDIR) $(OBJDIR)
+
+######################################################################
+# targets and rules
+######################################################################
+
+all:: $(MDEPENDS) $(DEPENDS) $(OBJECTS) $(TARGETS) 
+ifeq (1, $(WITH_DEBUG))
+	@echo "[---]	Done (DEBUG)."
+else
+	@echo "[---]	Done (RELEASE)."
+endif
+	@echo ""
+
+#
+# clean intermedium built files
+# make clean debug: clean only debug outputs
+# make clean:       clean all debug and opt outputs
+#
+ifeq (1, $(WITH_DEBUG))
+clean:
+	-@for i in $(SUBDIRS) ; do ( $(MAKE) -C $$i -k clean ) ; done
+	-@for i in $(CLEAN_FILES) ; do ( $(RM_VERBOSE) -r $$i ) ; done
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) --no-print-directory \
+		 clean WITH_DEBUG=0
+else
+clean:
+	-@for i in $(CLEAN_FILES) ; do ( $(RM_VERBOSE) -r $$i ) ; done
+endif
+
+#
+# clean all tempory files and built files
+# make cleanall WITH_DEBUG=1: clean only debug outputs
+# make cleanall:              clean all debug and opt outputs, everything
+#
+ifeq (1, $(WITH_DEBUG))
+cleanall:
+	- @for i in $(SUBDIRS) ; do ( $(MAKE) -C $$i -k cleanall ) ; done
+	- @for i in $(TEMP_DIRS) ; do ( $(RM_VERBOSE) -r $$i ) ; done
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) --no-print-directory \
+		 cleanall WITH_DEBUG=0
+	- @rm -fv *~ \#* .make* *.a *.d *.S *.bak
+else
+cleanall:
+	- @for i in $(TEMP_DIRS) ; do ( $(RM_VERBOSE) -r $$i ) ; done
+endif
+
+#
+# Common rules
+#
+depend: $(DEPENDS)
+	@echo "[---]	Created dependencies."
+
+verify: $(BINDIR) $(VERIFY_TESTCASE_PROGRAMS)
+	@$(TOOLS)/run-tests $(VERIFY_TESTCASE_PROGRAMS)
+
+
+opt:
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) --no-print-directory \
+		 WITH_DEBUG=0
+
+debug:
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) --no-print-directory \
+		 WITH_DEBUG=1
+
+.DELETE_ON_ERROR : depend
+
+#.SECONDARY: $(DEPENDS) $(OBJECTS)
+#	@echo "[---]	Done."
+
+
+######################################################################
+# Include all of the dependencies
+######################################################################
+include $(BUILD)/Makefile.tools
+
+ifeq (1, $(_DO_DEP))
+  ifneq (, $(DEPENDS))
+    -include $(DEPENDS)
+  endif
+endif
+
+# End of Makefile.post

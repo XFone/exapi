@@ -1,0 +1,9 @@
+#
+# Copyright (c) 2010-2016 ZeroneIO. All rights reserved.
+#
+
+This directory contains all rules and scripts for complation this project.
+The files includes rules for GNU make tools, SCons and project for MS
+Vistual Studio (VC6, VS2008 or Virtual Studio 201x).
+
+...

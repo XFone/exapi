@@ -1,0 +1,654 @@
+syntax = "proto2";
+package quotation;
+
+// Begin added by xiaofeng 2015-2-20 for C#
+// import "google/protobuf/csharp_options.proto";
+// option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+// option (google.protobuf.csharp_file_options).umbrella_classname = "QuotationProtos";
+
+option optimize_for = SPEED;
+// End added
+
+option java_outer_classname = "quotation";
+
+message Stock {
+    optional string type = 1[default="S"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required int64 new_price = 4;
+    optional int64 new_volume = 5;
+    optional int64 sum_volume = 6; // 市场总成交数量
+    optional int64 sum_amount = 7; // 市场总成交金额（真实值，没有扩大1万倍）
+    required string code = 8;
+    optional string name = 9; // 证券名称
+    optional int64 bp1 = 10;
+    optional int64 bp2 = 11;
+    optional int64 bp3 = 12;
+    optional int64 bp4 = 13;
+    optional int64 bp5 = 14;
+    optional int64 ba1 = 15;
+    optional int64 ba2 = 16;
+    optional int64 ba3 = 17;
+    optional int64 ba4 = 18;
+    optional int64 ba5 = 19;
+    optional int64 sp1 = 20;
+    optional int64 sp2 = 21;
+    optional int64 sp3 = 22;
+    optional int64 sp4 = 23;
+    optional int64 sp5 = 24;
+    optional int64 sa1 = 25;
+    optional int64 sa2 = 26;
+    optional int64 sa3 = 27;
+    optional int64 sa4 = 28;
+    optional int64 sa5 = 29;
+    optional int64 status = 30; // 状态，0:正常，1：停牌，2：涨停，3：跌停
+    optional int64 preclose = 31;
+    optional int64 open = 32;
+    optional int64 high = 33;
+    optional int64 low = 34;
+    optional int64 iopv = 35;
+    optional int64 bp1_ajust = 36;
+    optional int64 sp1_ajust = 37;
+    optional int64 bought_volume = 38;
+    optional int64 sold_volume = 39;
+    optional int64 bp6 = 40;
+    optional int64 bp7 = 41;
+    optional int64 bp8 = 42;
+    optional int64 bp9 = 43;
+    optional int64 bp10 = 44;
+    optional int64 ba6 = 45;
+    optional int64 ba7 = 46;
+    optional int64 ba8 = 47;
+    optional int64 ba9 = 48;
+    optional int64 ba10 = 49;
+    optional int64 sp6 = 50;
+    optional int64 sp7 = 51;
+    optional int64 sp8 = 52;
+    optional int64 sp9 = 53;
+    optional int64 sp10 = 54;
+    optional int64 sa6 = 55;
+    optional int64 sa7 = 56;
+    optional int64 sa8 = 57;
+    optional int64 sa9 = 58;
+    optional int64 sa10 = 59;
+    optional int64 upperlimit_price = 60; //涨停价
+    optional int64 lowerlimit_price = 61; //跌停价
+    optional int64 market = 62; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+}
+
+// 全息盘口
+message Handicap {
+    optional string type = 1[default="H"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required string code = 4; // 证券代码
+    optional string name = 5; // 证券名称
+    optional int64 market = 6; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional int64 status = 7; // 状态，0:正常，1：停牌，2：涨停，3：跌停
+    optional int64 upperlimit_price = 8; //涨停价
+    optional int64 lowerlimit_price = 9; //跌停价
+    optional int64 preclose = 10; // 昨收价
+    optional int64 open = 11; // 开盘价
+    optional int64 high = 12; // 最高价
+    optional int64 low = 13; // 最低价
+    optional int64 new_price = 14; // 最新价
+    optional int64 new_volume = 15; 
+    optional int64 sum_volume = 16; // 市场总成交数量
+    optional int64 sum_amount = 17; // 市场总成交金额
+    repeated int64 bp = 18; // 买价
+    repeated int64 ba = 19; // 卖量
+    repeated int64 sp = 20; // 卖价
+    repeated int64 sa = 21; // 卖量
+    message Item { 
+        required int64 volume = 1; // 委托数量
+        optional string order_no = 2; // 委托合同号
+    }
+    message Queue { // 委托队列
+        repeated Item items = 1;
+    }
+    repeated Queue ask = 22; // 卖盘盘口
+    repeated Queue bid = 23; // 买盘盘口
+}
+
+// 期货行情
+message Future {
+    optional string type = 1[default="F"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+	required string code = 4;
+	optional string name = 5; // 证券名称
+    required int64 new_price = 6;
+    required uint64 volume = 7;
+    required int64 match_amt = 8; //成交金额
+    optional int64 new_volume = 9; //最新成交量
+    optional int64 total_position = 10; //总持仓
+    optional int64 position_change = 11; //持仓变化量
+    required int64 bp1 = 12;
+    optional int64 bp2 = 13;
+    optional int64 bp3 = 14;
+    optional int64 bp4 = 15;
+    optional int64 bp5 = 16;
+    required int64 ba1 = 17;
+    optional int64 ba2 = 18;
+    optional int64 ba3 = 19;
+    optional int64 ba4 = 20;
+    optional int64 ba5 = 21;
+    required int64 sp1 = 22;
+    optional int64 sp2 = 23;
+    optional int64 sp3 = 24;
+    optional int64 sp4 = 25;
+    optional int64 sp5 = 26;
+    required int64 sa1 = 27;
+    optional int64 sa2 = 28;
+    optional int64 sa3 = 29;
+    optional int64 sa4 = 30;
+    optional int64 sa5 = 31;
+    optional string exchange_id = 32; // 交易所代码
+    optional int64 presettlement_price = 33; // 上次结算价 
+    optional int64 preclose = 34; // 昨日收盘价
+    optional int64 preposition = 35; // 昨日持仓
+    optional int64 open_price = 36; // 今开盘
+    optional int64 highest_price = 37; // 最高价
+    optional int64 lowest_price = 38; // 最低价
+    optional int64 close_price = 39; // 今收盘价
+    optional int64 settlement_price = 40; // 本次结算价
+    optional int64 upperlimit_price = 41; // 涨停价
+    optional int64 lowerlimit_price = 42; // 跌停价
+    optional string update_time = 43; // 最后修改时间
+    optional uint32 update_millisec = 44; // 最后修改毫秒
+    optional int64 average_price = 45; // 当日均价
+    optional int64 open_interest = 46; // 持仓量
+    optional int64 bought_volume = 47; // 单次的买成交量
+    optional int64 sold_volume = 48; // 单次的卖成交量
+    optional int64 market = 49; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+}
+
+// 期权行情定义
+message Option {
+    optional string type = 1[default="O"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required string code = 4; // 期权合约代码
+    optional string trade_code = 5; // 交易代码
+    optional string name = 6; // 期权合约名称
+    optional int64 market = 7; // 市场代码，[0]未知，[1]上海，[2]深圳，[9]特转A，[A]特转B，[D]上海B，[H]深圳B，扩展：[3]中金所，[4]上期所，[5]大商所，[6]郑商所
+    optional uint32 start_date = 8; // 期权首个交易日（YYYYMMDD），e.g. 100102001
+    optional uint32 end_date = 9; // 期权最后交易日/行权日（YYYYMMDD），e.g. 100102001
+    optional uint32 expire_date = 10; // 期权到期日（YYYYMMDD），e.g. 100102001
+    optional uint32 exercise_date = 11; // 行权日期（YYYYMMDD），e.g. 20140501
+    optional int64 exercise_price = 12; // 期权行权价，经过除权除息调整后的期权行权价，右对齐，精确到厘
+    optional string underlying_code = 13; // 标的证券代码
+    optional int32 underlying_type = 14; // 标的证券类型C3    0-A股 1-ETF (EBS – ETF， ASH – A 股)
+    optional int32 cp_flag = 15; // 认购认沽标记：1-认购，2-认沽
+    optional int32 option_type = 16; // 类型：1-个股认购期权，2-个股认沽期权，3-指数认购期权，4-指数认沽期权，5-商品认购期权，6-商品认沽期权
+    optional int32 preformance_type = 17; // 履约方式，1-欧式期权，2-美式期权
+    optional int32 price_limit_type = 18; // 涨跌幅限制类型，1-有涨跌幅限制，2-无涨跌幅限制
+    optional int64 contract_unit = 19; // 合约单位，经过除权除息调整后的合约单位, 一定是整数
+    optional uint32 exchange_time = 20; // 交易所行情时间（HHMMSSmmm），e.g. 100102001
+    optional int32 state = 21; // 状态，
+    optional int64 pre_open_interest = 22; // 昨持仓（浮点数，扩大10^4）
+    optional int64 pre_close = 23; // 昨收盘价（浮点数，扩大10^4）
+    optional int64 pre_settle = 24; // 昨结算价（浮点数，扩大10^4）
+    optional int64 open = 25; // 开盘价（浮点数，扩大10^4）
+    optional int64 high = 26; // 最高价（浮点数，扩大10^4）
+    optional int64 low = 27; // 最低价（浮点数，扩大10^4）
+    optional int64 latest = 28; // 最新价（浮点数，扩大10^4）
+    optional int64 volume = 29; // 成交总量
+    optional int64 amount = 30; // 成交总金额（浮点数，扩大10^4）
+    optional int64 open_interest = 31; // 持仓总量
+    optional int64 close = 32; // 今收盘价（浮点数，扩大10^4）
+    optional int64 settle = 33; // 今结算价（浮点数，扩大10^4）
+    optional int64 high_limit = 34; // 涨停价（浮点数，扩大10^4）
+    optional int64 low_limit = 35; // 跌停价（浮点数，扩大10^4）
+    optional int64 pre_delta = 36; // 昨虚实度（浮点数，扩大10^4）
+    optional int64 delta = 37; // 今虚实度（浮点数，扩大10^4）
+    optional int64 bp1 = 38; // 买1价（浮点数，扩大10^4）
+    optional int64 bp2 = 39; // 买2价
+    optional int64 bp3 = 40; // 买3价
+    optional int64 bp4 = 41; // 买4价
+    optional int64 bp5 = 42; // 买5价
+    optional int64 ba1 = 43; // 买1量 buy_volume
+    optional int64 ba2 = 44; // 买2量
+    optional int64 ba3 = 45; // 买3量
+    optional int64 ba4 = 46; // 买4量
+    optional int64 ba5 = 47; // 买5量
+    optional int64 sp1 = 48; // 卖1价（浮点数，扩大10^4）
+    optional int64 sp2 = 49; // 卖2价
+    optional int64 sp3 = 50; // 卖3价
+    optional int64 sp4 = 51; // 卖4价
+    optional int64 sp5 = 52; // 卖5价
+    optional int64 sa1 = 53; // 卖1量
+    optional int64 sa2 = 54; // 卖2量
+    optional int64 sa3 = 55; // 卖3量
+    optional int64 sa4 = 56; // 卖4量
+    optional int64 sa5 = 57; // 卖5量
+}
+
+// 指数行情
+message Index {
+    optional string type = 1[default="I"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    optional int64 new_price = 4;
+    optional int64 amount = 5;
+    optional int64 sum_price = 6;
+    optional int64 new_volume = 7;
+    required string code = 8;
+    optional int64 bp1 = 9;
+    optional int64 sp1 = 10;
+    optional int64 preclose = 11;
+    optional int64 amountofpriceupanddown_new = 12;
+    optional int64 amountofpriceupanddown_bp1 = 13;
+    optional int64 amountofpriceupanddown_sp1 = 14;
+    optional string name = 15; // 证券名称
+    optional int64 market = 16; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+}
+
+// ETF预估净值
+message VIndex {
+    optional string type = 1[default="V"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required double new_price = 4; // 最新价净值
+    required string code = 5; // ETF二级市场代码
+    optional double bp1 = 6; // 买一价净值（赎回净值）
+    optional double sp1 = 7; // 卖一价净值（申购净值）
+    optional double limit_up_amount = 8; // 非必须涨停市值
+    optional double limit_down_amount = 9; // 非必须跌停市值
+    optional double non_must_suspension_amount = 10; // 非必须停牌市值（非必须现金替代且停牌的市值）
+    optional double must_non_suspension_amount = 11; // 必须非停牌市值（必须现金替代且非停牌的市值）
+    message StockInfo {
+        optional string code = 1; // 股票代码
+        optional string name = 2; // 股票代码
+        optional int64 volume = 3; // 成分股数量
+        optional double amount = 4; // 金额
+    }
+    repeated StockInfo limit_up_stocks = 12; // 涨停信息列表
+    repeated StockInfo limit_down_stocks = 13; // 跌停信息列表
+    repeated StockInfo non_must_suspension_stocks = 14; // 非必须停牌信息列表
+    repeated StockInfo must_non_suspension_stocks = 15; // 必须非停牌信息列表
+    optional double etf_bp1 = 16; // ETF买一价
+    optional double etf_sp1 = 17; // ETF卖一价
+    optional double avg1 = 18; // 中间价净值
+    optional double limit_up_rate = 19; // 涨停市值占比
+    optional double limit_down_rate = 20; // 跌停市值占比
+    optional double non_must_suspension_rate = 21; // 非必须停牌市值占比
+    optional double must_non_suspension_rate = 22; // 必须非停牌市值占比
+    optional double must_non_suspension_amendment_value = 23; // 必须非停牌股票修正值
+    optional double must_non_suspension_amendment_rate = 24; // 必须非停牌股票修正比
+    optional double create_stock_amendment_value = 25; // 申购股票预估修正值
+    optional double create_stock_amendment_rate = 26; // 申购股票预估修正比
+    optional double create_amendment_value = 27; // 申购估值修正信号值（ETF点数）
+    optional double create_amendment_rate = 28; // 申购估值修正信号比（比率）
+    optional double redeem_stock_amendment_value = 29; // 赎回股票预估修正值
+    optional double redeem_stock_amendment_rate = 30; // 赎回股票预估修正比
+    optional double redeem_amendment_value = 31; // 赎回估值修正信号值（ETF点数）
+    optional double redeem_amendment_rate = 32; // 赎回估值修正信号比（比率）
+}
+
+// 分级基金IOPV
+message GradedFundIopv {
+    optional string type = 1[default="C"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required string fof_code = 4; // 母基金代码
+    optional string fof_name = 5; // 母基金名称
+    optional double fof_pre_nav = 6; // 母基金昨净值
+    required string a_code = 7; // A基金代码
+    optional string a_name = 8; // A基金名称
+    optional double a_bp1 = 9; // A基金买一价
+    optional double a_sp1 = 10; // A基金卖一价
+    optional uint32 a_quote_time = 11; // A基金行情时间
+    required string b_code = 12; // B基金代码
+    optional string b_name = 13; // B基金名称
+    optional double b_bp1 = 14; // B基金买一价
+    optional double b_sp1 = 15; // B基金卖一价
+    optional uint32 b_quote_time = 16; // B基金行情时间
+    required string underlying_code = 17; // 跟踪指数代码
+    optional double underlying_latest = 18; // 跟踪指数最新价
+    optional double underlying_pre_close = 19; // 跟踪指数前收价
+    optional uint32 underlying_quote_time = 20; // 跟踪指数行情时间
+    optional double hs300_latest = 21; // 沪深300指数最新价
+    optional double hs300_pre_close = 22; // 沪深300指数前收价
+    optional uint32 hs300_quote_time = 23; // 沪深300指数行情时间
+    optional int64 ratio_a = 24; // A份额比例（A:B）
+    optional int64 ratio_b = 25; // B份额比例（A:B）
+    optional double position_rate = 26; // 仓位比例，默认95%
+    optional double discount_fee_rate = 27; // 折价费率
+    optional double premium_fee_rate = 28; // 溢价费率（默认为0）
+    optional double underlying_amplitude = 29; // 跟踪指数涨跌幅
+    optional double hs300_amplitude = 30; // 跟踪指数涨跌幅
+    optional double fof_strength = 31; // 母基金强弱
+    optional double fof_iopv = 32; // 母基金最新净值
+    optional double bp1_iopv = 33; // 买一价净值
+    optional double sp1_iopv = 34; // 卖一价净值
+    optional int64 bp1_iopv_state = 35; // 买一价净值状态：0-有效，1-无效
+    optional int64 sp1_iopv_state = 36; // 卖一价净值状态：0-有效，1-无效
+    optional double discount_bp1 = 37; // 折价操作：买1价折溢价（扣除收费费，当bp1_iopv_state=0时有效）
+    optional double discount_sp1 = 38; // 折价操作：卖1价折溢价（扣除收费费，当sp1_iopv_state=0时有效）
+    optional double premium_bp1 = 39; // 溢价操作：买1价折溢价（扣除收费费，当bp1_iopv_state=0时有效）
+    optional double premium_sp1 = 40; // 溢价操作：卖1价折溢价（扣除收费费，当sp1_iopv_state=0时有效）
+    optional int64 state = 41; // 全局数据状态：0-正常，其他值：异常
+    optional string msg = 42; // 备注
+}
+
+// 期权波动率
+message OptionVolatility {
+    optional string type = 1[default="P"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required string code = 4; // 期权代码
+    optional string name = 5; // 期权名称
+    optional int64 price = 6; // 期权当前价格，浮点数（扩大10^4存储）
+    optional uint32 quote_time = 7; // 期权行情时间
+    optional int32 cp_flag = 8; // 认购认沽标记：1-认购，2-认沽
+    optional uint32 expire_date = 9; // 期权到期日（YYYYMMDD），e.g. 20140924
+    optional int64 exercise_price = 10; // 期权行权价，浮点数（扩大10^4存储）
+    optional int64 unit = 11; // 合约乘数
+    optional string underlying_code = 12; // 标的证券代码
+    optional int32 underlying_type = 13; // 标的证券类型C3    0-A股 1-ETF (EBS – ETF， ASH – A 股)
+    optional int64 underlying_price = 14; // 标的证券当前价格，浮点数（扩大10^4存储）
+    optional uint32 underlying_quote_time = 15; // 标的证券行情时间
+    optional double interest_rate = 16; // 无风险利率
+    optional double volatility = 17; // 波动率（来自波动率曲面）
+    optional int64 state = 18; // 状态：0:正常，其他值：异常
+    optional double implied_value = 19; // 隐含价值
+    optional double implied_volatility = 20; // 隐含波动率（小于0表示无法计算出隐含波动率）
+    optional double delta = 21; // 期权价格变动与标的资产价格变动的比率
+    optional double dollar_delta = 22;
+    optional double theta = 23; // 证券组合价值变化与时间变化的比率
+    optional double dollar_theta = 24;
+    optional double gamma = 25; // 交易组合Delta的变化与标的资产价格变化的比率
+    optional double dollar_gamma = 26;
+    optional double vega = 27; // vega敞口
+    optional double dollar_vega = 28;
+    optional double rho = 29; // rho敞口
+    optional double dollar_rho = 30;
+    optional string msg = 31; // 备注
+}
+
+message IndexParam{
+    optional string type = 1[default=''];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    optional double weight = 4;
+    optional int64 calc_shares = 5;
+    optional int64 total_shares = 6;
+    required string code = 7;
+    optional string effective_date = 8;
+    optional double c_factor = 9;
+    optional double pre_close = 10;
+    optional double adj_pre_close = 11; //调整后前收
+}
+
+//用于Order中每只股票下单和成交情况的记录
+message SecurityOrderInfo {
+    optional string type = 1[default=""];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required string stkcode = 4;
+    required int64 order_qty= 5;
+    required int64 match_qty= 6;
+    required int64 order_price = 7;
+    required double match_amount = 8[default=0.0];
+    required double clear_amount = 9[default=0.0];
+    optional double match_price = 10[default=0.0];
+    optional string last_match_id = 11[default='']; //最新的成交ID，用于Order判定Knock是否更新
+}
+
+//level2行情 逐笔委托
+message PublicOrderData {
+    optional string type = 1[default="D"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    optional string code = 4; // 委托代码
+    optional int64 order_day = 5; // 委托日期(YYMMDD)
+    optional int64 order_time = 6; // 托时间(HHMMSSmmm)
+    optional string order_no = 7; // 委托号
+    optional int64 order_price = 8; // 委托价格*10000
+    optional int64 order_qty = 9; // 委托数量
+    optional string order_type = 10; // 委托类别
+    optional int64 bs_flag = 11; // 买卖方向：1:买，2：卖，-1:撤单
+}
+
+//level2行情 委托队列
+message PublicOrderQueueData {
+    optional string type = 1[default="Q"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    optional string code = 4; // 委托代码
+    optional int64 order_day = 5; // 委托日期(YYMMDD)
+    optional int64 order_time = 6; // 托时间(HHMMSSmmm)
+    optional int64 bs_flag = 7; // 买卖方向：1:买，2：卖
+    optional int64 order_price = 8; // 委托价格*10000
+    optional int64 order_qty = 9; // 委托数量
+    repeated int64 volumes = 10; // 订单明细 
+}
+
+//level2行情 逐笔成交
+message PublicOrderTransaction{
+    optional string type = 1[default="T"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    optional string code = 4; // 委托代码
+    optional int64 match_day = 5; // 成交日期(YYMMDD)
+    optional int64 match_time = 6; // 成交时间(HHMMSSmmm)
+    optional string match_id = 7; // 成交编号
+    optional int64 match_price = 8; // 成交价格*10000
+    optional int64 match_qty = 9; // 成交数量
+    optional int64 match_amt = 10; // 成交金额
+    optional int64 bs_flag = 11; // 买卖方向1:买，2：卖
+    optional string match_kind = 12; // 成交类别
+    optional string match_code = 13; // 成交代码
+    optional string ask_order_no = 14; // 卖方委托序号
+    optional string bid_order_no = 15; // 买方委托序号
+}
+
+//当前盘口位的基差
+message CurrentBasis {
+    optional string type = 1[default="B"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    required uint32 date_time = 4; // 系统_行情接收时间（服务器接收时间，HHMMSSmmm）：e.g. 100102001
+    required string code = 5; // 当前code
+    required double create = 6; // 当前如果申购能锁定的基差
+    required double buy = 7; // 当前买入锁定的基差
+    required double sell = 8; // 当前卖出锁定的基差
+    required double redeem = 9; // 当前赎回能锁定的基差
+}
+
+//周期行情数据
+message CircleQuotation {
+    optional string type = 1[default="CIRCLE"];
+    optional uint32 trading_day = 2; // 数据日期：20150225
+    required uint32 stamp = 3; // 数据时间：100102001
+    optional int32 funcid = 4[default=10000004];
+    required string code = 5;
+    required int32 circle = 6;
+    required int64 open = 7;
+    required int64 high = 8;
+    required int64 low = 9;
+    required int64 close = 10;
+}
+
+// --------------------------------------------------------------------
+// 期权波动率曲面
+message OptionVolatilitySurface {
+    required string id = 1; // 曲面ID
+    repeated double x = 2; // X坐标列表（标的资产价格 / 期权行权价格）
+    repeated uint32 y = 3; // Y坐标列表（期权到日期）
+    message Value {
+        repeated double value = 1; // 波动率列表，每个元素的坐标为(iy, ix)
+    }
+    repeated Value v = 4; // 值列表，v[i]存储对应y[i]一行的数据
+}
+
+// 期权波动率曲面集合
+message OptionVolatilitySurfaces {
+    required string underlying_code = 1; // 标的资产代码
+    repeated OptionVolatilitySurface items = 2; // 曲面列表
+    optional string default_id = 3; // 默认曲面ID，用于计算Delta等
+}
+
+// 设置期权波动率曲面请求
+message SetOptionVolatilitySurfacesReq {
+    optional int32 funcid = 1[default=21000001];
+    required OptionVolatilitySurfaces data = 2;
+}
+
+// 设置期权波动率曲面响应
+message SetOptionVolatilitySurfacesRep {
+    optional int32 funcid = 1[default=21100001];
+    optional int64 rc = 2; // 返回值，0表示成功，其他值表示失败
+    optional string msg = 3; // 返回消息
+}
+
+// --------------------------------------------------------------------
+// “涨停、跌停、停牌、禁买、禁卖、非禁买、非禁卖”证券
+message SecurityState {
+	required string code = 1; // 证券代码
+	optional string name = 2; // 证券名称
+	optional uint32 state = 3; // 0：正常，1：停牌，2：涨停，4：跌停，8：禁买，16：禁卖，32：非禁买，64：非禁卖，128：修正位（使用人工状态覆盖自动状态）
+}
+
+message SecurityStateList {
+    repeated SecurityState items = 1;
+}
+
+// 交易日
+message TradingDay {
+	required uint32 data_date = 1; // 日期，e.g. 20140323
+	optional int32 weekday = 2; // 星期几，[星期一, 星期日] -> [1, 7]
+	optional int32 is_trading_day = 3; // 是否为交易日，0:否，1:是
+}
+
+// ETF成分股信息
+message EtfConstituentStock {
+	required string stock_id = 1; // 股票代码
+	optional string stock_name = 2; // 股票名称
+	optional int32 market = 3; // 市场代码，1：上海，2：深圳
+	optional int64 volume = 4; // 成分股数量（股票：股，债券：张，黄金：克）
+	optional int32 cash_replace_flag = 5; // 现金替代标志，0：禁止，1：允许，2：必须，3：跨市退补，4：跨市必须，5：跨境退补，6：跨境必须
+	optional double cash_replace_premium_rate = 6; // 现金替代溢价比率
+	optional double cash_replace_amount = 7; // 替代金额（单位：人民币元）
+}
+
+// ETF清单信息
+message EtfListInfo {
+	required uint32 data_date = 1; // 日期，e.g. 20140323
+	required uint32 data_time = 2; // 数据时间：e.g. 100102001
+	optional uint32 pre_trading_day = 3; // 前交易日，e.g. 20140323
+	optional string stock_id = 4; // ETF二级市场代码
+    optional string primary_code = 5; // ETF一级市场代码
+    optional string underlying_code = 6; // 跟踪指数代码
+    optional int32 market = 7; // 市场代码，1：上海，2：深圳
+    optional string stock_name = 8; // ETF名称
+    optional string company_name = 9; // 基金管理公司名称
+    optional double pre_cash_diff = 10; // 前交易日信息：现金差额（单位：元）
+    optional double pre_unit_iopv = 11; // 前交易日信息：最小申购、赎回单位净值(单位:元)
+    optional double pre_iopv = 12; // 前交易日信息：基金份额净值(单位:元)
+    optional double estimate_cash = 13; // 最小申购、赎回单位的预估现金部分(单位:元)
+    optional double max_cash_replace_rate = 14; // 现金替代比例上限
+    optional int64 max_purchase_volume = 15; // 申购上限
+    optional int64 max_redeem_volume = 16; // 赎回上限
+    optional int32 is_publish_iopv = 17; // 是否需要公布IOPV
+    optional int64 unit_volume = 18; // 最小申购、赎回单位(单位:份)
+    optional int64 compose_count = 19; // 申购赎回组合证券只数
+    optional int32 is_open_purchase = 20; // 是否开放申购
+    optional int32 is_open_redeem = 21; // 是否开放赎回
+    repeated EtfConstituentStock stocks = 22; // 成分股列表
+}
+
+// ETF费率
+message EtfFees {
+    required uint64 timestamp = 1; // 时间戳
+    message EtfFee {
+        required string code = 1; // ETF代码
+        optional double create_fee = 2; // 申购费率
+        optional double redeem_fee = 3; // 赎回费率
+    }
+    repeated EtfFee items = 2;
+}
+
+// ETF成分股估值修正
+message StockAmendments {
+    required uint64 timestamp = 1; // 时间戳
+    message StockAmendment {
+        required string code = 1; // 股票代码
+        required string name = 2; // 股票名称
+        optional int64 state = 3; // 股票状态：0-正常，1-停牌，2-涨停，3-跌停
+        optional double create_change = 4; // 申购预估涨跌幅
+        optional double redeem_change = 5; // 赎回预估涨跌幅
+    }
+    repeated StockAmendment items = 2;
+}
+
+// 分级基金信息
+message GradedFundInfo {
+	required uint32 data_date = 1; // 日期，e.g. 20140323
+	optional string fof_code = 2; // 母基金代码
+	optional string fof_name = 3; // 母基金名称
+	optional double fof_quota = 4; // 母基金份额
+	optional double fof_pre_nav = 5; // 母基金昨净值
+	optional double fof_nav = 6; // 母基金净值
+	optional double fof_market_value = 7; // 母基金市值：净值*份额
+	optional string a_code = 8; // A基金代码
+	optional string a_name = 9; // A基金名称
+	optional double a_quota = 10; // A基金份额
+	optional double a_pre_nav = 11; // A基金昨净值
+	optional double a_nav = 12; // A基金净值
+	optional double a_market_value = 13; // A基金市值：净值*份额
+	optional double a_pre_close = 14; // A基金前收价
+	optional double a_discount_premium_rate = 15; // A基金折溢价率：前收价/净值 - 1
+	optional string a_appointed_yield = 16; // A份额约定收益率
+	optional string b_code = 17; // B基金代码
+	optional string b_name = 18; // B基金名称
+	optional double b_quota = 19; // B基金份额
+	optional double b_pre_nav = 20; // B基金昨净值
+	optional double b_nav = 21; // B基金净值
+	optional double b_market_value = 22; // B基金市值：净值*份额
+	optional double b_pre_close = 23; // B基金前收价
+	optional double b_discount_premium_rate = 24; // B基金折溢价率：前收价/净值 - 1
+	optional int64 ratio_a = 25; // A份额比例（A:B）
+	optional int64 ratio_b = 26; // B份额比例（A:B）
+	optional double total_market_value = 27; // 基金总市值
+	optional string underlying_code = 28; // 跟踪指数代码
+	optional string underlying_name = 29; // 跟踪指数名称
+	optional double underlying_factor = 30; // 跟踪指数与沪深300指数相关系数
+	optional string manager_name = 31; // 基金管理人名称
+	optional uint32 listing_date = 32; // 基金上市日期
+	optional uint32 translation_date = 33; // 基金定期折算日期，自动更新年
+	optional string up_clause = 34; // 向上不定期折算条款
+	optional string down_clause = 35; // 向下不定期折算条款
+	optional double position_rate = 36; // 仓位比例，默认95%
+}
+
+
+// 期权基本信息
+message OptionInfo {
+	required uint32 data_date = 1; // 日期，e.g. 20140323
+	required string code = 2; // 合约代码
+	optional string name = 3; // 合约名称
+	optional string type = 4; // 合约类型
+	optional int64 market = 5; // 市场：0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板'
+	optional string trade_code = 6; // 交易代码
+	optional string underlying_code = 7; // 标的证券代码
+	optional string underlying_name = 8; // 标的证券名称
+	optional int64 underlying_type = 9; // 标的证券类型：0-A股，1-ETF
+	optional double underlying_pre_close = 10; // 标的证券前收盘价
+	optional int64 cp_flag = 11; // 认购认沽标记：1-认购，2-认沽
+	optional int64 unit = 12; // 合约单位
+	optional uint32 exercise_date = 13; // 行权日期
+	optional double exercise_price = 14; // 行权价
+	optional uint32 settle_date = 15; // 交收日期
+	optional uint32 expire_date = 16; // 到期日期
+	optional int64 is_expired = 17; // 是否到期：0-否，1-是
+	optional int64 is_new = 18; // 是否新挂：0-否，1-是
+	optional int64 is_adjusted = 19; // 是否调整：0-否，1-是
+	optional int64 is_open = 20; // 是否开盘：0-否，1-是
+	optional double high_limit = 21; // 涨停价
+	optional double low_limit = 22; // 跌停价
+	optional double pre_settle = 23; // 前结算价
+	optional double deposit = 24; // 交易保证金
+	optional int64 algebra = 25; // 代数
+}

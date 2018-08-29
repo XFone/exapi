@@ -1,0 +1,12 @@
+These files were taken from the Linux 2.6.16.7 Kernel
+Configuration System and modified for the Zian Project (xiaofeng 2010)
+
+TODO LIST
+---------
+1. Remove lxdialog, which depends highly on ncurses library.
+   Since we visit all via WEB, locally configuration with tty is no use.
+   (A re-implementing with Python-GTK or Python-GUI may be considered)
+
+2. Use Python(and PLY, PYGTK, etc.) to replace this in future
+
+

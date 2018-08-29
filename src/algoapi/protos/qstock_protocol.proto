@@ -1,0 +1,589 @@
+syntax = "proto2"; 
+package autotrade;
+
+// version: 2016-12-23 dai
+
+// Begin added by xiaofeng 2015-2-20 for C#
+//import "google/protobuf/csharp_options.proto";
+//option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+//option (google.protobuf.csharp_file_options).umbrella_classname = "QStockProtos";
+
+option optimize_for = SPEED;
+// End added
+
+// For Java
+//option java_package = "libswordfish";
+//option java_outer_classname = "QStockPB";
+
+//*********************************************
+//账号
+//*********************************************
+//登录
+message StockLoginReqt
+{
+    optional int32 funcid = 1[default=11000001];
+    optional string request_id = 2;
+}
+
+message StockLoginResp
+{
+    optional int32 funcid = 1[default=11100001];
+    required string fund_account = 2;
+    optional string request_id = 3;
+}
+
+//*********************************************
+//交易
+//*********************************************
+//单笔委托-支持信用账户
+message StockOrderReqt
+{
+    optional int32 funcid = 1[default=11001001];
+    required string code = 2;
+    required int64 price = 3;
+    required uint32 qty = 4;
+    required uint32 bsflag = 5;  //1-买入 2-卖出 3-申购 4-赎回 5-融资买入 6-融券卖出 7-卖券还款 8-买卷还卷
+    required uint32 market = 6; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板 
+    required string order_id = 7; //OrderID
+    optional string request_id = 8; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string order_type = 9; //委托类型 'General_Order' - 'Automatically_Withdraw'
+    optional string parent_id = 10;  //ParentID
+    optional string parent_type = 11;  //Parent Type
+    optional string robot_id = 12;
+    optional string trader_id = 13;
+    optional int64 request_time = 14[default=0];    //142345231时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 15[default=1000];  //精确到毫秒 1000
+    optional int64 request_date = 16[default=0];    //20141120 精确到毫秒，结合active_interval用于判定时间是否有效
+    optional string fund_id = 17; // 资金账号（多账户支持）
+    optional string session_id = 18; // 会话ID
+    optional string name = 19; // 证券名称
+}
+
+message StockOrderResp
+{
+    optional int32 funcid = 1[default=11101001];
+    required string order_group = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 4;  //对应的Order ID
+}
+
+//批量委托-支持信用账户
+message StockOrdersReqt
+{
+    optional int32 funcid = 1[default=11001002];
+    message SingleOrder
+    {
+        required string code = 1;
+        required int64 price = 2;
+        required uint32 qty = 3;
+        optional string name = 4; // 证券名称
+    }
+    repeated SingleOrder order_list = 2;
+    required uint32 bsflag = 3;  //1-买入 2-卖出 3-申购 4-赎回 5-融资买入 6-融券卖出 7-卖券还款 8-买卷还卷
+    required uint32 market = 4; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    required string order_id = 5; //OrderID
+    optional string order_type = 6; //委托类型 'General_Order' - 'Automatically_Withdraw'
+    optional string parent_id = 7;  //ParentID
+    optional string parent_type = 8;  //Parent Type
+    optional string request_id = 9; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string robot_id = 10;
+    optional string trader_id = 11;
+    optional int64 request_time = 12[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 13[default=1000];  //精确到毫秒
+    optional int64 request_date = 14[default=0];    //20141120 精确到毫秒，结合active_interval用于判定时间是否有效
+    optional string fund_id = 15; // 资金账号（多账户支持）
+    optional string session_id = 16; // 会话ID
+}
+message StockOrdersResp
+{
+    optional int32 funcid = 1[default=11101002];
+    required string order_group= 2;
+    message OrderResult
+    {
+        required int32 ret_code = 1; // 0-委托成功，其他：失败
+        optional string ret_msg = 2; // 错误信息
+        optional string orderno = 3; // 委托合同号（委托成功时有效）
+    }
+    repeated OrderResult results = 3; // 单笔委托结果
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 5;  //对应的Order ID
+}
+
+message StockOrdersRecieved
+{
+    optional int32 funcid = 1[default=11101010];
+    optional string request_id = 2; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//Order下单成功，返回下单编号，这里单笔和批量的报单号都用Order_group来替代
+message StockOrdersCreateResp
+{
+    optional int32 funcid = 1[default=11101014];
+    optional string request_id = 2;
+    required string order_id = 3;
+    required string order_group = 4;
+    optional string trader_id = 5;
+    optional string robot_id = 6;
+    optional uint32 data_date = 7; // 报单日期，e.g. 20131212
+    required uint32 data_time = 8; // 报单时间：e.g. 100102001
+    required string fund_id = 9; // 资金账号 
+    optional int64 market = 10; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional int64 bsflag = 11; // 买卖方向：1:买入，2：卖出，3：申购，4：赎回
+    message OrderList
+    {
+        required string code = 1;
+        required int64 price = 2;
+        required uint32 qty = 3;
+        optional string orderno = 4;  //内部报单号
+        optional int32 ret_code = 5;
+        optional string ret_message = 6;
+        optional string name = 7;
+    }
+    repeated  OrderList order_list = 12;
+    optional string account_name = 13[default=""];
+}
+
+
+//单笔撤单-支持信用账户
+message StockDeleteReqt
+{
+    optional int32 funcid = 1[default=11001004];
+    required string order_group= 2;
+    required uint32 market = 3; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int32 asset_prop = 5; //资产属性 0-默认普通账户 1 普通账户 2 信用账户
+    optional string fund_id = 6; // 资金账号（多账户支持）
+    optional string session_id = 7; // 会话ID
+    optional string trader_id = 8;
+}
+message StockDeleteResp
+{
+    optional int32 funcid = 1[default=11101004];
+    optional string order_group= 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+
+//批量撤单-支持信用账户
+message StockDeletesReqt
+{
+    optional int32 funcid = 1[default=11001005];
+    required string order_group= 2;
+    required uint32 market = 3; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+	optional int32 asset_prop = 5; //资产属性 0-默认普通账户 1 普通账户 2 信用账户
+	optional string fund_id = 6; // 资金账号（多账户支持）
+	optional string session_id = 7; // 会话ID
+	optional string trader_id = 8;
+}
+message StockDeletesResp
+{
+    optional int32 funcid = 1[default=11101005];
+    optional string order_group= 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//申购赎回
+message StockCreateRedeemReqt
+{
+    optional int32 funcid = 1[default=11001003];
+    required string code = 2;
+    required int64 qty = 3; // 申赎份额
+    required int64 basket_qty = 4;  // 申赎篮子个数
+    required uint32 bsflag = 5; //1-买入 2-卖出 3-申购 4-赎回
+    required uint32 market = 6;  //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional int64 price = 7; //申购赎回的实时价格 *10000
+    optional string request_id = 8; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 9[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 10[default=1000];  //精确到毫秒
+    optional int64 request_date = 11[default=0];    //
+    optional string order_id = 12;
+    optional string robot_id = 13;
+    optional string trader_id = 14;
+    optional string fund_id = 15; // 资金账号（多账户支持）
+    optional string session_id = 16; // 会话ID
+}
+
+message StockCreateRedeemResp
+{
+    optional int32 funcid = 1[default=11101003];
+    required string order_group = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 4;  //对应的Order ID
+}
+
+//
+//*********************************************
+//查询
+//*********************************************
+//单笔委托查询
+message StockQueryOrderReqt
+{
+    optional int32 funcid = 1[default=11002002];
+    optional string order_group = 2[default='']; //为空则查全部
+    enum QueryType
+    {
+        Type_ONCE = 0;
+        Type_MORE = 1;
+        Type_ALL = 2;
+    }
+    
+    optional QueryType query_type= 3[default=Type_ONCE]; //为空则查全部
+    enum QueryFlag
+    {
+        Type_Query_ALL= 0; //查询全部类型
+        Type_NO_DELETE= 1; //不查撤单
+        Type_DELETE= 2; //只查撤单
+    }
+    optional QueryFlag query_flag = 4[default=Type_NO_DELETE]; //默认不查撤单
+    optional string start_pos = 5[default=''];
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 10[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 11[default=1000];  //精确到毫秒
+    optional string fund_id = 12; // 资金账号（多账户支持）
+    optional string session_id = 13; // 会话ID
+}
+
+message StockQueryOrderResp
+{
+    optional int32 funcid = 1[default=11102002];
+    message OrderDetail
+    {
+        optional uint64 match_time = 1; //成交的时间，单位毫秒
+        required string orderno = 2; //委托序号
+        required uint32 bsflag = 3; //1-买入 2-卖出 3-申购 4-赎回
+        optional string orderid = 4; //成交合同ID
+        optional uint64 sumbit_time = 5; //报盘时间
+        optional uint64 order_time = 6; //委托时间
+        required uint32 market = 7;  //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+        required string code = 8;
+        
+        required int64 order_price = 9;
+        required uint32 order_qty = 10;
+        optional double order_frz_amt = 11; //冻结金额
+        optional double match_amt = 12;  //成交金额都是正值
+        required uint32 match_qty = 13;
+        required uint32 cancel_qty = 14;
+        required int64 order_status = 15; // 委托状态：0：未报，1：待报，(2：已报)，3：已报待撤，4：部成待撤，(5：部撤)，(6：已撤)，(7：部成)，(8：已成)，(9：废单)
+        optional string code_name  = 16;
+        optional double clear_amt = 17;  //买入时　该值为负值
+        optional string order_group = 18;
+        optional string info = 19;
+    }
+    repeated OrderDetail detail_list = 2;
+    optional string last_pos = 3;
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//批量委托查询
+message StockQueryOrdersReqt
+{
+    optional int32 funcid = 1[default=11002003];
+    optional string order_group = 2[default='']; //为空则查全部
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+    optional string fund_id = 6; // 资金账号（多账户支持）
+    optional string session_id = 7; // 会话ID
+}
+message StockQueryOrdersResp
+{
+    optional int32 funcid = 1[default=11102003];
+    message OrderDetail
+    {
+        optional uint64 match_time = 1;  //成交的时间，单位毫秒
+        required string orderno = 2;     //委托序号
+        required string order_group = 3; //委托批号
+        
+        required uint32 bsflag = 4;  //1-买入 2-卖出 3-申购 4-赎回
+        optional uint64 submit_time = 5; //报盘时间
+        optional uint64 order_time = 6;    //委托时间
+        required uint32 market = 7;  //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+        required string code = 8;
+        required int64 order_price = 9;  //*10000
+        required uint32 order_qty = 10;
+        optional double order_frz_amt = 11; //冻结金额
+        optional double match_amt = 12;
+        required uint32 match_qty = 13;
+        required uint32 cancel_qty = 14;
+        required string order_status = 15;
+        required string code_name  = 16;
+        optional double clear_amt = 17;  //买入时　该值为负值
+    }
+    repeated OrderDetail detail_list = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    //optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    //optional int64 active_interval = 5[default=1000];  //精确到毫秒
+}
+
+//ETF基本信息查询
+message ETFBasicInfoQueryReqt
+{
+    optional int32 funcid = 1[default=11002008];
+    required string code = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+}
+
+message ETFBasicInfoQueryResp
+{
+
+    optional int32 funcid = 1[default=11102008];
+    message ETFBasicInfo
+    {
+        required uint32 market = 2; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B
+        required string code = 3;
+        optional string name = 4;
+        required string level1_code= 5;
+        required string level2_code= 6;//二级代码，用于买卖，一级代码用于做申购代码
+        optional string capital_code= 7;
+        required uint32 trade_unit = 8;
+        optional double ecash_component = 9;//预估现金差额
+        required string publish_flag = 10; //IOPV发布标志
+        required string trade_stat = 11;
+        required uint32 record_num = 12; //成分股数目
+        required string trading_day = 13; //交易日期 
+        required double maxcashratio = 14;
+        required string pretrading_day = 15; //上次交易日期
+        required double cash_component = 16; //T-1日申购基准单位现金余（差）额
+        required double navpercu = 17; //T-1日申赎基准净值
+        required double nav = 18; //T-1日基金单位净值
+    }
+    repeated ETFBasicInfo infos = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    
+}
+
+//ETF清单查询
+message ETFBasketListQueryReqt
+{
+    optional int32 funcid = 1[default=11002009];
+    required string code = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+}
+message ETFBasketListQueryResp
+{
+    optional int32 funcid = 1[default=11102009];
+    message ConstituentStockInfo
+    {
+        required uint32 market = 1; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+        required string code = 2;
+        optional string name = 3;    
+        required int32 qty = 4;
+        required string replaceflag = 5; //0禁止 1可以 2必须
+        required double overpricerate = 6; //溢价比例
+        required double replaceamt = 7;
+    }
+    repeated ConstituentStockInfo stock_infos = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+//资产查询
+message StockQueryCaptialReqt
+{//资金查询拼写错误，为了兼容，以后用下面的版本
+    optional int32 funcid = 1[default=11002010];
+    optional string moneytype = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+    optional string fund_id = 6; // 资金账号（多账户支持）
+    optional string session_id = 7; // 会话ID
+}
+
+message StockQueryCapitalReqt
+{
+    optional int32 funcid = 1[default=11002010];
+    optional string moneytype = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 4[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 5[default=1000];  //精确到毫秒
+}
+
+message StockCapital
+{
+    optional int32 funcid = 1[default=11102010];
+    optional string moneytype = 2; // #资金代码 00：人民币 01：美元 02：港币
+    required double fund_bal = 3;
+    required double fund_ava = 4;
+    required double market_value = 5;
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//持仓查询
+message StockQueryPositionReqt
+{
+    optional int32 funcid = 1[default=11002006];
+    optional string code = 2;
+    optional uint32 market = 3; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    
+    enum QueryType
+    {
+        Type_ONCE = 0;
+        Type_MORE = 1;
+        Type_ALL = 2;
+    }
+    
+    optional uint32 query_count = 4[default=500];
+    optional QueryType query_type = 5[default=Type_ONCE];
+    optional string start_pos = 6[default=''];
+    optional string request_id = 7; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 8[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 9[default=1000];  //精确到毫秒
+    optional string fund_id = 10; // 资金账号（多账户支持）
+    optional string session_id = 11; // 会话ID
+}
+
+message StockPosition
+{
+    optional int32 funcid = 1[default=11102006];
+    message Position
+    {
+        required uint32 market = 1; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+        required string code = 2;
+        optional string name = 3;
+        required int64 bal = 4; //余额
+        required int64 can_sell_qty = 5;
+        optional int64 can_create_qty = 6;
+        optional int64 can_redeem_qty = 7;
+        optional int64 buy_frz_qty = 8;
+        optional int64 sell_frz_qty = 9;
+        optional int64 td_buy_qty = 10;
+        optional int64 td_sell_qty = 11;
+        optional int64 yd_qty = 12;
+        required double market_value = 13;
+        required double cost_price = 14;//成本价格
+        optional string start_pos = 15;
+    }
+    repeated Position positions = 2;
+    optional string last_pos = 3;
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//成交明细查询
+message StockQueryDealDetailReqt
+{
+    optional int32 funcid = 1[default=11002004];
+    optional string orderno = 2[default=''];
+    enum QueryType
+    {
+        Type_ONCE = 0;
+        Type_MORE = 1;
+        Type_ALL = 2;
+    }
+    
+    optional uint32 query_count = 3[default=500];
+    optional QueryType query_type = 4[default=Type_ONCE];
+    optional string start_pos = 5[default=''];
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 7[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 8[default=1000];  //精确到毫秒
+    optional string fund_id = 9; // 资金账号（多账户支持）
+    optional string session_id = 10; // 会话ID
+}
+
+message StockDealDetail
+{
+    optional int32 funcid = 1[default=11102004];
+    repeated RawStockKnock knocks = 2;
+    optional string last_pos = 3;
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//ETF动态清单查询,查询可申购数量
+message ETFBasketDynamicInfoReqt
+{
+    optional int32 funcid = 1[default=11002011];
+    required string code = 2;
+    required uint32 market = 3; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_time = 5[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效
+    optional int64 active_interval = 6[default=1000];  //精确到毫秒
+}
+message ETFBasketDynamicInfo
+{
+    optional int32 funcid = 1[default=11102011];
+    message DynamicInfo
+    {
+        optional uint32 market = 1; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+        required string code = 2;
+        required uint32 creatable_qty = 3;
+    }
+    repeated DynamicInfo dynamic_info = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+//-----------------------------------------------------
+//成交回报
+//-----------------------------------------------------
+message RawStockKnock{
+  optional int32 funcid = 1[default=11003001];
+  required uint64 stamp = 2;                      //成交时间
+  required string order_group = 3;              //委托批号
+  required string orderno = 4;                   //委托单号
+  optional uint32 market = 5; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+  required string code = 6;                         //
+  optional int64 order_price = 7; // 委托价格（扩大10000倍）
+  required int64 match_qty= 8;
+  required uint32 order_qty= 9;
+  required uint32 bsflag = 10;
+  required int32 match_type = 11;          //成交状态 0:未知 1:成交 2:撤单 3: 废单 4:确认
+  optional double clear_amt = 12;
+  required double match_amt = 13;           //成交金额
+  required int64 match_price = 14;            //成交价格（扩大10000倍）
+  optional int32 order_type = 15;               //下单类型, 0:未知 1:买卖2:查询3:撤单
+  required string match_id = 16;                //成交id
+  required string stock_account = 17;        //委托账号
+  optional string oppo_account = 18;         //对手盘账号
+  optional string name = 19;
+  optional string start_pos = 20;
+  optional string fund_id = 21; // 资金账号（多账户支持）
+}
+
+message OneStockKnock{
+  optional int32 funcid = 1[default=11003002];
+  required uint64 stamp = 2;
+  required string code = 3;
+  required string order_group = 4;              //委托批次号
+  required string orderno = 5;                   //委托单号
+  required string match_id = 6;                   //成交ID
+  required uint32 order_qty= 7;                  //下单数量
+  required uint32 match_qty= 8;                //成交数量
+  optional int64 order_price = 9;                 //报单价格，不一定知道  *10000
+  required double match_price = 10;             //成交价格
+  required double match_amt = 11;            //成交金额
+  required uint32 bsflag = 12;
+  optional string fund_id = 13; // 资金账号（多账户支持）
+}
+
+//汇总的成交回报,使用通用类型代替
+message SumStockKnock{
+  optional int32 funcid = 1[default=11003003];
+  required uint64 stamp = 2;
+  optional string type = 3[default='S'];
+  required string order_group = 4;
+  required uint64 order_qty = 5;
+  required uint64 match_qty= 6;
+  optional double match_amt= 7;
+  required uint64 cancel_qty = 8 [default=0];
+  required bool finished = 9[default=false];
+  required string order_id= 10;
+  repeated OneStockKnock one_knocks = 11;
+  optional string account_name = 12[default=""]; //账户信息
+  optional string fund_id = 13; // 资金账号（多账户支持）
+}
+
+
+//
+// 融资融券-信用账户
+//
+message CStockAvailableBalanceQueryReqt
+{
+	optional int32 funcid = 1[default=11003004];
+	optional string fund_id = 2; // 资金账号（多账户支持）
+	optional string session_id = 3; // 会话ID
+}
+message CStockAvailableBalanceQueryResp
+{
+	optional int32 funcid = 1[default=11103004];
+}

@@ -1,0 +1,28 @@
+# 
+# usage: docker-compose run --rm devel /bin/bash
+#
+
+version: '3'
+
+services:
+  devel:
+    container_name: trade-devel
+    image: zerone/exapi:1.0
+    build:
+        context: ../docker
+        dockerfile: Dockerfile
+    hostname: devel.zerone.test
+    volumes:
+      - ..:/devel:rw
+    environment:
+      - TERM=xterm-256color
+      - LANG=en_US.UTF-8
+      - TZ=Asia/Shanghai
+    tmpfs:
+      - /tmp
+    networks:
+      - br_intra
+
+networks:
+  br_intra:
+    driver: bridge

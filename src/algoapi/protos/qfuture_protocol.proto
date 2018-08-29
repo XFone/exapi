@@ -1,0 +1,605 @@
+syntax = "proto2"; 
+package autotrade;
+
+// version: 2016-12-23 dai
+
+// Begin added by xiaofeng 2015-2-20 for C#
+//import "google/protobuf/csharp_options.proto";
+//option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+//option (google.protobuf.csharp_file_options).umbrella_classname = "QFutureProtos";
+
+option optimize_for = SPEED;
+// End added
+
+// For Java
+//option java_package = "libswordfish";
+//option java_outer_classname = "QFuturePB";
+
+//*********************************************
+//账号
+//*********************************************
+//登录
+message FutureLoginReqt
+{
+    optional int32 funcid = 1[default=12000001];
+    optional string trading_day = 2;  //交易日，可以不用填入
+    optional string broker_id = 3;      //经纪公司代码
+    optional string future_account= 4;            //用户代码
+    optional string pwd = 5;              //密码
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+message FutureLoginResp
+{
+    optional int32 funcid = 1[default=12100001];
+    optional string future_account = 2;     //用户代码
+    optional string trading_day = 3;           //
+    optional string login_time = 4;              //
+    optional string broker_id = 5;            //经纪公司代码
+    optional string system_name = 6;      //交易系统名称
+    optional int32 front_id = 7;               //前置编号
+    optional int32 session_id = 8;            //会话ID
+    optional string max_order_ref = 9;     //最大报单引用
+    optional string shfe_time = 10;            //上期所时间
+    optional string dce_time = 11;            //大商所时间
+    optional string czce_time = 12;           //郑商所时间
+    optional string ffex_time = 13;            //中金所时间
+    optional string request_id = 14; //Requset Id 长连接请求必须填， 短连接不需要
+    required int32 ret_code = 15;
+    optional string ret_message = 16;
+}
+
+message FutureLogoutReqt
+{
+    optional int32 funcid = 1[default=12000002];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    required int32 ret_code = 5;
+    optional string ret_message = 6;
+}
+
+message FutureLogoutResp
+{
+    optional int32 funcid = 1[default=12100002];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    required int32 ret_code = 5;
+    optional string ret_message = 6;
+}
+
+//*********************************************
+//交易
+//*********************************************
+//单笔委托
+message FutureOrderReqt
+{
+    optional int32 funcid = 1[default=12001001];
+    required string code = 2;
+    required int64 price = 3;
+    required uint32 qty = 4;
+    required uint32 bsflag = 5;  //1-买入 2-卖出 3-申购 4-赎回
+    optional int32 kpcbj = 6[default=0]; //0-自动开平仓 1-开仓 2-默认平仓（平昨） 3-强平 4-平今 5-平昨 6-强减 7-本地强平
+    optional int64 stop_price = 7[default=0];
+    optional int32 hedge_flag = 8[default=0]; //1-投机 2套利 3套保 0由系统底层自动确定，默认是投机
+    optional string request_id = 9; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 10; //OrderID
+    optional string order_type = 11; //委托类型 'General_Order' - 'Automatically_Withdraw'
+    optional string parent_id = 12;  //ParentID
+    optional string parent_type = 13;  //Parent Type
+    // 0-默认为限价单 1任意价格 2限价 3最优价 4 最新价 5最新价上浮1跳 6 最新价上浮2跳 7 最新价上浮3跳
+    //8-卖一价 9卖一价上浮1跳 10卖一价上浮两跳 11-卖一价上浮3跳 12买一价 13买一价上浮1跳 14 买一价上浮2跳 15买一价上浮3跳
+    optional int32 price_type = 14[default=0];     
+    optional int64 request_time = 15[default=0];    //时间戳，精确到毫秒，结合active_interval用于判定时间是否有效,为0时表示不判断
+    optional int64 active_interval = 16[default=1000];  //精确到毫秒,默认是1S钟
+    optional int64 request_date = 17[default=0];
+    optional int64 market = 18; // 市场代码，0-未知 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B, 11-三板
+    optional string name = 19; // 合约名称
+    optional string fund_id = 20; // 资金账号（多账户支持）
+    optional string trader_id = 21; // 交易员ID
+    optional string session_id = 22; // 会话ID
+}
+
+message FutureOrderResp
+{
+    optional int32 funcid = 1[default=12101001];
+    required string order_group = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    required string order_id = 4;  //对应的Order ID
+}
+
+//单笔撤单
+message FutureDeleteReqt
+{
+    optional int32 funcid = 1[default=12001002];
+    required string order_group = 2;
+    optional uint32 market = 3[default=0]; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string fund_id = 5; // 资金账号（多账户支持）
+    optional string trader_id = 6; // 交易员ID
+    optional string session_id = 7; // 会话ID
+}
+message FutureDeleteResp
+{
+    optional int32 funcid = 1[default=12101002];
+    optional string request_id = 2; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+//*********************************************
+//查询
+//*********************************************
+//单笔委托查询
+message FutureQueryOrderReqt
+{
+    optional int32 funcid = 1[default=12002002];
+    optional string orderno = 2[default='']; //为空则查全部
+    optional string start_pos = 3[default='']; // 查询定位串
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_date = 5; // 请求日期，e.g. 20160630
+    optional int64 request_time = 6; // 请求时间，e.g. 100102001
+    optional int64 active_interval = 7[default=10000]; // 请求有效时间间隔，单位：毫秒
+}
+message FutureOrderInfo
+{
+    optional int32 funcid = 1[default=12102002];
+    message OrderDetail
+    {
+        optional uint64 match_time = 1; //成交的时间，单位毫秒
+        required string orderno = 2; //委托序号
+        required uint32 bsflag = 3;  //1-买入 2-卖出 3-申购 4-赎回
+        optional uint64 sumbit_time = 5; //报盘时间
+        required uint64 order_time = 6; //委托时间
+        required string code = 8;
+        required int64 order_price = 9;
+        required uint32 order_qty = 10;
+        required double order_frz_amt = 11; //冻结金额
+        required double match_amt = 12;
+        required uint32 match_qty = 13;
+        required uint32 unmatch_qty = 14;
+        required uint32 order_status = 15; // 委托状态：0：未报，1：待报，(2：已报)，3：已报待撤，4：部成待撤，(5：部撤)，(6：已撤)，(7：部成)，(8：已成)，(9：废单)
+        optional string name  = 16;
+        required int64 match_avg_price = 17;//成交均价
+        optional uint32 market = 18; // 市场代码：0-未知，1-上海，2-深圳，3-上海B，4-深圳B，5-中金所，6-上期所，7-大商所，8-郑商所，9-特转A，10-特转B，11-三板
+    	optional int64 cancel_qty = 19; // 撤单数量
+        optional int64 hedge_flag = 20; // 套保标记：1-投机，2-套利，3-套保
+        optional int64 kpcbj = 21; // 开平仓标记：0-自动开平仓，1-开仓，2-默认平仓（平昨） 3-强平 4-平今 5-平昨 6-强减 7-本地强平
+        optional int64 price_type = 22; // 0-默认为限价单，1任意价格，2限价，3最优价，4最新价，5最新价上浮1跳，6最新价上浮2跳，7最新价上浮3跳，8-卖一价，9卖一价上浮1跳，10卖一价上浮两跳，11-卖一价上浮3跳，12买一价，13买一价上浮1跳，14 买一价上浮2跳，15买一价上浮3跳
+    }
+    repeated OrderDetail detail_list = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string last_pos = 4;
+}
+
+//资产查询
+message FutureQueryCaptialReqt
+{
+    optional int32 funcid = 1[default=12002001];
+    optional string moneytype = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_date = 4; // 请求日期，e.g. 20160630
+    optional int64 request_time = 5; // 请求时间，e.g. 100102001
+    optional int64 active_interval = 6[default=10000]; // 请求有效时间间隔，单位：毫秒
+}
+
+message FutureCapital
+{
+    optional int32 funcid = 1[default=12102001];
+    optional string moneytype = 2;
+    required double fund_bal = 3;
+    required double fund_ava = 4;
+    required double market_value = 5;
+    optional string request_id = 6; //Requset Id 长连接请求必须填， 短连接不需要
+    optional double exchage_margin = 7; //交易所保证金
+    optional double delivery_margin = 8; //投资者交割保证金
+    optional double exchage_delivery_margin = 9; //交易所交割保证金
+    optional bool islast = 10;
+    optional int32 ret_code = 11;   //0 ok 有持仓 1表示没有持仓 其它标识错误
+    optional string ret_message = 12;
+    optional double curr_margin = 13; //当前保证金总额
+}
+
+//持仓查询
+message FutureQueryPositionReqt
+{
+    optional int32 funcid = 1[default=12002005];
+    optional string code = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_date = 4; // 请求日期，e.g. 20160630
+    optional int64 request_time = 5; // 请求时间，e.g. 100102001
+    optional int64 active_interval = 6[default=10000]; // 请求有效时间间隔，单位：毫秒
+}
+
+message FuturePosition
+{
+    optional int32 funcid = 1[default=12102005];
+    //message Position
+    //{
+    //    required uint32 market = 1;  //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B
+    //    required string code = 2;
+    //    optional string name = 3;
+    //    required uint32 mrcc = 4;//买入持仓
+    //    required int64 mrjj = 5; //买入均价
+    //    required uint32 mccc = 6;//卖出持仓
+    //    required int64 mcjj = 7; //卖出均价
+    //    optional int32 hedge_flag= 15;    //套保标记 1-投机 2-套利 3-套保
+    //}
+    repeated OneFuturePosition one_positions = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+}
+
+message OneFuturePosition
+{//单条持仓数据格式
+    optional int32 funcid = 12[default=12002009];
+    optional uint32 market = 1;  //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B
+    optional string code = 2;
+    optional string name = 3;
+    optional uint32 bsflag = 4;            // 持仓多空方向 1-持有多头 2-持有空头
+    optional int64 yd_position= 5[default=0];       //昨日持仓
+    optional  int64 today_position = 6[default=0]; //今日持仓
+    optional int64 position = 7[default=0];
+    optional int32 hedge_flag= 8;    //套保标记 1-投机 2-套利 3-套保
+    optional double open_cost = 9[default=0.0]; //持仓成本
+    optional string account_name = 10; 
+    optional bool islast = 11;
+    optional int32 ret_code = 13[default=0];   //0 ok 有持仓 1表示没有持仓 其它标识错误
+    optional string ret_message = 14[default=''];
+    optional int64 can_close_qty = 15[default=0];  //可平仓量-abandon 20160625
+    optional int64 pending_close_qty = 16[default=0];    //正在挂单的平仓数量 20160625
+    optional int64 today_open_volume = 17[default=0];  //今开仓量(已开)
+    optional int64 today_close_volume = 18[default=0];  //今平仓量(已平)
+    optional int64 today_opening_volume = 19[default=0];  //今正在开仓量(正开)
+    optional int64 today_closing_volume = 20[default=0];  //今正在平仓量(正平)
+    optional int64 yd_closing_volume = 21[default=0];  //昨日正在平仓量(正平)
+}
+
+
+//成交明细查询
+message FutureQueryDealDetailReqt
+{
+    optional int32 funcid = 1[default=12002003];
+    optional string order_group = 2[default=''];
+    optional string start_pos = 3[default='']; // 查询定位串
+    optional string request_id = 4; // Requset Id 长连接请求必须填， 短连接不需要
+    optional int64 request_date = 5; // 请求日期，e.g. 20160630
+    optional int64 request_time = 6; // 请求时间，e.g. 100102001
+    optional int64 active_interval = 7[default=10000]; // 请求有效时间间隔，单位：毫秒
+}
+
+message FutureDealDetail
+{
+    optional int32 funcid = 1[default=12102003];
+    message DealDetail
+    {
+        required string match_id = 1;  //成交ID
+        required uint32 bsflag = 2;  //1-买入 2-卖出 3-申购 4-赎回
+        required string orderno = 3;
+        optional uint32 market = 4; //0-前台未知交易所 1-上海 2-深圳 3-上海B 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 9-特转A 10-特转B
+        required string code = 5;
+        optional string name = 6;
+        optional uint64 match_time = 7;  
+        required uint32 match_qty = 8;
+        required int64 match_price = 9;
+        required int64 match_amt = 10;
+        required double clear_amt = 11;
+        required int64 match_type = 12; // 成交类型：1：买卖成功，2：撤单成功, 3：废单
+        
+        required uint32 order_qty = 13;
+        required int64 order_price = 14;
+    }
+    repeated DealDetail deal_details = 2;
+    optional string request_id = 3; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string last_pos = 4;
+}
+
+message OneFutureKnock{
+  optional int32 funcid = 1[default=12003002];
+  required uint64 stamp = 2;
+  required string code = 3;
+  required string order_group = 4;
+  optional string order_no = 5;                   //委托单号 CTP没有批量和单笔的概念，因此可以默认没有=order_group
+  optional string match_id = 6;  //成交ID
+  required int64 order_price = 7;
+  required int64 match_price = 8;
+  required uint64 order_qty = 9;
+  required uint64 match_qty = 10;
+  optional double match_amt= 11;
+  optional uint32 bsflag = 12;
+  optional string account_name = 13; //为了和CTP内部成交兼容
+}
+
+message SumFutureKnock{
+  optional int32 funcid = 1[default=12003003];
+  required uint64 stamp = 2;
+  optional string type = 3[default='F'];
+  required string order_group = 4;
+  required uint64 order_qty = 5;
+  required uint64 match_qty = 6;
+  optional double match_amt= 7;  //成交金额
+  required uint64 cancel_qty = 8[default=0];
+  required bool finished = 9[default=false];
+  required string order_id = 10; //order index_id
+  repeated OneFutureKnock one_knocks = 11;
+  optional string account_name = 12[default=""];
+}
+
+//查询投资者结算结果-CTP登录后需要完成操作
+message FutureQuerySettlementReqt
+{
+    optional int32 funcid = 1[default=12002006];
+    optional string broker_id = 2;                     //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4;                   //Requset Id 长连接请求必须填， 短连接不需要
+    optional string trading_day = 5;      //交易日
+}
+
+message FutureQuerySettlementResp
+{
+    optional int32 funcid = 1[default=12102006];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string trading_day = 5;      //交易日
+    optional int32 sequence_no= 6;      //序号
+    optional int32 settlement_id = 7;      //结算编号
+    optional string settlement_content= 8;      //消息正文
+    required int32 ret_code = 9;
+    optional string ret_message = 10;
+}
+//确认投资者结算结果-查询后需要完成操作
+message FutureConfirmSettlementReqt
+{
+    optional int32 funcid = 1[default=12102007];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string confirm_date = 5;      //确认日期
+    optional string confirm_time = 6;      //确认时间
+}
+message FutureConfirmSettlementResp
+{
+    optional int32 funcid = 1[default=12102007];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string confirm_date = 5;      //确认日期
+    optional string confirm_time = 6;      //确认时间
+    required int32 ret_code = 7;
+    optional string ret_message = 8;
+    optional bool islast = 9[default = false];
+}
+//查询投资者结算结果确认
+message FutureQuerySettlementConfirmReqt
+{
+    optional int32 funcid = 1[default=12102008];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+}
+message FutureQuerySettlementConfirmResp
+{
+    optional int32 funcid = 1[default=12102008];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional string confirm_date = 5;      //确认日期
+    optional string confirm_time = 6;      //确认时间
+    required int32 ret_code = 7;
+    optional string ret_message = 8;
+}
+
+//ctp内部协议
+message FutureSystemConnected
+{
+    optional int32 funcid = 1[default=12003004];
+}
+message FutureSystemDisconnected
+{
+    optional int32 funcid = 1[default=12003005];
+    required int32 reason = 2;
+}
+
+message FutureOrderInsertResp
+{
+    optional int32 funcid = 1[default=12003006];
+    required int32 ret_code = 2;
+    optional string ret_message = 3;
+    optional string order_group = 4;
+    optional string code = 5;
+    optional int32 bsflag = 6;
+    optional int32 kpcbj = 7;
+    optional int32 hedge_flag = 8;
+    optional string account_name = 9;
+    optional int32 front_id = 10;               //前置编号
+    optional int32 session_id = 11;            //会话ID
+ }
+
+message FutureOrderActionResp
+{
+    optional int32 funcid = 1[default=12003007];
+    required int32 ret_code = 2;
+    optional string ret_message = 3;
+    optional string order_group = 4;
+    optional string code = 5;
+    optional string account_name = 6;
+    optional int32 front_id = 7;               //前置编号
+    optional int32 session_id = 8;            //会话ID
+}
+
+message FutureRtnOrderInsertErr
+{
+    optional int32 funcid = 1[default=12003008];
+    required int32 ret_code = 2;
+    optional string ret_message = 3;
+    optional string order_group = 4;
+    optional string code = 5;
+    optional int32 bsflag = 6;
+    optional int32 kpcbj = 7;
+    optional int32 hedge_flag = 8;
+    optional string account_name = 9;
+    optional int32 front_id = 10;               //前置编号
+    optional int32 session_id = 11;            //会话ID
+    optional string order_status = 12;
+}
+
+message FutureRtnOrderActionErr
+{
+    optional int32 funcid = 1[default=12003009];
+    required int32 ret_code = 2;
+    optional string ret_message = 3;
+    optional string order_group = 4;
+    optional string code = 5;
+    optional string account_name = 6;
+    optional int32 front_id = 7;               //前置编号
+    optional int32 session_id = 8;            //会话ID
+}
+
+message FutureRtnOrder
+{
+    optional int32 funcid = 1[default=12003010];
+    optional int32 front_id = 2;               //前置编号
+    optional int32 session_id = 3;            //会话ID
+    optional string exchange_id = 4;       //交易所代码
+    optional string account_name = 5;
+
+    optional string order_group = 6;
+    optional string code = 7;
+    optional string order_sys_id = 8;
+    optional string order_submit_status = 9; //是一个报单提交状态类型
+    optional string order_local_id = 10;
+    optional string order_status = 11;   //一个报单状态类型 '5' 表示撤单
+    
+    optional int64 order_qty = 12; 
+    optional int64 match_qty = 13; 
+    optional int64 unmatch_qty = 14; 
+    optional int32 bsflag = 15;
+    optional int32 hedge_flag = 16;
+    optional int32 kpcbj = 17;
+    optional int32 insert_date = 18[default=-1];
+    optional int32 insert_time = 19[default=-1];
+    optional int32 active_time = 20[default=-1];
+    optional int32 suspend_time = 21[default=-1];
+    optional int32 update_time = 22[default=-1];
+    optional int32 cancel_time = 23[default=-1];
+}
+
+message FutureRtnTrade
+{
+    optional int32 funcid = 1[default=12003011];
+    optional int32 front_id = 2;               //前置编号
+    optional int32 session_id = 3;            //会话ID
+    optional string exchange_id = 4;       //交易所代码
+    optional string account_name = 5;
+    optional string order_group = 6;
+    optional string code = 7;
+    optional string match_id = 8;
+    optional int64 match_qty = 9;
+    optional double match_amt = 10;
+    optional int32 bsflag = 11;
+    optional int32 kpcbj = 12;
+    optional int32 hedge_flag = 13;
+    optional int64 stamp = 14;
+    optional int64 match_price = 15;
+    optional string order_sys_id = 16; //是一个报单提交状态类型
+}
+
+//查询报单
+message InnerQueryOrderReqt
+{
+    optional int32 funcid = 1[default=12003012];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string exchange_id = 4; //交易所代码
+    optional string order_sys_id = 5;      //报单编号
+    optional string insert_time_start = 6;      //开始时间
+    optional string insert_time_end = 7;      //结束时间
+}
+message InnerFutureQueryOrderResp
+{
+    optional int32 funcid = 1[default=12103012];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string request_id = 4; //Requset Id 长连接请求必须填， 短连接不需要
+    optional int32 front_id = 5;               //前置编号
+    optional int32 session_id = 6;            //会话ID
+    optional int32 ret_code = 7[default=0];
+    optional string ret_message = 8;
+    optional bool islast = 9[default = false];
+    optional string order_group = 10;//报单引用
+    optional string user_id = 11;//用户代码
+    optional int32 order_price_type = 12;//报单价格条件
+    optional int32 bsflag = 13;
+    optional int32 kpcbj= 14;
+    optional int32 hedge_flag = 15;
+    optional int64 order_price = 16;
+    optional int32 order_qty = 17;
+    optional int32 time_condition = 18;//有效期类型
+    optional int32 order_date = 19;
+    optional int32 volume_condition = 20;//成交量类型
+    optional int32 min_match_volume = 21;
+    optional int32 contingent_condition = 22;//触发条件
+    optional int64 stop_price = 23;
+    optional int32 force_close_reason = 24;//强平原因
+    optional string order_local_id = 25;
+    optional string exchange_id = 26;
+    optional string participant_id = 27;
+    optional string client_id = 28;
+    optional string order_submit_status = 29;
+    optional string trading_day = 30;
+    optional string settlement_id = 31;
+    optional string order_sys_id = 32;
+    optional string order_source = 33;
+    optional string order_status = 34;
+    optional string order_type = 35;
+    optional int32 match_qty = 36;
+    optional int32 remain_qty = 37;
+    optional int32 insert_date = 38[default=-1];
+    optional int32 insert_time = 39[default=-1];
+    optional int32 active_time = 40[default=-1];
+    optional int32 suspend_time = 41[default=-1];
+    optional int32 update_time = 42[default=-1];
+    optional int32 cancel_time = 43[default=-1];
+    optional string instrument_id = 44;//合约代码
+}
+
+//查询成交
+message InnerQueryTradeReqt
+{
+    optional int32 funcid = 1[default=12003013];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;     //用户代码
+    optional string instrument_id = 4;       //合约代码
+    optional string exchange_id = 5; //交易所代码
+    optional string order_sys_id = 6;      //报单编号
+    optional string insert_time_start = 7;      //开始时间
+    optional string insert_time_end = 8;      //结束时间
+}
+message InnerFutureQueryTradeResp
+{
+    optional int32 funcid = 1[default=12103013];
+    optional string broker_id = 2;      //经纪公司代码
+    optional string future_account= 3;            //用户代码
+    optional string instrument_id = 4;       //合约代码
+    optional string order_group = 5;
+    optional string user_id = 6;
+    optional string exchange_id = 7;
+    optional string match_id = 8;
+    optional int32 bsflag = 9;
+    optional string order_sys_id = 10;
+    optional string exchange_instrument_id = 11;
+    optional int32 kpcbj = 12;
+    optional int32 hedge_flag = 13;
+    optional int64 match_price = 14;
+    optional int32 match_qty = 15;
+    optional int32 match_date = 16;
+    optional int32 match_time = 17;
+    optional int32 match_type = 18;
+    optional string order_local_id = 19;
+    optional string clearing_part_id = 20;
+    optional string sequence_no = 21;
+    optional int32 trading_day = 22;
+    optional int32 settlement_id = 23;
+    optional int32 ret_code = 24[default=0];
+    optional string ret_message = 25;
+    optional bool islast = 26[default = false];
+}

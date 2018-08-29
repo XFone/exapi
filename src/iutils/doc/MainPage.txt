@@ -1,0 +1,19 @@
+/** @mainpage IUTILS Project
+ *
+ * @section S_I Introduction
+ * This is an auto-generated <i>Technical Document</i> for main.h <br>
+ * There are following <b>Modules</b> in this program: <br>
+ * <ul>
+ * <li>\ref EXAMPLES "test"
+ * </ul>
+ * <img src="use_case.png">
+ *
+ * @section S_N Notes
+ * NOTES:
+ * <br>
+ *
+ * @section S_C Copyright
+ * <b>CONFIDENTIAL</b><br>
+ * Copyright 2014 ZeroneIO. All rights reserved.
+ *
+ */

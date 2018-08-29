@@ -1,0 +1,104 @@
+#
+# $Id: $
+#
+# Utilities as make tools, such as doxgen, tarball, and clean tools.
+#
+# Copyright (c) 2013-2014 ZeroneIO. All rights reserved.
+#
+# $Log: $
+#
+#
+
+#
+# Common helper targets
+#
+update:
+	svn update
+	$(MAKE) depend
+
+#
+# Generate doc++ html documents
+#
+docs::  ./doc/Doxyfile
+	doxygen $^
+	-cp -a doc/img/* doc/html/
+	@echo "[---]	Created documents."
+
+#
+# Splint static type checking
+#
+lint:: option.lnt
+	splint -f $^ $(_INCDIR_LIST) $(_DEFINE_LIST) $(SOURCES)
+	@echo "[---]	Lint check done."
+
+#
+# Clean
+#
+
+#
+# find and clean specific files pattern
+# @param pattern file pattern
+#
+define find_clean_files
+	- $(FIND) . -name '$1' -print -exec $(REMOVE) {} \;
+endef
+
+define find_clean_dirs
+	- $(FIND) . -type d -name '$1' -print -prune -exec $(REMOVE) -r {} \;
+endef
+
+# Clean all code thoroughly (temp files created by MSDEV project)
+cleanmsvc: cleanwdk
+	$(call find_clean_files,*.ncb)
+	$(call find_clean_files,*.opt)
+	$(call find_clean_files,*.plg)
+	$(call find_clean_dirs,Debug)
+	$(call find_clean_dirs,Release)
+
+# Clean all code thoroughly (temp files created by Delphi project)
+cleandelphi: cleanwdk
+	$(call find_clean_files,*.~pas)
+	$(call find_clean_files,*.~ddp)
+	$(call find_clean_files,*.~dfm)
+	$(call find_clean_files,*.~dpr)
+
+# clean MS vistual studio intermediate files
+cleanwdk:
+	$(call find_clean_files,buildchk.*)
+	$(call find_clean_files,buildfre.*)
+	$(call find_clean_dirs,obj)
+	$(call find_clean_dirs,objchk)
+	$(call find_clean_dirs,objfre)
+
+# clean doxgen docs
+cleandocs:
+	@$(RM_VERBOSE) -r doc/html
+
+# clean eclipse settings
+cleaneclipse:
+	$(call find_clean_dirs,.settings)
+	$(call find_clean_files,.classpath)
+	$(call find_clean_files,.project)
+
+#
+# Tarball and backup (source only)
+#
+tar: cleanall
+	- tar cvf \
+	../$(shell basename `pwd`)_$(shell date '+%y%m%d-%H%M%S'.tar) .
+
+tgz: cleanall
+	- tar czvf \
+	../$(shell basename `pwd`)_$(shell date '+%y%m%d-%H%M%S'.tgz) .
+
+tbz: cleanall
+	- tar cjvf \
+	../$(shell basename `pwd`)_$(shell date '+%y%m%d-%H%M%S'.tar.bz2) .
+
+txz: cleanall
+	- tar cvf - . | xz -z > \
+	../$(shell basename `pwd`)_$(shell date '+%y%m%d-%H%M%S'.tar.xz)
+
+backup:
+	- tar cvf - $(HEADERS) $(SOURCES) $(OSRC) | \
+	gzip > `date +"backup_$(PROG)-%Y%m%d-%H%M.tgz"`

@@ -1,0 +1,185 @@
+#
+# $Id: $
+#
+# Makefile Pre-include file
+#
+# Copyright (c) 2013. @Company. All rights reserved.
+#
+# $Log: $
+#
+#
+
+include $(BUILD)/make.conf
+
+all:: ;
+
+#
+# set directories
+#
+OBJDIR = obj.$(TARGET_NAME)
+BINDIR = bin.$(TARGET_NAME)
+DEPDIR = $(OBJDIR)
+
+#
+# console color: print information terminal with color
+#
+ifeq (xterm ,$(TERM))
+  ifneq (, $(COLORTERM))
+    SET_COLOR = "["
+  endif
+endif
+
+ifeq (xterm-256color, $(TERM))
+  SET_COLOR = "["
+endif
+    
+ifdef SET_COLOR
+    CC_COLOR  = "$(SET_COLOR)34m"
+    SRC_COLOR = "$(SET_COLOR)33m"
+    BIN_COLOR = "$(SET_COLOR)37;1m"
+    LD_COLOR  = "$(SET_COLOR)34;1m"
+    MK_COLOR  = "$(SET_COLOR)32;1m"
+    NO_COLOR  = "$(SET_COLOR)0m"
+endif
+
+#
+# set rules for SDK, software tool or other platform
+#
+include $(BUILD)/rules.mk
+
+################## Defines Functions For Makefile.post #####################
+
+#
+# Get .o from .c (and .cc .cxx .cpp)
+#
+get_objname = $(strip                          \
+	      $(patsubst %.cpp, $(OBJDIR)/%.o, \
+	      $(patsubst %.cxx, $(OBJDIR)/%.o, \
+	      $(patsubst %.cc,  $(OBJDIR)/%.o, \
+	      $(1:%.c=$(OBJDIR)/%.o)))))
+
+#
+# If the source file is not in current directory, generate rules for it
+#
+
+define print_c_rules
+  $(shell printf "%s: %s\n\t\044(call make_c_depend)\n\n"      \
+	"$(DEPDIR)/$(notdir $(basename $(1))).d"               \
+	"$(1) $(OBJDIR)/cflags $(OBJDIR)/stdccflags"           \
+	> $(DEPDIR)/$(notdir $(basename $(1))).d.rule)
+  $(shell printf "%s: %s\n\t\044(call make_c_compile)\n\n"     \
+	"$(OBJDIR)/$(notdir $(basename $(1))).o"               \
+	"$(1) $(OBJDIR)/cflags $(OBJDIR)/stdccflags"           \
+	>> $(DEPDIR)/$(notdir $(basename $(1))).d.rule)
+endef
+
+define print_cxx_rules
+  $(shell printf "%s: %s\n\t\044(call make_cxx_depend)\n\n"    \
+	"$(DEPDIR)/$(notdir $(basename $(1))).d"               \
+	"$(1) $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags"         \
+	> $(DEPDIR)/$(notdir $(basename $(1))).d.rule)
+  $(shell printf "%s: %s\n\t\044(call make_cxx_compile)\n\n"   \
+	"$(OBJDIR)/$(notdir $(basename $(1))).o"               \
+	"$(1) $(OBJDIR)/cxxflags $(OBJDIR)/stdccflags"         \
+	>> $(DEPDIR)/$(notdir $(basename $(1))).d.rule)
+endef
+
+define generate_dep_rules
+  $(if $(filter .c, $(suffix $(1))), $(call print_c_rules, $(1)))
+  $(if $(filter .cc .cxx .cpp, $(suffix $(1))), $(call print_cxx_rules, $(1)))
+  DEPENDS += $(DEPDIR)/$(notdir $(basename $(1))).d.rule
+endef
+
+#
+# Add sencondary dependency rule for build target
+#
+define target_template
+  $(1): $(2)
+endef
+
+#
+# Generate dependency rules for local makefile
+#
+define make_make_depend
+	@if [ ! -d $(dir $@) ] ; then mkdir -p $(dir $@) ; fi
+	@echo "[DEP]	$@"
+	@echo "# autogen by function make_make_depend()" > $@
+endef
+
+#
+# Generate dependency rules for C code
+#
+define make_c_depend
+	@if [ ! -d $(dir $@) ] ; then mkdir -p $(dir $@) ; fi
+	@printf %s $(dir $@) > $@
+	@echo "[DEP]	$<"
+	@$(CC) $(DFLAGS) $(CFLAGS) $(STDCCFLAGS) $(DEP) $< \
+	       $(DEPFLAGS) $(DEPDIR)/$(@F).tmp >/dev/null
+	@cat $(DEPDIR)/$(@F).tmp >> $@
+	@$(REMOVE) $(DEPDIR)/$(@F).tmp
+endef
+
+# to fix: without path for .o, include dependency not work
+define make_c_depend_new
+	@echo "[DEP]	$<"
+	@$(CC) $(DFLAGS) $(CFLAGS) $(STDCCFLAGS) $(DEP) $< \
+	       $(DEPFLAGS) $@ >/dev/null
+endef
+
+#
+# Generate dependency rules for C++ code
+#
+define make_cxx_depend
+	@if [ ! -d $(dir $@) ] ; then mkdir -p $(dir $@) ; fi
+	@printf %s $(dir $@) > $@
+	@echo "[DEP]	$<"
+	@$(CXX) $(DFLAGS) $(CXXFLAGS) $(STDCCFLAGS) $(DEP) $< \
+		$(DEPFLAGS) $(DEPDIR)/$(@F).tmp >/dev/null
+	@cat $(DEPDIR)/$(@F).tmp >> $@
+	@$(REMOVE) $(DEPDIR)/$(@F).tmp
+endef
+
+# to fix: without path for .o, include dependency not work
+define make_cxx_depend_new
+	@echo "[DEP]	$<"
+	@$(CXX) $(DFLAGS) $(CXXFLAGS) $(STDCCFLAGS) $(DEP) $< \
+		$(DEPFLAGS) $@ >/dev/null
+endef
+
+#
+# Compiling C code
+#
+define make_c_compile
+	@printf '%b	%b\n' $(CC_COLOR)[CC] $(SRC_COLOR)$<$(NO_COLOR)
+	@$(CC) $(CFLAGS) $(STDCCFLAGS) -c $(OUTPUT_FLAG)$@ $<
+endef
+
+#
+# Compiling C++ code
+#
+define make_cxx_compile
+	@printf '%b	%b\n' $(CC_COLOR)[CXX] $(SRC_COLOR)$<$(NO_COLOR)
+	@$(CXX) $(CXXFLAGS) $(STDCCFLAGS) -c $(OUTPUT_FLAG)$@ $<
+endef
+
+#
+# Building module
+# @param name module name
+# @param path module build path
+#
+define make_module
+	@echo "---------------------------------------------------------------"
+	@printf "Building module %b in %b ...\n" $(MK_COLOR)$1$(NO_COLOR) $2
+	@echo "---------------------------------------------------------------"
+	- TARGET_ARCH=$(TARGET_ARCH) $(MAKE) --no-print-directory -C $2
+endef
+
+
+#
+# Print test information
+# @param name testcase name
+# @param desc description
+#
+define run_case
+	@printf '%b	%b: %b\n' $(MK_COLOR)[TEST] $(SRC_COLOR)$1$(NO_COLOR) $2
+endef

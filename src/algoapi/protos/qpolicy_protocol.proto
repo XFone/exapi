@@ -1,0 +1,162 @@
+syntax = "proto2"; 
+package autotrade;
+
+// Begin added by xiaofeng 2015-2-20 for C#
+//import "google/protobuf/csharp_options.proto";
+//option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+//option (google.protobuf.csharp_file_options).umbrella_classname = "QPolicyProtos";
+
+option optimize_for = SPEED;
+// End added
+
+message PolicyParameters
+{
+    required string algono  = 1;            // 算法编号 (algoServer)
+
+    required string sec_uid = 2;            // 股东代码 (证券账户 - trdacct)
+    required string fund_id = 3;            // 资金账号 (资产账户 - fundacct)	
+
+    required uint32 market  = 4;            // 0-前台未知交易所 1-上海 2-深圳 3-上海B 
+                                            // 4-深圳B 5-中金所 6-上期所 7-大商所 8-郑商所 
+                                            // 9-特转A 10-特转B, 
+    required string stock_code = 5;         // 证券代码
+    optional int32  stock_type = 6;         // 证券类型 ['0','2'] '0':股票 '1':债券 '2':基金
+    required uint32 hedge_flag = 7;         // 投保标志 0:投机, 1:保值, 2:套利
+
+    required string bsflag = 8;             // 买卖方向 '0B':证券买入  - ???
+    optional int32  autotradesno = 9;       // PB系统算法方案号
+
+    required int32  total_type = 10;        // 委托总量类型[0,1] 0:按数量,1:按金额
+    optional int32  total_qty  = 11;        // 委托总量(按数量) 下单量
+    optional int64  total_amount = 12;      // 委托金额(按金额) 下单金额
+
+    required int32  order_type = 13;        // 下单价格类型 [1,4] 1:成交价 2:自选买档 3:自选卖档 4:自定义价
+    optional int64  order_price = 14;       // 下单价格(自定义价)
+    optional int32  order_price_level = 15; // 下单价格档位(自选档) [1,10]
+
+
+    required int32  trade_type = 16;        // 交易类型[0,2]  0:普通交易 1:信用交易 2:期货交易
+    optional int32  credit_type = 17;       // 信用交易标识[0,2] 0:普通交易 1:融资交易 2:融券交易
+
+    optional int32  suborder_valid_period = 18;  // 子单生命周期(追单频率) in seconds
+    optional bool   radical_reorder = 19;   // 是否激进下单
+    optional int32  radical_level   = 20;   // 激进下单档位 对手方[1,10]
+    optional int32  radical_count   = 21;   // 激进次数
+
+    optional int32  order_frequency = 22;   // 下单频率 (in seconds)
+
+    optional int32  order_limit_price_type = 23;  // 限定价格类型 [0,2] 0:无限制 1:按百分比 2:按固定值
+    optional int64  max_price = 24;         // 最大限定价格 * 10000
+    optional int64  min_price = 25;         // 最小限定价格 * 10000
+    optional int32  price_float_point = 26; // 价格浮动点数 [-20, 20]
+
+    optional int32  min_trade_unit = 27;    // 最小交易单位
+
+    required int32  start_mode = 28;        // 启动模式[0,1] 0: 立即启动 1: 定时启动
+    optional int32  start_time = 29;        // 开始时间(HHmmSS)
+    optional int32  execute_time = 30;      // 执行耗时(in minutes)
+}
+
+message AccountParameters
+{
+    required string cust_code   = 1;        // 客户代码(用户名)
+    optional int32  int_org     = 2;        // 内部机构(操作机构）
+    optional string channel     = 3;        // 通道号（操作渠道）
+
+    optional int32  fund_sn     = 4;        // 资产子账户（sub number）
+
+    optional string acct_type   = 5;        // 账户类型
+    optional string encrypt_key = 6;        // 加密因子
+    optional string auth_data   = 7;        // 认证数据
+}
+
+message TraceParameters
+{
+    optional int32  level  = 1 [default=5];         // trace & debug level
+    optional string server = 2;                     // trace server address:port as 'tcp://<ip>:<port>'
+    optional bool   backtest = 3 [default=false];   // back-test or real
+    optional int32  playback_speed = 4 [default=1]; // back-test playback speed times (x N)
+    optional uint32 playback_day   = 5;             // playback market date in format '20150225' (2015-02-25)
+    optional uint32 playback_time  = 6;             // playback market time in format '100102001' (10:01:02.001)
+}
+
+message AlgoPolicyCreateReqt
+{
+    optional int32  funcid = 1 [default=91000001];
+    required PolicyParameters  param   = 2;
+    optional TraceParameters   trace   = 3;
+    optional AccountParameters account = 4;
+    optional string request_id         = 5;
+}
+
+message AlgoPolicyCreateResp
+{
+    optional int32  funcid = 1 [default=91100001];
+    required int32  error_code = 2;         // 错误代码
+    optional string error_msg  = 3;         // 错误信息
+    optional string algo_instance_id = 4;   // 算法实例号 (robot_id)
+    optional string request_id = 5;
+}
+
+message AlgoPolicyUpdateReqt
+{
+    optional int32  funcid = 1 [default=91000002];
+    required int32  op_code = 2;            // 操作代码[0,n] 0:create, 1:stop, 2:suspend, 3:update-params, 4:resume
+    required string algo_instance_id = 3;   // 算法实例号 (robot_id)
+    optional PolicyParameters param = 4;
+    optional TraceParameters  trace = 5;
+    optional string request_id = 6;
+}
+
+message AlgoPolicyUpdateResp
+{
+    optional int32  funcid = 1 [default=91100002];
+    required int32  error_code = 2;         // 错误代码
+    optional string error_msg  = 3;         // 错误信息
+    optional string algo_instance_id = 4;   // 算法实例号 (robot_id)
+    optional string request_id = 5;    
+}
+
+message AlgoPolicyDeleteReqt
+{
+    optional int32  funcid = 1 [default=91000003];
+    required string algo_instance_id = 2;   // 算法实例号 (robot_id)    
+    optional string request_id = 3;
+}
+
+message AlgoPolicyDeleteResp
+{
+    optional int32  funcid = 1 [default=91100003];
+    required int32  error_code = 2;         // 错误代码
+    optional string error_msg  = 3;         // 错误信息
+    optional string algo_instance_id = 4;   // 算法实例号 (robot_id)
+    optional string request_id = 5;    
+}
+
+message AlgoPolicyQueryReqt
+{
+    optional int32  funcid = 1 [default=91000004];
+    required string algo_instance_id = 2;   // 算法实例号 (robot_id) 
+    optional string order_id   = 3;         // order or suborder id
+    optional string request_id = 4;
+}
+
+message AlgoPolicyQueryResp
+{
+    optional int32  funcid = 1 [default=91100004];
+    required int32  error_code = 2;         // 错误代码
+    optional string error_msg  = 3;         // 错误信息
+
+    message SubOrderInfo                    // see qstock::StockQueryOrderResp.OrderDetail
+    {
+        required string orderno = 1;        // see qstock::StockQueryOrderReqt
+        // order_group ? 
+        optional string order_id = 2;
+        optional string order_status = 3;
+    }
+
+    repeated SubOrderInfo order_list = 4;   // sub-order information list
+    optional int32  si_state   = 5;         // 算法策略执行状态 0:INIT, 1:IDLE, 2:STATED, 3:SUSPENDED, 4:STOPPED
+    optional string si_trace   = 6;         // 记录最后的出错信息 
+    optional string request_id = 7;
+}

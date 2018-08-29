@@ -1,0 +1,50 @@
+#
+# $Id: $
+#
+# Micros set by configure tool
+#
+# Copyright (c) 2011 @Company@. All rights reserved.
+#
+# $Log: $
+#
+#
+
+# Host architectures
+ARCH      = @MACHTYPE@
+MACHTYPE  = @MACHTYPE@
+OSTYPE    = @OSTYPE@
+OSRELEASE = @OSRELEASE@
+
+# Target architectures
+# TARGET_ARCH = @MACHTYPE@
+
+# Tools
+CC        = $(CROSS_COMPILE)@CC@
+CXX       = $(CROSS_COMPILE)@CXX@
+MKSHLIB   = $(CXX) -shared -fPIC
+LINKER    = $(CXX)
+DEP       = -MM
+DEPFLAGS  = -MF
+RANLIB    = $(CROSS_COMPILE)ranlib
+AR        = $(CROSS_COMPILE)ar
+ARFLAGS   = crv
+STRIP     = $(CROSS_COMPILE)strip
+LEX      := $(LEX)
+YACC     := $(YACC)
+FIND     := $(FIND)
+RM_VERBOSE= $(REMOVE) -v
+
+# default flags for compiling both C and C++ files
+STDCCFLAGS= @STDCCFLAGS@ -I.
+
+# default flags for compiling C (.c) files
+CFLAGS    = @CFLAGS@
+
+# default flags for compiling C++ (.cxx and .cpp) files
+CXXFLAGS  = @CXXFLAGS@
+
+# default flags for linking objects
+LDFLAGS   = @LDFLAGS@
+
+# default build targets (debug/opt, 32/64bits, etc.)
+WITH_DEBUG = 1

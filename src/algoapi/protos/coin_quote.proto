@@ -1,0 +1,224 @@
+syntax = "proto2";
+package digitalcurrency;
+
+// Begin added by xiaofeng 2018-8-20 for C#
+// import "google/protobuf/csharp_options.proto";
+// option (google.protobuf.csharp_file_options).namespace = "AlgoApi.Protos";
+// option (google.protobuf.csharp_file_options).umbrella_classname = "CoinQuote";
+
+option optimize_for = SPEED;
+// End added
+
+// draft version 0.1
+
+enum MessgeTypeID {
+    ReqDepthID        =   1;
+    RespDetphID       =   2;           
+}
+
+message TIterm {
+    optional    int64               timestamp   =   1;
+    optional    int64               high        =   2;
+    optional    int64               low         =   3;
+    optional    int64               dayHigh     =   4;
+    optional    int64               dayLow      =   5;
+    optional    int64               vol         =   6;
+    optional    int64               last        =   7;
+    optional    int64               buy         =   8;
+    optional    int64               sell        =   9;
+    optional    int64               change      =   10;
+}
+
+enum TradingPair {
+    BTCUSDT     =       0;
+    ETHUSDT     =       1;
+    BCHUSDT     =       2;
+    // TODO ...
+}
+
+message TickerItem {
+    optional    string              channel     =   1;
+    optional    TradingPair         tpair       =   2;
+    optional    TIterm              titerm      =   3;
+}
+
+enum Exchange {
+    Exchange_OKCOIN     =   0;
+    Exchange_BINANCE    =   1;
+    Exchange_HUOBI      =   2;
+}
+
+message TickerData {
+    optional    Exchange            exchange    =   1;
+    repeated    TickerItem          tickers     =   2;
+}
+
+message AskBid {
+    optional    int64               price       =   1;
+    optional    int64               amount      =   2;
+}
+
+message DIterm {
+    repeated    AskBid              asks        =   1;
+    repeated    AskBid              bids        =   2;
+    optional    int64               timestamp   =   3;
+}
+
+message DepthItem {
+    optional    string              channel     =   1;
+    optional    TradingPair         tpair       =   2;
+    optional    DIterm              diterm      =   3;
+}
+
+message DepthData {
+    optional    Exchange            exchange    =   1;
+    repeated    DepthItem           depths      =   2;
+}
+
+message TradeData {
+    optional    double              price       =   1;
+    optional    double              amount      =   2;
+    optional    int64               timestamp   =   3;  
+//"isBuyerMaker": true,
+//"isBestMatch": true
+}
+
+enum KlineInterval {
+    OneMinute       =   1;
+    ThreeMinute     =   2;
+    FiveMinute      =   3;
+    FifteenMinute   =   4;
+    ThirtyMinute    =   5;
+    OneHour         =   6;
+    TwoHour         =   7;
+    FourHour        =   8;
+    SixHour         =   9;
+    TwelveHour      =   10;
+    OneDay          =   11;
+    ThreeDay        =   12;
+    OneWeek         =   13;    
+}
+
+message KlineData {
+    optional    int64               open_time   =   1;
+    optional    double              open_price  =   2;
+    optional    double              high_price  =   3;
+    optional    double              low_price   =   4;
+    optional    double              close_price =   5;
+    optional    int64               close_time  =   6;
+    optional    double              volumn      =   7;
+    optional    int64               number      =   8;
+}
+
+message PriceData {
+    required    TradingPair         tpair       =   1;
+    required    double              price       =   2;
+}
+
+enum TradeType {
+    BuyMarket       =   1;
+    SellMarket      =   2;
+    BuyLimit        =   3;
+    SellLimit       =   4;
+    //TODO    
+}
+
+enum OrderStatus {
+    Canceled        =   1;
+    NoDeal          =   2;
+    PartialDeal     =   3;
+    CompleteDeal    =   4;
+    Canceling       =   5;
+}
+
+message OrderData {
+    required    int64               order_id    =   1;
+    required    OrderStatus         status      =   2;
+    required    Exchange            exchange    =   3;
+    required    double              amount      =   4;
+    required    double              price       =   5;
+    required    double              deal_amount =   6;
+    required    double              avg_price   =   7;
+    required    TradeType           order_type  =   8;
+}
+
+/*********************************************/
+// Depth
+message ReqDepth {
+    required    Exchange            exchange    =   1;
+    required    TradingPair         tpair       =   2;
+    optional    int64               limit       =   3;           
+}
+message RespDepth {
+    required    int64               error_code  =   1;
+    required    DepthData           depth_data  =   2;
+}
+
+// Trades List
+message ReqTradeList {
+    required    Exchange            exchange    =   1;
+    required    TradingPair         tpair       =   2;
+    optional    int64               limit       =   3;
+    optional    int64               begin_time  =   4;
+    optional    int64               end_time    =   5;
+}
+message RespTradeList {
+    required    int64               error_code  =   1;
+    repeated    TradeData           trade_data  =   2;
+}
+
+// Kline
+message ReqKline {
+    required    Exchange            exchange    =   1;
+    required    TradingPair         tpair       =   2;
+    required    KlineInterval       kline_type  =   3;
+    optional    int64               begin_time  =   4;
+    optional    int64               end_time    =   5;
+}
+message RespKline {
+    required    int64               error_code  =   1;
+    repeated    KlineData           kline_data  =   2;
+}
+
+// Price
+message ReqPrice {
+    required    Exchange            exchange    =   1;
+    optional    TradingPair         tpair       =   2;
+}
+message RespPrice {
+    required    int64               error_code  =   1;
+    repeated    PriceData           price_data  =   2;
+}
+
+// NewTrade
+message ReqNewTrade {
+    required    Exchange            exchange    =   1;
+    required    TradingPair         tpair       =   2;
+    required    TradeType           ttype       =   3;
+    required    double              price       =   4;
+    required    double              amount      =   5;
+}
+message RespNewTrade {
+    required    int64               error_code  =   1;
+    optional    int64               order_id    =   2;
+}
+
+// CancleTrade
+message ReqCancelTrade {
+    required    Exchange            exchange    =   1;
+    required    int64               order_id    =   2;
+}
+message RespCancelTrade {
+    // error_code = 0 means request commit success, not request done
+    required    int64               error_code  =   1;
+}
+
+// OrderInfo
+message ReqOrderInfo {
+    required    Exchange            exchange    =   1;
+    optional    int64               order_id    =   2;
+}
+message RespOrderInfo {
+    required    int64               error_code  =   1; 
+    repeated    OrderData           order_data  =   2;
+}
