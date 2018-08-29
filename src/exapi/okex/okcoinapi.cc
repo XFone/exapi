@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "okcoinapi.h"
+#include "RestRequest.h"
 
 void OKCoinApi::SetKey(string api_key, string secret_key)
 {

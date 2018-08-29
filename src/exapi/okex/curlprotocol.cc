@@ -25,7 +25,6 @@ CUrlProtocol::~CUrlProtocol()
 
 int CUrlProtocol::InitApi(HTTP_SERVER_TYPE type)
 {
-
     if (type == HTTP_SERVER_TYPE_CN) {
         domain = _url_domain_cn;
     }

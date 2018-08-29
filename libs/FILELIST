@@ -1,0 +1,25 @@
+!!! All directories in this folder are ignored in vesion repository. !!!
+
+This folder contains following compiled libraries (static link only):
+
+[libs]
+boost-1.66.0
+cjson-1.0
+googletest-1.8.0
+iconv-1.14
+libevent-2.1.8
+protobuf-3.6.1
+redis-4.0.11
+restbed-4.6
+tbb-2018_U5
+zeromq-4.2.3
+...
+
+
+[tarballs - https://{svn-host}/exapi_libs/dev]
+linux_x64_gcc4.6_ubuntu-12.04.tgz       - Linux ubuntu-12.04 with gcc 4.6
+linux_x64_gcc4.7_ubuntu-12.04.tgz       - Linux ubuntu-12.04 with gcc 4.7
+macos_x64_llvm8.0_darwin-16.3.tgz       - MacOS 10.12.2
+macos_x64_llvm9.1_darwin-17.7.tgz       - MacOS 10.13.6
+windows_x86_vc110.zip                   - Vistual Studio 2012
+windows_x86_vc140.zip                   - Vistual Studio 2015

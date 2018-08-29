@@ -29,13 +29,16 @@ namespace AlgoApi {
     using namespace DataSource;
     using namespace Protos;
  
+#ifndef DEF_TRADE_TYPES
+#define DEF_TRADE_TYPES
     typedef int32_t quantity_t;
     typedef int32_t price_t;
     typedef int64_t volume_t;
     typedef int64_t amount_t;
     typedef int32_t timestamp_t;
-    typedef quotation::Stock *PStockData;
+#endif // DEF_TRADE_TYPES
 
+    typedef quotation::Stock *PStockData;
     //typedef SharedObject QuotationData;
 
 #ifdef USE_TBB

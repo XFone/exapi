@@ -1,7 +1,7 @@
 /*
  * $Id: $
  *
- * RestRequest and UriHelp class implementation
+ * RestRequest class implementation
  * 
  * Copyright (c) 2014-2018 Zerone.IO . All rights reserved.
  *
@@ -15,6 +15,7 @@
 #include "DumpFunc.h"
 
 #include "urlhelp.h"
+#include "RestRequest.h"
 using namespace exapi;
 
 #ifdef USE_OPENSSL

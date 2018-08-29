@@ -36,7 +36,7 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 
 # Sources to build
 SOURCES = $(wildcard *.cc *.cxx)
-INCDIRS  += ./include
+INCDIRS  += ./include ../common/include
 
 # All
 all::
