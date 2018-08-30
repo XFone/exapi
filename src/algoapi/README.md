@@ -12,13 +12,11 @@
 
 ## Definition
 
-|-------------|---------------------|--------------------|
 | name        | Chinese             | Description        |
 |:------------|:--------------------|:-------------------|
 | order_group | 母单号               |                    |
 | order_id    | 子单号               |                    |
-| orderno     | 委托号               ｜ matched_id        |
-|-------------|---------------------|--------------------|
+| orderno     | 委托号               | matched_id         |
 
 
 ## REST API and WebSocket API
@@ -27,19 +25,19 @@
 
 - github: [okcoin-okex](https://github.com/okcoin-okex/API-docs-OKEx.com)
 
-- agent: [../dcapi/okex](../exapi/okex/README.md)
+- agent: [../exapi/okex](../exapi/okex/README.md)
 
 ### 2. Binance
 
 - github: [binance-exchange](https://github.com/binance-exchange/binance-official-api-docs)
 
-- agent: [../dcapi/binance](../exapi/binance/README.md)
+- agent: [../exapi/binance](../exapi/binance/README.md)
 
 ### 3. Huobi
 
 - github: [huobiapi](https://github.com/huobiapi/API_Docs/wiki)
 
-- agent: [../dcapi/huobi](../exapi/huobi/README.md)
+- agent: [../exapi/huobi](../exapi/huobi/README.md)
 
 ## Protobuf Files
 

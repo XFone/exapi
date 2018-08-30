@@ -34,6 +34,36 @@ namespace exapi {
     class DAQuoteOkexSpi : public IQuoteSpi {
     public:
         virtual ~DAQuoteOkexSpi() {}
+
+        /**
+         * @param addr server address
+         */
+        virtual void OnConnected(const char *addr) {}
+
+        /**
+         * @param addr server address
+         */
+        virtual void OnDisconnected(const char *addr) {}
+
+        /**
+         * @param quoteType quote type
+         * @param pQuoteData union of quotation data
+         */
+        virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) {}
+    
+        /**
+         * @param quoteType quote type
+         * @param psymbol quote symbol
+         * @param status symbol subscription status
+         */
+        virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) {}
+
+        /**
+         * @param quoteType quote type
+         * @param psymbol quote symbol
+         * @param status symbol subscription status
+         */
+        virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) {}
     };
 
     /**
@@ -122,7 +152,7 @@ namespace exapi {
         /**
          * 获取美元人民币汇率
          */
-        int GetExchange_Rate(void);
+        int GetExchangeRate(void);
 
         /**
          * 获取交割预估价

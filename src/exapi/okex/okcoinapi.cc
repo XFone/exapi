@@ -27,7 +27,7 @@ void OKCoinApi::SetKey(string api_key, string secret_key)
 string OKCoinApi::GetTicker(string &symbol)         //Get /api/v1/ticker	获取OKCoin行情
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_TICKER);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol);
@@ -38,7 +38,7 @@ string OKCoinApi::GetTicker(string &symbol)         //Get /api/v1/ticker	获取O
 string OKCoinApi::GetDepth(string &symbol,string &size,string &merge)   //Get /api/v1/depth		获取OKCoin市场深度
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_DEPTH);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -51,7 +51,7 @@ string OKCoinApi::GetDepth(string &symbol,string &size,string &merge)   //Get /a
 string OKCoinApi::GetTrades(string &symbol,string &since)			//Get /api/v1/trades	获取OKCoin最近600交易信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_TRADES);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -63,7 +63,7 @@ string OKCoinApi::GetTrades(string &symbol,string &since)			//Get /api/v1/trades
 string OKCoinApi::GetKline(string &symbol,string &type,string &size,string &since)			//Get /api/v1/kline		获取比特币或莱特币的K线数据
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_KLINE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -81,7 +81,7 @@ string OKCoinApi::GetKline(string &symbol,string &type,string &size,string &sinc
 string OKCoinApi::DoUserinfo()				//POST /api/v1/userinfo	获取用户信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_USERINFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -94,7 +94,7 @@ string OKCoinApi::DoTrade(string &symbol,string &type,string &price,string &amou
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_TRADE);
 
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -111,7 +111,7 @@ string OKCoinApi::DoTrade(string &symbol,string &type,string &price,string &amou
 string OKCoinApi::DoTrade_History(string &symbol,string &since)			//POST /api/v1/trade_history				获取OKCoin历史交易信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_TRADE_HISTORY);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -125,7 +125,7 @@ string OKCoinApi::DoTrade_History(string &symbol,string &since)			//POST /api/v1
 string OKCoinApi::DoBatch_Trade(string &symbol,string &type,string &orders_data)	//POST /api/v1/batch_trade批量下单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_BATCH_TRADE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -141,7 +141,7 @@ string OKCoinApi::DoBatch_Trade(string &symbol,string &type,string &orders_data)
 string OKCoinApi::DoCancel_Order(string &symbol,string &order_id)			//POST /api/v1/cancel_order撤销订单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_CANCEL_ORDER);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -156,7 +156,7 @@ string OKCoinApi::DoCancel_Order(string &symbol,string &order_id)			//POST /api/
 string OKCoinApi::DoOrder_Info(string &symbol,string &order_id)			//POST /api/v1/order_info获取用户的订单信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_ORDER_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -170,7 +170,7 @@ string OKCoinApi::DoOrder_Info(string &symbol,string &order_id)			//POST /api/v1
 string OKCoinApi::DoOrders_Info(string &type,string &symbol,string &order_id)		//POST /api/v1/orders_info批量获取用户订单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_ORDERS_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -185,7 +185,7 @@ string OKCoinApi::DoOrders_Info(string &type,string &symbol,string &order_id)		/
 string OKCoinApi::DoOrder_History(string &symbol,string &status,string &current_page,string &page_length)				//POST /api/v1/order_history				获取历史订单信息，只返回最近七天的信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_ORDER_HISTORY);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -201,7 +201,7 @@ string OKCoinApi::DoOrder_History(string &symbol,string &status,string &current_
 string OKCoinApi::DoWithdraw(string &symbol,string &chargefee,string &trade_pwd,string &withdraw_address,string &withdraw_amount)			//POST /api/v1/withdraw	提币BTC/LTC
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_WITHDRAW);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -219,7 +219,7 @@ string OKCoinApi::DoWithdraw(string &symbol,string &chargefee,string &trade_pwd,
 string OKCoinApi::DoCancel_Withdraw(string &symbol,string &withdraw_id)			//POST /api/v1/cancel_withdraw				取消提币BTC/LTC
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_CANCEL_WITHDRAW);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -233,7 +233,7 @@ string OKCoinApi::DoCancel_Withdraw(string &symbol,string &withdraw_id)			//POST
 string OKCoinApi::DoOrder_Fee(string &symbol,string &order_id)			//POST /api/v1/order_fee查询手续费
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_ORDER_FEE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -247,7 +247,7 @@ string OKCoinApi::DoOrder_Fee(string &symbol,string &order_id)			//POST /api/v1/
 string OKCoinApi::DoLend_Depth(string &symbol)				//POST /api/v1/lend_depth获取放款深度前10
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_LEND_DEPTH);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -260,7 +260,7 @@ string OKCoinApi::DoLend_Depth(string &symbol)				//POST /api/v1/lend_depth获�
 string OKCoinApi::DoBorrows_Info(string &symbol)				//POST /api/v1/borrows_info查询用户借款信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_BORROWS_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -273,7 +273,7 @@ string OKCoinApi::DoBorrows_Info(string &symbol)				//POST /api/v1/borrows_info�
 string OKCoinApi::DoBorrow_Money(string &symbol,string &days,string &amount,string &rate)			//POST /api/v1/borrow_money申请借款
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_BORROW_MONEY);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -289,7 +289,7 @@ string OKCoinApi::DoBorrow_Money(string &symbol,string &days,string &amount,stri
 string OKCoinApi::DoCancel_Borrow(string &symbol,string &borrow_id)				//POST /api/v1/cancel_borrow				取消借款申请
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_CANCEL_BORROW);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -304,7 +304,7 @@ string OKCoinApi::DoCancel_Borrow(string &symbol,string &borrow_id)				//POST /a
 string OKCoinApi::DoBorrow_Order_info(string &borrow_id)		//POST /api/v1/borrow_order_info			获取借款订单记录
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_BORROW_ORDER_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -317,7 +317,7 @@ string OKCoinApi::DoBorrow_Order_info(string &borrow_id)		//POST /api/v1/borrow_
 string OKCoinApi::DoRepayment(string &borrow_id)				//POST /api/v1/repayment用户还全款
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_REPAYMENT);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -330,7 +330,7 @@ string OKCoinApi::DoRepayment(string &borrow_id)				//POST /api/v1/repayment用�
 string OKCoinApi::DoUnrepayments_Info(string &symbol,string &current_page,string &page_length)	//POST /api/v1/unrepayments_info			未还款列表
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_UNREPAYMENTS_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -345,7 +345,7 @@ string OKCoinApi::DoUnrepayments_Info(string &symbol,string &current_page,string
 string OKCoinApi::DoAccount_Records(string &symbol,string &type,string &current_page,string &page_length)				//POST /api/v1/account_records				获取用户提现/充值记录
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_ACCOUNT_RECORDS);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -366,7 +366,7 @@ string OKCoinApi::DoAccount_Records(string &symbol,string &type,string &current_
 string OKCoinApiCom::DoFuture_Ticker(string &symbol,string &contract_type)			//GET /api/v1/future_ticker				获取OKCoin期货行情
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_TICKER);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -378,7 +378,7 @@ string OKCoinApiCom::DoFuture_Ticker(string &symbol,string &contract_type)			//G
 string OKCoinApiCom::DoFuture_Depth(string &symbol,string &contract_type,string &size,string &merge)	//GET /api/v1/future_depth				获取OKCoin期货深度信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_DEPTH);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -392,7 +392,7 @@ string OKCoinApiCom::DoFuture_Depth(string &symbol,string &contract_type,string 
 string OKCoinApiCom::DoFuture_Trades(string &symbol,string &contract_type)			//GET /api/v1/future_trades				获取OKCoin期货交易记录信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_TRADES);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -404,7 +404,7 @@ string OKCoinApiCom::DoFuture_Trades(string &symbol,string &contract_type)			//G
 string OKCoinApiCom::DoFuture_Index(string &symbol)				//GET /api/v1/future_index				获取OKCoin期货指数信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_INDEX);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol);
@@ -415,7 +415,7 @@ string OKCoinApiCom::DoFuture_Index(string &symbol)				//GET /api/v1/future_inde
 string OKCoinApiCom::DoExchange_Rate()		//GET /api/v1/exchange_rate				获取美元人民币汇率
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_EXCHANGE_RATE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init();
 
@@ -425,7 +425,7 @@ string OKCoinApiCom::DoExchange_Rate()		//GET /api/v1/exchange_rate				获取美
 string OKCoinApiCom::DoFuture_Estimated_Price(string &symbol)	//GET /api/v1/future_estimated_price	获取交割预估价
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_ESTIMATED_PRICE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol);
@@ -435,7 +435,7 @@ string OKCoinApiCom::DoFuture_Estimated_Price(string &symbol)	//GET /api/v1/futu
 string OKCoinApiCom::DoFuture_Kline(string &symbol,string &type,string &contract_type,string &size,string &since)	//GET /api/v1/future_kline				获取期货合约的K线数据
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_KLINE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -450,7 +450,7 @@ string OKCoinApiCom::DoFuture_Kline(string &symbol,string &type,string &contract
 string OKCoinApiCom::DoFuture_Hold_amount(string &symbol,string &contract_type)		//GET /api/v1/future_hold_amount		获取当前可用合约总持仓量
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_HOLD_AMOUNT);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("symbol", symbol)
@@ -465,7 +465,7 @@ string OKCoinApiCom::DoFuture_Hold_amount(string &symbol,string &contract_type)	
 string OKCoinApiCom::DoFuture_Userinfo()			//POST /api/v1/future_userinfo			获取OKCoin期货账户信息 （全仓）
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_USERINFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -477,7 +477,7 @@ string OKCoinApiCom::DoFuture_Userinfo()			//POST /api/v1/future_userinfo			获�
 string OKCoinApiCom::DoFuture_Position(string &symbol,string &contract_type)			//POST /api/v1/future_position			获取用户持仓获取OKCoin期货账户信息 （全仓）
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_POSITION);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -491,7 +491,7 @@ string OKCoinApiCom::DoFuture_Position(string &symbol,string &contract_type)			/
 string OKCoinApiCom::DoFuture_Trade(string &symbol,string &contract_type,string &price,string &amount,string &type,string &match_price,string &lever_rate)			//POST /api/v1/future_trade				期货下单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_TRADE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -510,7 +510,7 @@ string OKCoinApiCom::DoFuture_Trade(string &symbol,string &contract_type,string 
 string OKCoinApiCom::DoFuture_Trades_history(string &symbol,string &date,string &since)			//POST /api/v1/future_trades_history	获取OKCoin期货交易历史
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_TRADES_HISTORY);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -526,7 +526,7 @@ string OKCoinApiCom::DoFuture_Trades_history(string &symbol,string &date,string 
 string OKCoinApiCom::DoFuture_Batch_trade(string &symbol,string &contract_type,string &orders_data,string &lever_rate)	//POST /api/v1/future_batch_trade		批量下单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_BATCH_TRADE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -542,7 +542,7 @@ string OKCoinApiCom::DoFuture_Batch_trade(string &symbol,string &contract_type,s
 string OKCoinApiCom::DoFuture_Cancel(string &symbol,string &order_id,string &contract_type)				//POST /api/v1/future_cancel			取消期货订单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_CANCEL);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -556,7 +556,7 @@ string OKCoinApiCom::DoFuture_Cancel(string &symbol,string &order_id,string &con
 string OKCoinApiCom::DoFuture_Order_info(string &symbol,string &contract_type,string &status,string &order_id,string &current_page,string &page_length)	//POST /api/v1/future_order_info		获取期货订单信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_ORDER_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -574,7 +574,7 @@ string OKCoinApiCom::DoFuture_Order_info(string &symbol,string &contract_type,st
 string OKCoinApiCom::DoFuture_Orders_info(string &symbol,string &contract_type,string &order_id)			//POST /api/v1/future_orders_info		批量获取期货订单信息
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_ORDERS_INFO);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -589,7 +589,7 @@ string OKCoinApiCom::DoFuture_Orders_info(string &symbol,string &contract_type,s
 string OKCoinApiCom::DoFuture_Userinfo_4fix()	//POST /api/v1/future_userinfo_4fix		获取逐仓期货账户信息	
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_USERINFO_4FIX);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -601,7 +601,7 @@ string OKCoinApiCom::DoFuture_Userinfo_4fix()	//POST /api/v1/future_userinfo_4fi
 string OKCoinApiCom::DoFuture_Position_4fix(string &symbol,string &contract_type,string &type)			//POST /api/v1/future_position_4fix		逐仓用户持仓查询
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_POSITION_4FIX);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)
@@ -616,7 +616,7 @@ string OKCoinApiCom::DoFuture_Position_4fix(string &symbol,string &contract_type
 string OKCoinApiCom::DoFuture_Explosive(string &symbol,string &contract_type,string &status,string &current_page,string &page_length)		//POST /api/v1/future_explosive			获取期货爆仓单
 {
     Uri uri = urlprotocol.GetUrl(HTTP_API_TYPE_FUTURE_EXPLOSIVE);
-    auto request = RestRequest::CreateBuilder(uri);
+    auto request = RestRequest::CreateBuilder(uri.domain, uri.protocol, uri.method, uri.api.c_str());
 
     request->Init()
         .AddParam("api_key", m_api_key)

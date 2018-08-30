@@ -32,14 +32,23 @@ namespace exapi {
     class RestRequest : public restbed::Request {
     public:
         RestRequest(): restbed::Request() {}
-        //RestRequest(const restbed::Uri &value): restbed::Request(value) {}
 
-        static std::shared_ptr<RestRequest> CreateBuilder(Uri &uri);
-        
+        static std::shared_ptr<RestRequest>
+        CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path);
+
         RestRequest &Init();
 
-        /// Sync request and return respose
+        /**
+         *  Send request and return respose in synchronise mode
+         * @param req rest request
+         * @return response body (json-string)
+         */
         static std::string SendSync(std::shared_ptr<RestRequest> &req);
+
+        static int SendAsync(std::shared_ptr<RestRequest> &req, 
+            const std::function<void (const std::shared_ptr<restbed::Request>, const std::shared_ptr<restbed::Response>)> &callback);
+
+        static std::string& ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::string &body);
 
         //----------------------  Setters in builder style -------------------
 

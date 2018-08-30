@@ -46,32 +46,32 @@ namespace exapi {
         /**
          * @param addr server address
          */
-        virtual void OnConnected(const char *addr) {}
+        virtual void OnConnected(const char *addr) = 0;
 
         /**
          * @param addr server address
          */
-        virtual void OnDisconnected(const char *addr) {}
+        virtual void OnDisconnected(const char *addr) = 0;
 
         /**
          * @param quoteType quote type
          * @param pQuoteData union of quotation data
          */
-        virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) {}
+        virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) = 0;
     
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) {}
+        virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) = 0;
 
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) {}
+        virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) = 0;
     };
 
     /**
