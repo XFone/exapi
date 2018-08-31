@@ -18,8 +18,8 @@ using namespace exapi;
 
 /*const*/ enum HTTP_SERVER_TYPE
 {
-    HTTP_SERVER_TYPE_CN,		//国内站
-    HTTP_SERVER_TYPE_COM,		//国际站
+    HTTP_SERVER_TYPE_CN,                //国内站
+    HTTP_SERVER_TYPE_COM,               //国际站
 };
 
 /*const*/ enum HTTP_PROTOCL_TYPE

@@ -20,8 +20,6 @@
 #include <cstring>
 #include <iostream>
 
-#include "okcoinapi.h"
-
 /** 
  * Read command line options
  */
@@ -73,11 +71,53 @@ int main(int argc, char *argv[])
         );
         return -1;
     }
-
-    OKCoinApiCom api("", "");
-
-    std::string symbol = "eth_btc";
-    std::string json = api.GetTicker(symbol);
     
     return 0;
+}
+
+
+wss_test() {
+	std::string com_apiKey		= "";									//请到www.okcoin.com申请。
+	std::string com_secretKey	= "";									//请到www.okcoin.com申请。
+	comapi = new OKCoinWebSocketApiCom(com_apiKey,com_secretKey);		//国际站
+	comapi->SetCallBackOpen(com_callbak_open);
+	comapi->SetCallBackClose(com_callbak_close);
+	comapi->SetCallBackMessage(com_callbak_message);
+	comapi->Run();//启动连接服务器线程
+
+	cout << "输入1订阅比特币当周合约行情，输入2订阅比特币期货指数，输入3取消订阅，输入4关闭连接，请输入：";
+	string i;
+	cin >> i;
+	if(i == "1")
+	{
+		comapi->ok_futureusd_btc_ticker_this_week();
+	}
+	
+	if(i == "2")
+	{
+		comapi->ok_futureusd_btc_ticker_this_week();
+	}
+
+	//对于已经注册的数据在不需要时注销掉，不再接收，
+	//注册太多非必要数据，会使您的程序整体性能下降，请开发者注意处理。
+	if(i == "3")
+	{
+		if(comapi != 0)
+		{
+			comapi->remove_ok_spotusd_btc_ticker();
+		}
+		system("pause");
+	}
+
+	//关闭连接
+	//cnapi->Close();	
+	comapi->Close();
+
+	system("pause");
+
+	//释放API实例
+	//delete cnapi;
+	delete comapi;
+	cout << "释放API实例完成。";
+
 }

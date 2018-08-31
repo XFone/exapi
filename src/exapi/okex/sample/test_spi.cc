@@ -40,6 +40,20 @@ int checkopt(int opt, char *parg)
     return result;
 }
 
+/*----------------------------- sync mode -----------------------------------*/
+
+#include "okcoinapi.h"
+
+void test_okex_quote_sync()
+{
+    OKCoinApiCom api("", "");
+
+    std::string symbol = "eth_btc";
+    std::string json = api.GetTicker(symbol);
+}
+
+/*---------------------------- async mode -----------------------------------*/
+
 #include "MyQuoteOkexSpi.h"
 
 void test_okex_quote_spi()
@@ -69,6 +83,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // test sync mode
+    test_okex_quote_sync();
+
+    // test async mode
     test_okex_quote_spi();
     
     return 0;

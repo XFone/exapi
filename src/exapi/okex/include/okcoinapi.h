@@ -4,7 +4,7 @@
  * Copy from https://github.com/OKCoin/rest/blob/master/C%2B%2B/net/http/curl/okcoinapi.h
  * 
  * Class OKCoinApiCn  - synchronized functions for www.okcoin.cn
- * Class OKCoinApiCom - synchronized functions www.okcoin.com
+ * Class OKCoinApiCom - synchronized functions for www.okcoin.com
  * 
  * $Log: $
  */
