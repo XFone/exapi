@@ -45,17 +45,79 @@ namespace exapi {
         void start();
 
         void stop();
+
+        /**
+         * subscribe to emit/event channel
+         * @param channel name of channel
+         */
+        void emit(const std::string channel);
+
+        /**
+         * subscribe to emit/event channel
+         * @param channel name of channel
+         * @param parameter parameters in json (e.g., '{}' is empty)
+         */
+        void emit(const std::string channel, std::string &parameter);
+
+        /**
+         * Unsubscribe to emit/event channel
+         * @param channel name of channel
+         */
+        void remove(const std::string channel);
+
     };
 
+    /**
+     * OKex websocket emit parameter builder
+     */
+    class ParameterBuilder {
+    protected:
+        std::vector< std::pair<std::string, std::string> > m_params;
+
+    public:
+        ParameterBuilder() : m_params() {}
+
+        ParameterBuilder &AddParam(const char *name, const std::string &val) {
+            std::pair<std::string, std::string> param(name, val);
+            m_params.push_back(param);
+            return *this;
+        }
+
+        std::string build() {
+            std::string result("{");
+            int n = 0;
+            for (auto param : m_params) {
+                result += ((n++ != 0) ? ",'" : "'");
+                result += param.first;
+                result += "':'";
+                result += param.second;
+                result += "'";
+            }
+            result += "}";
+            return result;
+        }
+
+        std::string buildSign(const std::string &secret) {
+            std::string result("{");
+            std::string signature;
+            int n = 0;
+            for (auto param : m_params) {
+                result += ((n++ != 0) ? ",'" : "'");
+                result += param.first;
+                result += "':'";
+                result += param.second;
+                result += "'";
+                // calculate signature
+            }
+            result += "'sign':'";
+            result += signature;
+            result += "'}";
+            return result;
+        }
+    };
 } // namespace exapi
 
 /*  TO REMOVE: 
-typedef websocketpp::client<websocketpp::config::asio_tls> client;
-
-// pull out the type of messages sent by our config
-typedef websocketpp::config::asio_tls_client::message_type::ptr message_ptr;
-typedef websocketpp::lib::shared_ptr<boost::asio::ssl::context> context_ptr;
-typedef client::connection_ptr connection_ptr;
 
 class WebSocket
 {
@@ -115,11 +177,6 @@ public:
         if(callbak_close != 0)callbak_close();
     }
 
-    void on_socket_init(websocketpp::connection_hdl) 
-    {
-
-    }
-
     context_ptr on_tls_init(websocketpp::connection_hdl)
     {
         context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv1);
@@ -153,12 +210,6 @@ public:
     void on_close_handshake_timeout(websocketpp::connection_hdl hdl)
     {
     }
-    
-    void doclose() 
-    {
-        m_manual_close = true;
-        m_endpoint.close(m_hdl,websocketpp::close::status::going_away,"");
-    }
 
     void run(std::string &uri)
     {
@@ -173,41 +224,6 @@ public:
             std::cout << "other exception" << std::endl;
         }
     }
-    void emit(std::string channel)
-    {
-        string cmd = "{'event':'addChannel','channel':'";
-        cmd += channel;
-        cmd += "'}";
-        m_endpoint.send(m_hdl, cmd, websocketpp::frame::opcode::text);
-
-        //m_endpoint.send(hdl, "{'event':'addChannel','channel':'ok_btcusd_ticker'}", websocketpp::frame::opcode::text);
-       // m_endpoint.send(hdl, "{'event':'addChannel','channel':'ok_btcusd_depth'}", websocketpp::frame::opcode::text);
-    }
-
-    void emit(std::string channel,string &parameter)
-    {
-        string cmd = "{'event':'addChannel','channel':'";
-        cmd += channel;
-        cmd += "','parameters':{";
-        cmd += parameter;
-        cmd += "}}";
-        m_endpoint.send(m_hdl, cmd, websocketpp::frame::opcode::text);
-
-        //m_endpoint.send(hdl, "{'event':'addChannel','channel':'ok_btcusd_ticker'}", websocketpp::frame::opcode::text);
-       // m_endpoint.send(hdl, "{'event':'addChannel','channel':'ok_btcusd_depth'}", websocketpp::frame::opcode::text);
-    }
-
-    void remove(std::string channel)
-    {
-        string cmd = "{'event':'removeChannel','channel':'";
-        cmd += channel;
-        cmd += "'}";
-        m_endpoint.send(m_hdl, cmd, websocketpp::frame::opcode::text);
-
-        //m_endpoint.send(hdl, "{'event':'addChannel','channel':'ok_btcusd_ticker'}", websocketpp::frame::opcode::text);
-       // m_endpoint.send(hdl, "{'event':'addChannel','channel':'ok_btcusd_depth'}", websocketpp::frame::opcode::text);
-    }
-
 };
 
 */

@@ -19,7 +19,7 @@
 namespace exapi {
     
     /** Inherited from restbed::WebSocket */
-    class WebSocket;
+    class WebSocketClient;
 
     typedef void (*wss_callback_open)();
     typedef void (*wss_callback_close)();

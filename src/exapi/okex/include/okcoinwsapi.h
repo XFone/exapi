@@ -27,32 +27,24 @@ class OKCoinWebSocketApi
 {
 protected:
     OKCoinWebSocketApi();
-    void SetKey(string api_key,string secret_key);
+    void SetKey(string api_key, string secret_key);
     void SetUri(string uri);
     string m_api_key;               //用户申请的apiKey
     string m_secret_key;            //请求参数签名的私钥
     string m_uri;
 
-    void Emit(const char *channel,string &parameter);
+    void Emit(const char *channel, string &parameter);
     void Emit(const char *channel);
     void Emit(string &channel);
     void Remove(string channel);
+
 private:
-    wss_callback_open       m_callbak_open;
-    wss_callback_close      m_callbak_close;
-    wss_callback_message    m_callbak_message;
+    WebSocketClient *pWebsocket;
 
 public:
     virtual ~OKCoinWebSocketApi();
     void Run();
     void Close();
-    // static unsigned __stdcall RunThread(void * arg);
-    WebSocket *pWebsocket;
-    // HANDLE hThread;
-
-    void SetCallBackOpen(wss_callback_open callbak_open);
-    void SetCallBackClose(wss_callback_close callbak_close);
-    void SetCallBackMessage(wss_callback_message callbak_message);
 };
 
 class OKCoinWebSocketApiCn:public OKCoinWebSocketApi //国内站

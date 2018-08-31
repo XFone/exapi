@@ -14,14 +14,15 @@
 #include "Trace.h"
 #include "DumpFunc.h"
 
+#include <cstdio>
+
 #include "WebSockClient.h"
 using namespace exapi;
 
-void WebSocketClient::start() {
-
+void WebSocketClient::start()
+{
     set_open_handler([this](const std::shared_ptr<restbed::WebSocket> &ws) {
-        const std::string key = ws->get_key();
-        LOGFILE(LOG_INFO, "wss[%s]: opened connection", key.data());
+        LOGFILE(LOG_INFO, "wss[%s]: opened connection", ws->get_key().data());
 
         if (nullptr != this->cb_open) this->cb_open();
     });
@@ -92,4 +93,54 @@ void WebSocketClient::start() {
         }
     });
 
+}
+
+void WebSocketClient::stop()
+{
+    if (!this->is_closed()) {
+        this->close();
+    }
+}
+
+void WebSocketClient::emit(const std::string channel)
+{
+    std::string cmd("{'event':'addChannel','channel': '"); 
+    
+    cmd += channel;
+    cmd += "'}";
+
+    send(cmd, [&channel](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "wss[%s] channel %s emitted", 
+                ws->get_key().data(), channel.c_str());
+    });
+
+    //send("{'event':'addChannel','channel':'ok_btcusd_ticker'}");
+    //send("{'event':'addChannel','channel':'ok_btcusd_depth'}");
+}
+
+void WebSocketClient::emit(const std::string channel, std::string &parameter)
+{
+    std::string cmd("{'event':'addChannel','channel': '");
+    
+    cmd += channel;
+    cmd += "',parameters:";
+    cmd += parameter;
+    cmd +=  "}";
+
+    send(cmd, [&channel](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "wss[%s] channel %s emitted", 
+                ws->get_key().data(), channel.c_str());
+    });
+}
+
+void WebSocketClient::remove(std::string channel)
+{
+    std::string cmd("{'event':'removeChannel','channel':'");
+    cmd += channel;
+    cmd += "'}";
+
+    send(cmd, [&channel](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "wss[%s] channel %s removed", 
+                ws->get_key().data(), channel.c_str());
+    });
 }

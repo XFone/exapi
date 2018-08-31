@@ -70,6 +70,25 @@ void test_okex_quote_spi()
     api->Dispose();
 }
 
+/*----------------------------- Websocket -----------------------------------*/
+
+#include "okcoinwsapi.h"
+
+void test_okex_websocket()
+{
+    std::string com_apiKey		= "";                       //请到www.okcoin.com申请
+    std::string com_secretKey	= "";                       //请到www.okcoin.com申请
+    OKCoinWebSocketApiCom api(com_apiKey, com_secretKey);   //国际站
+
+    api.Run();                              //启动连接服务器线程
+
+    api.ok_spotusd_btc_ticker();            // 订阅行情
+
+    sleep(20);
+
+    api.remove_ok_spotusd_btc_ticker();     // 取消订阅
+}
+
 int main(int argc, char *argv[])
 {
     int res;
@@ -88,6 +107,9 @@ int main(int argc, char *argv[])
 
     // test async mode
     test_okex_quote_spi();
+
+    // test websocket
+    test_okex_websocket();
     
     return 0;
 }

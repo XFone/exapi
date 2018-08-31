@@ -1,4 +1,20 @@
-# Sample of api in async mode
+# Sample codes
+
+## Using OKCoinApiCom in sync mode
+
+```C++
+void test_okex_quote_sync()
+{
+    OKCoinApiCom api("", "");
+
+    std::string symbol = "eth_btc";
+    std::string json = api.GetTicker(symbol);
+
+    cout << "json: " << json << endl;
+}
+```
+
+## Using DAQuoteOkexApi + DAQuoteOkexSpi in async mode
 
 1. Define an class (MyQuoteOkexSpi) inherited from DAQuoteOkexSpi:
 
