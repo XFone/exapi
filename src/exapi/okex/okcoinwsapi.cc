@@ -24,10 +24,7 @@ OKCoinWebSocketApi::OKCoinWebSocketApi() : pWebsocket(nullptr)
 
 OKCoinWebSocketApi::~OKCoinWebSocketApi()
 {
-    if (pWebsocket != nullptr) {
-        Close();
-        pWebsocket.reset();
-    }
+    Close();
 }
 
 void OKCoinWebSocketApi::SetKey(string api_key, string secret_key)

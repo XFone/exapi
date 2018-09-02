@@ -26,23 +26,33 @@ namespace exapi {
     class WebSocketClient {
     protected:
         std::string          m_url;
-        bool                 m_ssl;
         ws_callback_open     cb_open;
         ws_callback_close    cb_close;
         ws_callback_message  cb_message;
 
-        WebSocketClientImpl *m_client;
-
-        WebSocketClient() {};
+        std::unique_ptr<WebSocketClientImpl> m_client;
+        // WebSocketClient() = delete;
 
     public:
         WebSocketClient(const std::string url);
 
-        virtual ~WebSocketClient();
+        ~WebSocketClient();
 
         void start();
 
         void stop();
+
+        void set_open_callback(ws_callback_open callback) {
+            this->cb_open = callback;
+        }
+
+        void set_close_callback(ws_callback_close callback) {
+            this->cb_close = callback;
+        }
+
+        void set_message_callback(ws_callback_message callback) {
+            this->cb_message = callback;
+        }
 
         /**
          * subscribe to emit/event channel

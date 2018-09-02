@@ -19,10 +19,11 @@
 #include <restbed>
 
 // defined in Log.h
+extern "C" void _log_impl1_vargs(int pri, const char * file, int line, const char * fmt, va_list ap);
 extern "C" void _log_impl2_vargs(int pri, const char * fmt, va_list ap);
 
 /**
- * LoggerImpl
+ * LoggerImpl implements restbed::Logger
  */
 class LoggerImpl : public restbed::Logger {
 protected:
@@ -50,7 +51,7 @@ public:
     void log(const restbed::Logger::Level level, const char *format, ...) {
         va_list arglist;
         va_start(arglist, format);
-        _log_impl2_vargs(GetLevel(level), format, arglist);
+        _log_impl1_vargs(GetLevel(level), "restbed", level, format, arglist);
         va_end(arglist);
     }
 
@@ -58,7 +59,7 @@ public:
         if (expr) {
             va_list arglist;
             va_start(arglist, format);
-            _log_impl2_vargs(GetLevel(level), format, arglist);
+            _log_impl1_vargs(GetLevel(level), "restbed", level, format, arglist);
             va_end(arglist);
         }
     }

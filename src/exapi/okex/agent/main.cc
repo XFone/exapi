@@ -59,12 +59,15 @@ void test_okex_websocket()
     OKCoinWebSocketApiCom api("test", "");      // 国际站
 
     try {
+        std:string input;
+
         api.Run();                              // 启动连接服务器线程
 
         LOGFILE(LOG_DEBUG, "subscribe usd_btc ticker...");
         api.ok_spotusd_btc_ticker();            // 订阅行情
-        
-        sleep(10);
+
+        std::cout << "Press enter to exit..." << endl;
+        std::getline(std::cin, input);
 
         LOGFILE(LOG_DEBUG, "unsubscribe usd_btc ticker...");
         api.remove_ok_spotusd_btc_ticker();     // 取消订阅

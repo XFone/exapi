@@ -35,6 +35,7 @@ namespace exapi {
         std::shared_ptr<restbed::WebSocket>                    m_socket;
         std::shared_ptr<restbed::Request>                      m_request;
         std::shared_ptr<std::thread>                           m_worker;
+        bool                                                   is_start;
 
         static std::string assign_key() {
             // TODO
@@ -44,7 +45,7 @@ namespace exapi {
         static void set_websocket_headers(const std::string &url, const std::shared_ptr<restbed::Request> &req) {
             std::string host_port(req->get_host()); 
             host_port += ":"; 
-            host_port += req->get_port();
+            host_port += std::to_string(req->get_port());
             
             req->set_protocol((url.find("wss:") == std::string::npos) ? "HTTP" : "HTTPS");
             //req->set_host("localhost");
@@ -113,7 +114,7 @@ namespace exapi {
     #endif
 
     public:
-        WebSocketClientImpl() {}
+        WebSocketClientImpl() : is_start(false) {}
         
         ~WebSocketClientImpl() {}
 
@@ -134,12 +135,12 @@ namespace exapi {
             // set_close_handshake_timeout(3000);
 
             TRACE(7, "<<<\n%s\n<<<", 
-                restbed::String::to_string(restbed::Http::to_bytes(m_request)).c_str());
+                  restbed::String::to_string(restbed::Http::to_bytes(m_request)).c_str());
 
             auto response = restbed::Http::sync(m_request);
 
             TRACE(7, ">>>\n%s\n>>>", 
-                restbed::String::to_string(restbed::Http::to_bytes(response)).c_str());
+                  restbed::String::to_string(restbed::Http::to_bytes(response)).c_str());
 
             if (response->get_status_code() != restbed::SWITCHING_PROTOCOLS ||
                 response->get_header("upgrade", restbed::String::lowercase ) != "websocket") {
@@ -157,18 +158,26 @@ namespace exapi {
 
         void start() {
             m_worker = std::make_shared<std::thread>([this]() {
+                LOGFILE(LOG_INFO, "websocket worker starting...");
+
                 while (this->m_socket->is_open()) {
                     this->m_ws_mgnr->process_io(this->m_request);
-                    // sleep
+                    // TODO sleep
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
+
+                LOGFILE(LOG_INFO, "websocket worker exiting...");
             });
+            // this->m_ws_mgnr->process_io(this->m_request);
+            is_start = true;
         }
 
         void stop() {
-            if (nullptr != m_socket && m_socket->is_open()) {
+            is_start = false;
+            if (nullptr != m_socket && !m_socket->is_closed()) {
                 m_socket->close();
             }
-            if (nullptr != m_worker) {
+            if (nullptr != m_worker && m_worker->joinable()) {
                 m_worker->join();
             }
         }
@@ -178,10 +187,10 @@ namespace exapi {
 /*---------------------------- WebSocketClient -----------------------------*/
 
 WebSocketClient::WebSocketClient(const std::string url)
-  : m_url(url), m_ssl(false), m_client(new WebSocketClientImpl),
+  : m_url(url), m_client(new WebSocketClientImpl),
     cb_open(nullptr), cb_close(nullptr), cb_message(nullptr)
 {
-    m_url = "ws://localhost:1984/chat"; // TESTING
+    // m_url = "ws://localhost:1984/chat"; // TESTING
     // to check this:
     //m_pimpl->m_manager = make_shared<restbed::detail::WebSocketManagerImpl>();
     //m_client = new WebSocketClientImpl();
@@ -189,7 +198,7 @@ WebSocketClient::WebSocketClient(const std::string url)
 
 WebSocketClient::~WebSocketClient() {
     stop();
-    delete m_client;
+    // delete m_client;
 };
 
 void WebSocketClient::start()
@@ -200,14 +209,16 @@ void WebSocketClient::start()
 
     auto socket = m_client->m_socket;
 
-    LOGFILE(LOG_DEBUG, "-- 1 --");
+    LOGFILE(LOG_DEBUG, "websocket is %s", socket->is_open() ? "open" : "closed");
 
+    // open_handler
     socket->set_open_handler([this](const std::shared_ptr<restbed::WebSocket> &ws) {
-        LOGFILE(LOG_INFO, "ws[%s]: opened connection", ws->get_key().data());
+        LOGFILE(LOG_INFO, "ws[%s] opened connection", ws->get_key().data());
 
         if (nullptr != this->cb_open) this->cb_open();
     });
 
+    // close_handler
     socket->set_close_handler([this](const std::shared_ptr<restbed::WebSocket> &ws) {        
         if (ws->is_open()) {
             auto response = std::make_shared<restbed::WebSocketMessage>(
@@ -217,23 +228,30 @@ void WebSocketClient::start()
             ws->send(response);
         }
 
-        LOGFILE(LOG_INFO, "ws[%s]: closed connection", ws->get_key().data());
+        LOGFILE(LOG_INFO, "ws[%s] closed connection", ws->get_key().data());
 
         if (nullptr != this->cb_close) this->cb_close();
     });
 
+    // error_handler
     socket->set_error_handler([](const std::shared_ptr<restbed::WebSocket> &ws, 
                          const std::error_code &ec) {
-        LOGFILE(LOG_WARN, "ws[%s]: error - %s", 
+        LOGFILE(LOG_WARN, "ws[%s] error - %s", 
                 ws->get_key().data(), ec.message().data());
+        if (ws->is_closed()) {
+            // TODO: re-connecting
+        }
     });
 
+    LOGFILE(LOG_DEBUG, "ws[%s] starting...", socket->get_key().c_str());
+    m_client->start();
+
+    // message_handler
     socket->set_message_handler([this](const std::shared_ptr<restbed::WebSocket> &ws, 
                                        const std::shared_ptr<restbed::WebSocketMessage> &msg) {
-
-        LOGFILE(LOG_DEBUG, "ws[%s] got message", ws->get_key().c_str());
-
         const auto opcode = msg->get_opcode();
+
+        LOGFILE(LOG_DEBUG, "ws[%s] got data with opcode %d", ws->get_key().c_str(), opcode);
     
         if (opcode == restbed::WebSocketMessage::PING_FRAME) {
             auto response = std::make_shared<restbed::WebSocketMessage>(
@@ -265,7 +283,8 @@ void WebSocketClient::start()
             response->set_mask(0);
 
             auto msgdata = msg->get_data();
-            TRACE(7, ">>>[%s]>>>\n%s\n>>>", ws->get_key().data(), msgdata.data());
+            TRACE(7, ">>>[%s]>>>\n%s\n>>>", ws->get_key().data(), 
+                  restbed::String::to_string(msgdata).c_str());
 
             if (nullptr != this->cb_message) {
                 this->cb_message((char *)msgdata.data());
@@ -276,43 +295,25 @@ void WebSocketClient::start()
         }
     });
 
-    LOGFILE(LOG_DEBUG, "ws-cli[%s] starting...", socket->get_key().c_str());
-
-    if (socket->is_open()) {
-        // set_socket(socket_setup(false, settings));
-        m_client->start();
-    }
-
-    /* TO DELETE
-    try {
-        error_code ec;
-        auto con = get_connection(m_uri, ec);
-        if (ec) { print ec.message(); }
-        else con->set_proxy("http://humupdates.uchicago.edu:8443");
-
-        // Start the ASIO io_service run loop
-        connect(con);
-        run();
-    } catch (const std::exception & e) {
-        LOGFILE(LOG_ERROR, "%s", e.what());
-    } catch (...) {
-        LOGFILE(LOG_ALERT, "unknown exception");
-    }
-    */
-
     LOGFILE(LOG_INFO, "ws[%s] started", socket->get_key().c_str());
 }
 
 void WebSocketClient::stop()
 {
-    auto socket = m_client->m_socket;
-    LOGFILE(LOG_DEBUG, "ws[%s] stopping...", socket->get_key().c_str());
-    m_client->stop();
-    LOGFILE(LOG_INFO, "ws[%s] stopped", socket->get_key().c_str());
+    if (m_client->is_start) {
+        auto socket = m_client->m_socket;
+        LOGFILE(LOG_DEBUG, "ws[%s] stopping...", socket->get_key().c_str());
+
+        m_client->stop();
+
+        LOGFILE(LOG_INFO, "ws[%s] stopped", socket->get_key().c_str());
+    }
 }
 
 void WebSocketClient::emit(const std::string channel, std::string &parameter)
 {
+    auto socket = m_client->m_socket;
+
     std::string cmd("{'event':'addChannel','channel': '");
     
     cmd += channel;
@@ -320,12 +321,12 @@ void WebSocketClient::emit(const std::string channel, std::string &parameter)
         cmd += "','parameters':";
         cmd += parameter;
     }
-    cmd +=  "}";
+    cmd +=  "'}";
 
-    LOGFILE(LOG_DEBUG, "ws[%s] emit command %s", cmd.c_str());
+    LOGFILE(LOG_DEBUG, "ws[%s] emit command %s", socket->get_key().c_str(), cmd.c_str());
 
-    m_client->m_socket->send(cmd, [&channel](const std::shared_ptr<restbed::WebSocket> &ws) {
-        LOGFILE(LOG_DEBUG, "ws[%s] channel %s emitted", 
+    socket->send(cmd, [channel](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' emitted", 
                 ws->get_key().data(), channel.c_str());
     });
     //send("{'event':'addChannel','channel':'ok_btcusd_ticker'}");
@@ -334,12 +335,16 @@ void WebSocketClient::emit(const std::string channel, std::string &parameter)
 
 void WebSocketClient::remove(std::string channel)
 {
+    auto socket = m_client->m_socket;
+
     std::string cmd("{'event':'removeChannel','channel':'");
     cmd += channel;
     cmd += "'}";
 
-    m_client->m_socket->send(cmd, [&channel](const std::shared_ptr<restbed::WebSocket> &ws) {
-        LOGFILE(LOG_DEBUG, "ws[%s] channel %s removed", 
+    LOGFILE(LOG_DEBUG, "ws[%s] remove command %s", socket->get_key().c_str(), cmd.c_str());
+
+    socket->send(cmd, [channel](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' removed", 
                 ws->get_key().data(), channel.c_str());
     });
 }
