@@ -76,8 +76,8 @@ void test_okex_quote_spi()
 
 void test_okex_websocket()
 {
-    std::string com_apiKey		= "";                       //请到www.okcoin.com申请
-    std::string com_secretKey	= "";                       //请到www.okcoin.com申请
+    std::string com_apiKey      = "";                       //请到www.okcoin.com申请
+    std::string com_secretKey   = "";                       //请到www.okcoin.com申请
     OKCoinWebSocketApiCom api(com_apiKey, com_secretKey);   //国际站
 
     api.Run();                              //启动连接服务器线程

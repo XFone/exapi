@@ -42,9 +42,6 @@ RestRequest::CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METH
     //req->add_header("User-Agent", "Mozilla/5.0 (exapi; rv:1.0.0) exapi");
     req->add_header("Connection", "keep-alive");
 
-    // xiaofeng 2018-08-28 TO CHECK: 'a/5'
-    restbed::Bytes body({'\0'});
-    req->set_body(body);
     return req;
 }
 
@@ -63,7 +60,9 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
             req->get_method().c_str(), req->get_host().c_str(), req->get_path().c_str());
 
     try {
-        TRACE(7, "<<<\n%s\n<<<", restbed::Http::to_bytes(req).data());
+        TRACE(7, "<<<\n%s\n<<<", 
+              restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
+    
 #if 0
         auto ssl_settings = std::make_shared<restbed::SSLSettings>();
         ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
@@ -93,7 +92,9 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
             req->get_method().c_str(), req->get_host().c_str(), req->get_path().c_str());
 
     try {
-        TRACE(7, "<<<\n%s\n<<<", restbed::Http::to_bytes(req).data());
+        TRACE(7, "<<<\n%s\n<<<", 
+              restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
+
         restbed::Http::async(req, callback);
     } catch (std::system_error ex) {
         LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
@@ -125,7 +126,8 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
         // TRACE(8, "  fetching length %d", length);
     }
 
-    TRACE(7, ">>>\n%s\n>>>", restbed::Http::to_bytes(rsp).data());
+    TRACE(7, ">>>\n%s\n>>>", 
+          restbed::String::to_string(restbed::Http::to_bytes(rsp)).c_str());
 
     rsp->get_body(body, nullptr);
 
@@ -153,15 +155,10 @@ RestRequest::Sign(const std::string &secret_key) {
 
     (void)MD5((const unsigned char *)params.c_str(), params.size() - 1, md);
 
-#if 1
+    // output in upper case
     for (int n = 0; n < MD5_DIGEST_LENGTH; n++) {
         sprintf(&strMd5[n << 1], "%02X", md[n]);
     }
-#else
-    size_t len = MD5_DIGEST_LENGTH;
-    int n = snprintf_hex(strMd5, sizeof(strMd5), (const char *)md, &len);
-    strMd5[n] = '\0';
-#endif
 
     AddParam("sign", strMd5);
 

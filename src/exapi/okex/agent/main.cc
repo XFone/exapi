@@ -52,6 +52,29 @@ int checkopt(int opt, char *parg)
     return result;
 }
 
+#include "okcoinwsapi.h"
+
+void test_okex_websocket()
+{
+    OKCoinWebSocketApiCom api("test", "");      // 国际站
+
+    try {
+        api.Run();                              // 启动连接服务器线程
+
+        LOGFILE(LOG_DEBUG, "subscribe usd_btc ticker...");
+        api.ok_spotusd_btc_ticker();            // 订阅行情
+        
+        sleep(10);
+
+        LOGFILE(LOG_DEBUG, "unsubscribe usd_btc ticker...");
+        api.remove_ok_spotusd_btc_ticker();     // 取消订阅
+    } catch (const std::exception &e) {
+        LOGFILE(LOG_ERROR, "exception %s", e.what());
+    } catch (...) {
+        LOGFILE(LOG_ALERT, "unknown exception");
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int res;
@@ -71,6 +94,8 @@ int main(int argc, char *argv[])
         );
         return -1;
     }
-    
+
+    test_okex_websocket();
+
     return 0;
 }

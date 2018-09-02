@@ -21,9 +21,9 @@ namespace exapi {
     /** Inherited from restbed::WebSocket */
     class WebSocketClient;
 
-    typedef void (*wss_callback_open)();
-    typedef void (*wss_callback_close)();
-    typedef void (*wss_callback_message)(const char *pmsg);
+    typedef void (*ws_callback_open)();
+    typedef void (*ws_callback_close)();
+    typedef void (*ws_callback_message)(const char *pmsg);
 
     /* TO REMOVE */
     enum CONNECTION_STATE {

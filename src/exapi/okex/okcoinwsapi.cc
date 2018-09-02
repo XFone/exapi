@@ -24,7 +24,10 @@ OKCoinWebSocketApi::OKCoinWebSocketApi() : pWebsocket(nullptr)
 
 OKCoinWebSocketApi::~OKCoinWebSocketApi()
 {
-    Close();
+    if (pWebsocket != nullptr) {
+        Close();
+        pWebsocket.reset();
+    }
 }
 
 void OKCoinWebSocketApi::SetKey(string api_key, string secret_key)
@@ -74,62 +77,17 @@ void OKCoinWebSocketApi::Remove(string channel)
 
 void OKCoinWebSocketApi::Run()
 {
-    assert(pWebsocket != nullptr);
+    if (pWebsocket == nullptr) {
+        pWebsocket = std::make_shared<WebSocketClient>(m_uri);
+    }
     pWebsocket->start();
 }
 
-/*
-unsigned __stdcall OKCoinWebSocketApi::RunThread( LPVOID arg )
-{
-    if(arg != 0)
-    {
-        OKCoinWebSocketApi *api = (OKCoinWebSocketApi *)arg;
-        
-        for(int i = 0;i < MAX_RETRY_COUNT;i++)
-        {
-            if(api->pWebsocket != 0)
-            {
-                api->pWebsocket->doclose();
-            }
-            
-            if(api->pWebsocket == 0)
-            {
-                api->pWebsocket = new WebSocket();
-            }
+/*------------------------- OKCoinWebSocketApiCn ----------------------------*/
 
-            if(api->pWebsocket != 0)
-            {
-                api->pWebsocket->callbak_open = api->m_callbak_open;
-                api->pWebsocket->callbak_close = api->m_callbak_close;
-                api->pWebsocket->callbak_message = api->m_callbak_message;
-                api->pWebsocket->run(api->m_uri);
-                bool bManualClose = api->pWebsocket->m_manual_close;
-                delete api->pWebsocket;
-                api->pWebsocket = 0;
-                if(bManualClose == false)//是否为主动关闭连接，如果不是用户主动关闭，当接到断开联接回调时则自动执行重新连接机制。
-                {
-                    Sleep(2000);
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-    }
-    //::SetEvent(Global::g_hExit);
 
-    return 0;
-}
-*/
+//-------------- 获取OKCoin现货行情数据 --------------
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-//获取OKCoin现货行情数据
 void OKCoinWebSocketApiCn::ok_spotcny_btc_ticker() //比特币行情数据
 {
     Emit("ok_sub_spotcny_btc_ticker");
@@ -150,7 +108,8 @@ void OKCoinWebSocketApiCn::ok_spotcny_btc_kline_1min() //比特币K线数据
     Emit("ok_sub_spotcny_btc_kline_1min");
 }
 
-// 用OKCoin进行现货交易
+//--------------- 用OKCoin进行现货交易 ---------------
+
 void OKCoinWebSocketApiCn::ok_spotcny_trades() //订阅交易数据
 {
     ParameterBuilder pbld;
@@ -194,7 +153,7 @@ void OKCoinWebSocketApiCn::remove_ok_spotcny_btc_ticker() //比特币行情数�
     Remove("ok_sub_spotcny_btc_ticker");
 }
 
-//////////////////////////////////////////////////////////////////////////////////
+/*------------------------- OKCoinWebSocketApiCom ---------------------------*/
 
 //获取OKCoin现货行情数据
 void OKCoinWebSocketApiCom::ok_spotusd_btc_ticker() //比特币行情数据

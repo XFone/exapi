@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#include "wsshelp.h"
+#include "wshelp.h"
 using namespace exapi;
 
 #define URL_CN                      "wss://real.okcoin.cn:10440/websocket/okcoinapi"
@@ -39,7 +39,7 @@ protected:
     void Remove(string channel);
 
 private:
-    WebSocketClient *pWebsocket;
+    std::shared_ptr<WebSocketClient> pWebsocket;
 
 public:
     virtual ~OKCoinWebSocketApi();
