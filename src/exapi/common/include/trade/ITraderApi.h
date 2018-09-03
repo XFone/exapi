@@ -44,27 +44,41 @@ namespace exapi {
       #endif
 
         /**
+         * On server connected (not used in HTTP/1.1)
          * @param addr server address
          */
-        virtual void OnConnected(const char *addr) {}
+        virtual void OnConnected(const char *addr) = 0;
 
         /**
+         * On server disconnected (not used in HTTP/1.1)
          * @param addr server address
          */
-        virtual void OnDisconnected(const char *addr) {}
+        virtual void OnDisconnected(const char *addr) = 0;
 
-        virtual void OnUserLogon(void *pLogon) {}
+        /**
+         * Response to UserLogon
+         * @param pLogon userContext
+         */
+        virtual void OnUserLogon(void *pLogon) = 0;
+
+        /**
+         * Response is received for a pending command
+         * @param cmdType command type
+         * @param pRespData response data
+         * @return process status (0 for success)
+         */
+        virtual int OnResponse(int cmdType, void *pRespData) = 0;
     };
 
     /**
      * ITraderApi
      * Common trader service
      */
-    _INTERFACE_ IQuoteApi {
+    _INTERFACE_ ITraderApi {
     public:
       // C++0x or C++11
       #if (__cplusplus >= 199711L)
-        virtual ~IQuoteApi() = default;
+        virtual ~ITraderApi() = default;
       #endif
 
         /**

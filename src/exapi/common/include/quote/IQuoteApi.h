@@ -44,16 +44,19 @@ namespace exapi {
       #endif
 
         /**
+         * On server connected (not used in HTTP/1.1)
          * @param addr server address
          */
         virtual void OnConnected(const char *addr) = 0;
 
         /**
+         * On server disconnected (not used in HTTP/1.1)
          * @param addr server address
          */
         virtual void OnDisconnected(const char *addr) = 0;
 
         /**
+         * New quotation data is comming
          * @param quoteType quote type
          * @param pQuoteData union of quotation data
          */

@@ -14,15 +14,14 @@
  */
 
 #if defined(SHARELIB) && defined(WIN32)
-# ifdef SHARELIBAPIEXPORT
-#  define APIEXPORT declspec(dllexport)
+# ifdef SHARELIB_API_EXPORT
+#  define API_EXPORT __declspec(dllexport)
 # else
-#  define APIEXPORT declspec(dllimport)
+#  define API_EXPORT __declspec(dllimport)
 # endif
 #else
-# define  APIEXPORT 
+# define  API_EXPORT 
 #endif
-
 #include "trade/ITraderApi.h"
 
 namespace exapi {
@@ -31,12 +30,47 @@ namespace exapi {
      * DATraderOkexSpi
      * Okex trader interface for async callback
      */
-    class DATraderOkexSpi {
+    class DATraderOkexSpi : public ITraderSpi {
     public:
         virtual ~DATraderOkexSpi() {}
 
-    //现货交易 API
-    //用于OKCoin快速进行现货交易
+        /**
+         * On server connected (not used in HTTP/1.1)
+         * @param addr server address
+         */
+        virtual void OnConnected(const char *addr) {}
+
+        /**
+         * On server disconnected (not used in HTTP/1.1)
+         * @param addr server address
+         */
+        virtual void OnDisconnected(const char *addr) {}
+
+        /**
+         * Response to UserLogon
+         * @param pLogon userContext
+         */
+        virtual void OnUserLogon(void *pLogon) {}
+
+        /**
+         * Response is received for a pending command
+         * @param cmdType command type
+         * @param pRespData response data
+         * @return process status (0 for success)
+         */
+        virtual int OnResponse(int cmdType, void *pRespData);
+ 
+        //------------------ spot callbacks ----------------------
+
+        /**
+         * Callback to GetUserInfo
+         * @param pUserInfo struct of exapi::UserInfo (TODO)
+         */
+        void OnUserInfo(void *pUserInfo) {}
+
+        //...MORE
+
+        //----------------- future callbacks ---------------------
 
     };
 
@@ -44,16 +78,18 @@ namespace exapi {
      * DATraderOkexApi
      * Okex trade service
      */
-    class APIEXPORT DATraderOkexApi {
+    class API_EXPORT DATraderOkexApi : public ITraderApi {
     public:
         virtual ~DATraderOkexApi() {}
 
         /**
          * Create TraderApi
+         * @param api_key user should applied an api-key from okcoin.com
+         * @param secret_key key for signing parameter
          * @param dpath the local directory to save quotation data, default is work path
          * @return the DATraderOkexApi instance
          */
-        static DATraderOkexApi *CreateApi(const char *dpath = "");
+        static DATraderOkexApi *CreateApi(const char *api_key, const char *secret_key, const char *dpath = "");
         
         /**
          * Delete current instance and free all resources
@@ -71,12 +107,12 @@ namespace exapi {
          */
         virtual int Join() = 0;
 
-        //----------------  Spot Trade ---------------------------------------
+        //-------------------------  Spot Trade -------------------------------
 
         /**
          * 获取用户信息
          */
-        int GetUserinfo();
+        int GetUserInfo();
 
         /**
          * 下单交易
@@ -174,7 +210,7 @@ namespace exapi {
         int GetOrderHistory(const char *symbol, const char *status,
                             size_t currentpage, size_t pagelength);
 
-        //---------------- Future Trade --------------------------------------
+        //------------------------- Future Trade -----------------------------
 
         /**
          * 获取OKCoin期货账户信息（全仓）

@@ -36,16 +36,19 @@ namespace exapi {
         virtual ~DAQuoteOkexSpi() {}
 
         /**
+         * On server connected (not used in HTTP/1.1)
          * @param addr server address
          */
         virtual void OnConnected(const char *addr) {}
 
         /**
+         * On server disconnected (not used in HTTP/1.1)
          * @param addr server address
          */
         virtual void OnDisconnected(const char *addr) {}
 
         /**
+         * New quotation data is comming
          * @param quoteType quote type
          * @param pQuoteData union of quotation data
          */
@@ -158,6 +161,11 @@ namespace exapi {
          * 获取交割预估价
          */
         int GetFutureEstimatedPrice(const char *symbol);
+
+        /**
+         * 获取当前可用合约总持仓量
+         */
+        int GetFutureHoldAmount(const char *symbol, const char *contract_type);
 
     };
 
