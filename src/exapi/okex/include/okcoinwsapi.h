@@ -12,6 +12,7 @@
 #ifndef __OKCOINWEBSOCKETAPI_H__
 #define __OKCOINWEBSOCKETAPI_H__
 #include <string>
+#include <memory>
 
 using namespace std;
 

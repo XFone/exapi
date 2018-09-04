@@ -59,6 +59,7 @@ $(RESTBED_SRC):
 	@echo "⬇️  Downloading $(SRC_URL)..."
 	@wget -c $(SRC_URL) -O $(RESTBED_VER).tgz
 	@tar zxf $(RESTBED_VER).tgz
+	@cd $(RESTBED_SRC) ; patch -p1 < ../$(RESTBED_VER).patch
 
 $(RESTBED_SRC)/build/Makefile:
 	@mkdir -p $(RESTBED_SRC)/build
