@@ -10,14 +10,19 @@
  */
 #pragma once
 
-/** @file WebSockClient.h Wrap class of restbed::Request.
+/** @file WebSockClient.h Wrap class of WebSocketClientImpl.
  */
 
-#include "wshelp.h"
+#include <string>
+#include <chrono>
 
 namespace exapi {
 
     class WebSocketClientImpl;
+
+    typedef void (*ws_callback_open)();
+    typedef void (*ws_callback_close)();
+    typedef void (*ws_callback_message)(const char *pmsg);
 
     /**
      * WebSocketClient
@@ -30,9 +35,14 @@ namespace exapi {
         ws_callback_close    cb_close;
         ws_callback_message  cb_message;
 
+        /** pointer to implementation class */
         std::unique_ptr<WebSocketClientImpl> m_client;
+  
+        /** time_point for latency management */
+        std::chrono::steady_clock::time_point m_sent_time;
+ 
         // WebSocketClient() = delete;
-
+ 
     public:
         WebSocketClient(const std::string url);
 

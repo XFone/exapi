@@ -29,8 +29,8 @@ typedef long msecs_t;
 #if !(_WIN32 || _WIN64)
 typedef union _LARGE_INTEGER {
     struct { 
-        uint32_t    LowPart;    
-        int32_t     HighPart;    
+        uint32_t    LowPart;
+        int32_t     HighPart;
     }; 
     int64_t     QuadPart; 
 } LARGE_INTEGER;
@@ -45,6 +45,8 @@ public:
     typedef void *POwner;
     typedef void (*TimeoutCallback)(int tag, POwner);
 
+    static const ticks_t m_start;
+
 protected:
    /**
     * Call by worker (threads)
@@ -55,14 +57,14 @@ protected:
 public:
 
     /**
-     * Ticks to usecs
+     * Ticks to seconds
      */
-    static usecs_t Ticks2USecs(ticks_t ticks);
+    static double Ticks2Secs(ticks_t ticks);
 
     /**
-     * Usecs to ticks
+     * Seconds to ticks
      */
-    static ticks_t Usecs2Ticks(usecs_t usecs);
+    static ticks_t Secs2Ticks(double secs);
 
     /**
      * Get current time-stamp in us (realtime-clock)
@@ -79,12 +81,16 @@ public:
     static void GetDateTime(LARGE_INTEGER &qpcnt);
 
     /**
+     * Current microseconds (us) offset to specific time (e.g., 1970/1/1 00:00:00)
+     * chrono::steady_clock::now().time_since_epoch()
+     */
+    static int64_t GetUsecsOffset();
+
+    /**
      * Current usecs (MAX 2147 seconds) offset to every 15 minutes
      */
-    static usecs_t GetUsecs() {
-        LARGE_INTEGER qpcnt;
-        GetClock(qpcnt);
-        return (usecs_t)qpcnt.QuadPart; // lose high part
+    static usecs_t GetUsecsShort() {
+        return (usecs_t)GetUsecsOffset(); // lose high part
     }
 
     /**

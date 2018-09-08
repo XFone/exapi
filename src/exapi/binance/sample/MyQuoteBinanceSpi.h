@@ -28,18 +28,17 @@ public:
         cout << "** OnDisconnected" << endl;
     }
 
-    virtual void OnQuoteUpdated(QuoteApiType quoteType, void *pQuoteData) {
-        int type = (int)quoteType - QuoteApiType::EX_TYPE_OKEX; // see enum HTTP_PROTOCL_TYPE
-        cout << "** OnQuoteUpdated - type: " << type << ", json:\n"
+    virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) {
+        cout << "** OnQuoteUpdated - type: " << quoteType << ", json:\n"
              << (const char *)pQuoteData << "\n"
              << endl;
     }
 
-    virtual void OnSymbolSubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {
+    virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) {
         cout << "** OnSymbolSubscribed" << endl;
     }
 
-    virtual void OnSymbolUnsubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {
+    virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) {
         cout << "** OnSymbolUnsubscribed" << endl;
     }
 };

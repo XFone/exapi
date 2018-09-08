@@ -14,7 +14,6 @@
 #include "Trace.h"
 #include "DumpFunc.h"
 
-#include "urlhelp.h"
 #include "RestRequest.h"
 using namespace exapi;
 
@@ -63,7 +62,6 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
         TRACE(7, "<<<\n%s\n<<<", 
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
     
-        req->m_sent_time = std::chrono::steady_clock::now();
 #if 0
         auto ssl_settings = std::make_shared<restbed::SSLSettings>();
         ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
@@ -96,9 +94,7 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
         TRACE(7, "<<<\n%s\n<<<", 
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
 
-        req->m_sent_time = std::chrono::steady_clock::now();
         restbed::Http::async(req, callback);
-        
     } catch (std::system_error ex) {
         LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
     }
@@ -109,14 +105,12 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
 std::string &
 RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::string &body)
 {
-    // TODO
-    // StatsLatency(rsp, std::chrono::steady_clock::now(), req->m_sent_time);
-
     LOGFILE(LOG_DEBUG, "Response: HTTP/%1.1f %d %s", 
             rsp->get_version(), rsp->get_status_code(), rsp->get_status_message().data());
 
+    auto headers = rsp->get_headers();
+
     TRACE_IF(8, {
-        auto headers = rsp->get_headers();
         for (const auto header : headers) {
             _trace_impl(8, "  Header| %s: %s", header.first.data(), header.second.data());
         }

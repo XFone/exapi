@@ -61,58 +61,6 @@ namespace exapi {
             req->set_header("Sec-WebSocket-Extensions", "permessage-deflate; client_max_window_bits");
         }
 
-    #if 0
-        // TO REMOVE, see in restbed::Http::ssl_socket_setup
-        static std::shared_ptr<SocketImpl>
-        ssl_socket_setup(const std::shared_ptr<const restbed::SSLSettings> &settings) {
-            asio::ssl::context context(asio::ssl::context::sslv23);
-            std::shared_ptr<asio::ssl::stream<asio::ip::tcp::socket>> socket = nullptr;
-            int verify_mode = 0;
-
-            if (settings != nullptr) {
-                const auto pool = settings->get_certificate_authority_pool();
-
-                if (pool.empty()) {
-                    context.set_default_verify_paths();
-                } else {
-                    context.add_verify_path(settings->get_certificate_authority_pool());
-                }
-                verify_mode = (asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert);
-            } else {
-                verify_mode = asio::ssl::verify_none;
-            }
-
-            socket = std::make_shared< asio::ssl::stream<asio::ip::tcp::socket> >(*m_io_service, context);
-            socket->set_verify_mode(verify_mode);
-            socket->set_verify_callback(asio::ssl::rfc2818_verification(m_host));
-            return std::make_shared<SocketImpl>(socket);
-        }
-
-        static std::shared_ptr<SocketImpl>
-        socket_setup(boolconst shared_ptr<const restbed::Settings> &settings) {
-            std::shared_ptr<SocketImpl> socket;
-
-            if (nullptr == m_socket) {
-                if (m_is_ssl) {
-                    socket = ssl_socket_setup(settings->get_ssl_settings();
-                } else {
-                    auto socket = make_shared<tcp::socket>(*m_io_service);
-                    socket = std::make_shared<SocketImpl>(socket);
-                }
-            }
-
-            socket->set_timeout(settings->get_connection_timeout());
-            return socket;
-        }
-
-        void on_tls_init() {
-            set_options(asio::ssl::context::default_workarounds |
-                        asio::ssl::context::no_sslv2 |
-                        asio::ssl::context::no_sslv3 |
-                        asio::ssl::context::single_dh_use);
-        }
-    #endif
-
     public:
         WebSocketClientImpl() : is_start(false) {}
         
@@ -187,8 +135,8 @@ namespace exapi {
 /*---------------------------- WebSocketClient -----------------------------*/
 
 WebSocketClient::WebSocketClient(const std::string url)
-  : m_url(url), cb_open(nullptr), cb_close(nullptr), cb_message(nullptr),
-    m_client(new WebSocketClientImpl)
+  : m_url(url), m_client(new WebSocketClientImpl),
+    cb_open(nullptr), cb_close(nullptr), cb_message(nullptr)
 {
     // m_url = "ws://localhost:1984/chat"; // TESTING
     // to check this:

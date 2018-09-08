@@ -14,8 +14,19 @@
  */
 
 #include <restbed>
+#include <chrono>
 
 namespace exapi {
+
+    enum HTTP_PROTOCOL {
+        HTTP_PROTOCOL_HTTP,
+        HTTP_PROTOCOL_HTTPS
+    };
+
+    enum HTTP_METHOD {
+        METHOD_GET,
+        METHOD_POST
+    };
 
     /**
      * RestRequest
@@ -30,6 +41,10 @@ namespace exapi {
      * </pre>
      */
     class RestRequest : public restbed::Request {
+    protected:
+        /** time_point for latency management */
+        std::chrono::steady_clock::time_point m_sent_time;
+
     public:
         RestRequest(): restbed::Request() {}
 

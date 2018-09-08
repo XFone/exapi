@@ -33,6 +33,35 @@ namespace exapi {
 #endif // DEF_TRADE_TYPES
 
     /**
+     * QuoteApiType
+     */
+    class QuoteApiType {
+    private:
+        int m_apitype;
+
+    public:
+      #if (__cplusplus >= 199711L)
+        QuoteApiType() = delete;
+        enum ExType : int { // C++11 required
+      #else
+        enum ExType {
+      #endif
+            EX_TYPE_BINANCE     = 0x010000,
+            EX_TYPE_BITMEX      = 0x020000,
+            EX_TYPE_OKEX        = 0x030000,
+            EX_TYPE_HUOBI       = 0x040000
+        };
+
+        QuoteApiType(const QuoteApiType &r) { m_apitype = r.m_apitype; }
+
+        QuoteApiType(int apiType) : m_apitype(apiType) {}
+
+        QuoteApiType(int type, ExType ex) : m_apitype(ex + type) {}
+
+        operator int() const { return m_apitype; }
+    };
+
+    /**
      * IQuoteSpi
      * Common quotation interface for async callback
      */
@@ -60,21 +89,21 @@ namespace exapi {
          * @param quoteType quote type
          * @param pQuoteData union of quotation data
          */
-        virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) = 0;
+        virtual void OnQuoteUpdated(QuoteApiType quoteType, void *pQuoteData) = 0;
     
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) = 0;
+        virtual void OnSymbolSubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) = 0;
 
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) = 0;
+        virtual void OnSymbolUnsubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) = 0;
     };
 
     /**
@@ -125,7 +154,7 @@ namespace exapi {
          * @param max_size
          * @return 0 for sucess, or errono
          */
-        virtual int GetQuote(int quoteType, const char *symbol, const char *range = nullptr, size_t max_size = 0) = 0;
+        virtual int GetQuote(QuoteApiType quoteType, const char *symbol, const char *range = nullptr, size_t max_size = 0) = 0;
 
     };
 

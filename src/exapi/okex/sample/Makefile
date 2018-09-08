@@ -36,7 +36,7 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 STDCCFLAGS += -DNO_FILE_LINE
 
 # Sources to build
-SOURCES = $(wildcard *.cc ../*.cc)
+SOURCES = $(wildcard *.cc ../*.cc ../../common/*.cc)
 INCDIRS  += ../include ../../common/include
 
 # All

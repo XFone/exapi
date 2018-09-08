@@ -33,6 +33,36 @@ namespace exapi {
 #endif // DEF_TRADE_TYPES
 
     /**
+     * QuoteApiType
+     */
+    class TraderApiType {
+    private:
+        int m_apitype;
+
+    public:
+      #if (__cplusplus >= 199711L)
+        TraderApiType() = delete;
+        enum ExType : int { // C++11 required
+      #else
+        enum ExType {
+      #endif
+            EX_TYPE_BINANCE     = 0x010000,
+            EX_TYPE_BITMEX      = 0x020000,
+            EX_TYPE_OKEX        = 0x030000,
+            EX_TYPE_HUOBI       = 0x040000
+        };
+
+        TraderApiType(const TraderApiType &r) { m_apitype = r.m_apitype; }
+
+        TraderApiType(int apiType) : m_apitype(apiType) {}
+
+        TraderApiType(int type, ExType ex) : m_apitype(ex + type) {}
+
+        operator int() const { return m_apitype; }
+
+    };
+
+    /**
      * ITraderSpi
      * Common trader interface for async callback
      */
@@ -63,11 +93,11 @@ namespace exapi {
 
         /**
          * Response is received for a pending command
-         * @param cmdType command type
+         * @param apiType api command type
          * @param pRespData response data
          * @return process status (0 for success)
          */
-        virtual int OnResponse(int cmdType, void *pRespData) = 0;
+        virtual int OnResponse(TraderApiType apiType, void *pRespData) = 0;
     };
 
     /**

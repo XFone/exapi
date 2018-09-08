@@ -1,7 +1,7 @@
 /*
  * $Id: $
  * 
- * DAQuoteOkexApi and DAQuoteOkexSpi class declaration
+ * DAQuoteBinanceApi and DAQuoteBinanceSpi class declaration
  * 
  * Copyright (c) 2014-2018 Zerone.IO. All rights reserved.
  *
@@ -10,7 +10,7 @@
  */
 #pragma once
 
-/** @file DAQuoteOkexApi.h Okcoin and Okex quotation client api.
+/** @file DAQuoteBinanceApi.h Binance quotation client api.
  */
 
 #if defined(SHARELIB) && defined(WIN32)
@@ -28,12 +28,12 @@
 namespace exapi {
 
     /**
-     * DAQuoteOkexSpi
-     * Okex quotation interface for async callback
+     * DAQuoteBinanceSpi
+     * Binance quotation interface for async callback
      */
-    class DAQuoteOkexSpi : public IQuoteSpi {
+    class DAQuoteBinanceSpi : public IQuoteSpi {
     public:
-        virtual ~DAQuoteOkexSpi() {}
+        virtual ~DAQuoteBinanceSpi() {}
 
         /**
          * On server connected (not used in HTTP/1.1)
@@ -52,37 +52,39 @@ namespace exapi {
          * @param quoteType quote type
          * @param pQuoteData union of quotation data
          */
-        virtual void OnQuoteUpdated(QuoteApiType quoteType, void *pQuoteData) {}
+        virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) {}
     
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolSubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {}
+        virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) {}
 
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolUnsubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {}
+        virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) {}
     };
 
     /**
-     * DAQuoteOkexApi
-     * Okex quotation service
+     * DAQuoteBinanceApi
+     * Binance quotation service
      */
-    class API_EXPORT DAQuoteOkexApi : public IQuoteApi {
+    class API_EXPORT DAQuoteBinanceApi : public IQuoteApi {
     public:
-        virtual ~DAQuoteOkexApi() {}
+        virtual ~DAQuoteBinanceApi() {}
 
         /**
          * Create TraderApi
+         * @param api_key user should applied an api-key from binance.com
+         * @param secret_key key for signing parameter
          * @param dpath the local directory to save quotation data, default is work path
          * @return the DAQuoteOkexApi instance
          */
-        static DAQuoteOkexApi *CreateApi(const char *dpath = "");
+        static DAQuoteBinanceApi *CreateApi(const char *api_key, const char *secret_key, const char *dpath = "");
         
         /**
          * Delete current instance and free all resources
@@ -152,15 +154,26 @@ namespace exapi {
 
         //--------------------------  Extra Data -----------------------------
 
-        /**
-         * 获取美元人民币汇率
-         */
-        int GetExchangeRate(void);
+		// Public API
+		static void get_serverTime( Json::Value &json_result); 	
 
-        /**
-         * 获取交割预估价
-         */
-        int GetFutureEstimatedPrice(const char *symbol);
+		static void get_allPrices( Json::Value &json_result );
+		static double get_price( const char *symbol );
+
+		static void get_allBookTickers( Json::Value &json_result );
+		static void get_bookTicker( const char *symbol, Json::Value &json_result ) ;
+
+		static void get_depth( const char *symbol, int limit, Json::Value &json_result );
+		static void get_aggTrades( const char *symbol, int fromId, time_t startTime, time_t endTime, int limit, Json::Value &json_result ); 
+		static void get_24hr( const char *symbol, Json::Value &json_result ); 
+		static void get_klines( const char *symbol, const char *interval, int limit, time_t startTime, time_t endTime,  Json::Value &json_result );
+
+
+		// API key required
+		static void start_userDataStream( Json::Value &json_result );
+		static void keep_userDataStream( const char *listenKey  );
+		static void close_userDataStream( const char *listenKey );
+
 
         /**
          * 获取当前可用合约总持仓量

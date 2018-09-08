@@ -11,7 +11,7 @@
 
 BUILD = ../../../../build
 SUBDIRS =
-RULESET = CLANG
+RULESET =
 
 # Makefile rules pre processing
 include $(BUILD)/Makefile.pre
@@ -20,10 +20,10 @@ include $(BUILD)/Makefile.pre
 -include config.mk
 
 # Build target (TARGET_LIB, TARGET_SHLIB or TARGET_PRG)
-TARGET_PRG = exapi-okex
+TARGET_PRG = test-binance-spi
 
 # Depended Modules (libraries)
-MODULES += PTHREAD IUTILS UUID OPENSSL RESTBED PROTOBUF ZMQ4
+MODULES += PTHREAD IUTILS UUID OPENSSL RESTBED
 
 # CFLAGS, CXXFLAGS and STDCCFLAGS
 CXXFLAGS += -std=c++0x             # for <atomic> and lambda
@@ -32,8 +32,11 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 # Additional LDFLAGS
 # LDFLAGS += -Wl,-t
 
+# for UNIT_TEST and LOGFILE: dont print filename and lineno
+STDCCFLAGS += -DNO_FILE_LINE
+
 # Sources to build
-SOURCES = $(wildcard *.cc ../*.cc ../*.cxx ../../common/*.cc)
+SOURCES = $(wildcard *.cc ../*.cc ../../common/*.cc)
 INCDIRS  += ../include ../../common/include
 
 # All
@@ -42,6 +45,11 @@ all::
 	@echo "---------------------------------------------------------------"
 	@echo "               Production Release ($(COMPILE_TYPE))."
 	@echo "---------------------------------------------------------------"
+
+# Test
+test: all
+	@echo "🌞  Testing..."
+	@$(LD_PREFIX) $(BINDIR)/$(TARGET_PRG) -t 7 -v 7 2>&1
 
 # Makefile rules post processing
 include $(BUILD)/Makefile.post

@@ -20,7 +20,7 @@ include $(BUILD)/Makefile.pre
 -include config.mk
 
 # Build target (TARGET_LIB, TARGET_SHLIB or TARGET_PRG)
-TARGET_PRG = exapi-okex
+TARGET_PRG = exapi-binance
 
 # Depended Modules (libraries)
 MODULES += PTHREAD IUTILS UUID OPENSSL RESTBED PROTOBUF ZMQ4
@@ -33,7 +33,7 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 # LDFLAGS += -Wl,-t
 
 # Sources to build
-SOURCES = $(wildcard *.cc ../*.cc ../*.cxx ../../common/*.cc)
+SOURCES = $(wildcard *.cc ../*.cc ../../common/*.cc)
 INCDIRS  += ../include ../../common/include
 
 # All

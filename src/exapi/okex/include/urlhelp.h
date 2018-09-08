@@ -14,20 +14,9 @@
  */
 
 #include <string>
+#include "RestRequest.h"
 
 namespace exapi {
-
-    /// TO REMOVE
-    enum HTTP_PROTOCOL {
-        HTTP_PROTOCOL_HTTP, 
-        HTTP_PROTOCOL_HTTPS 
-    };
-
-    /// TO REMOVE
-    enum HTTP_METHOD {
-        METHOD_GET, 
-        METHOD_POST 
-    };
 
     /// TO REMOVE
     #ifndef UINT

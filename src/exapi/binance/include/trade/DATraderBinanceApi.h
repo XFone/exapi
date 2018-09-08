@@ -1,7 +1,7 @@
 /*
  * $Id: $
  * 
- * DATraderOkexApi and DATraderOkexSpi class declaration
+ * DATraderBinanceApi and DATraderBinanceSpi class declaration
  * 
  * Copyright (c) 2014-2018 Zerone.IO. All rights reserved.
  *
@@ -10,7 +10,7 @@
  */
 #pragma once
 
-/** @file DATraderOkexApi.h Okcoin and Okex trader client api.
+/** @file DATraderBinanceApi.h Binance trader client api.
  */
 
 #if defined(SHARELIB) && defined(WIN32)
@@ -27,10 +27,10 @@
 namespace exapi {
 
     /**
-     * DATraderOkexSpi
-     * Okex trader interface for async callback
+     * DATraderBinanceSpi
+     * Binance trader interface for async callback
      */
-    class DATraderOkexSpi : public ITraderSpi {
+    class DATraderBinanceSpi : public ITraderSpi {
     public:
         virtual ~DATraderOkexSpi() {}
 
@@ -54,11 +54,11 @@ namespace exapi {
 
         /**
          * Response is received for a pending command
-         * @param apiType api command type
+         * @param cmdType command type
          * @param pRespData response data
          * @return process status (0 for success)
          */
-        virtual int OnResponse(TraderApiType apiType, void *pRespData);
+        virtual int OnResponse(int cmdType, void *pRespData);
  
         //------------------ spot callbacks ----------------------
 
@@ -75,21 +75,21 @@ namespace exapi {
     };
 
     /**
-     * DATraderOkexApi
-     * Okex trade service
+     * DATraderBinanceApi
+     * Binance trade service
      */
-    class API_EXPORT DATraderOkexApi : public ITraderApi {
+    class API_EXPORT DATraderBinanceApi : public ITraderApi {
     public:
-        virtual ~DATraderOkexApi() {}
+        virtual ~DATraderBinanceApi() {}
 
         /**
          * Create TraderApi
-         * @param api_key user should applied an api-key from okcoin.com
+         * @param api_key user should applied an api-key from binance.com
          * @param secret_key key for signing parameter
          * @param dpath the local directory to save quotation data, default is work path
          * @return the DATraderOkexApi instance
          */
-        static DATraderOkexApi *CreateApi(const char *api_key, const char *secret_key, const char *dpath = "");
+        static DATraderBinanceApi *CreateApi(const char *api_key, const char *secret_key, const char *dpath = "");
         
         /**
          * Delete current instance and free all resources
@@ -274,6 +274,96 @@ namespace exapi {
          * 获取OKCoin期货交易历史
          */
         int GetFutureTradeHistory(const char *symbol, const char *date, const char *range);
+
+
+		static void get_account( long recvWindow , Json::Value &json_result );
+		
+		static void get_myTrades( 
+			const char *symbol, 
+			int limit,
+			long fromId,
+			long recvWindow, 
+			Json::Value &json_result 
+		);
+		
+		static void get_openOrders(  
+			const char *symbol, 
+			long recvWindow,   
+			Json::Value &json_result 
+		) ;
+		
+
+		static void get_allOrders(   
+			const char *symbol, 
+			long orderId,
+			int limit,
+			long recvWindow,
+			Json::Value &json_result 
+		);
+
+
+		static void send_order( 
+			const char *symbol, 
+			const char *side,
+			const char *type,
+			const char *timeInForce,
+			double quantity,
+			double price,
+			const char *newClientOrderId,
+			double stopPrice,
+			double icebergQty,
+			long recvWindow,
+			Json::Value &json_result ) ;
+
+
+		static void get_order( 
+			const char *symbol, 
+			long orderId,
+			const char *origClientOrderId,
+			long recvWindow,
+			Json::Value &json_result ); 
+
+
+		static void cancel_order( 
+			const char *symbol, 
+			long orderId,
+			const char *origClientOrderId,
+			const char *newClientOrderId,
+			long recvWindow,
+			Json::Value &json_result 
+		);
+
+
+		// WAPI
+		static void withdraw( 
+			const char *asset,
+			const char *address,
+			const char *addressTag,
+			double amount, 
+			const char *name,
+			long recvWindow,
+			Json::Value &json_result );
+
+		static void get_depositHistory( 
+			const char *asset,
+			int  status,
+			long startTime,
+			long endTime, 
+			long recvWindow,
+			Json::Value &json_result );
+
+		static void get_withdrawHistory( 
+			const char *asset,
+			int  status,
+			long startTime,
+			long endTime, 
+			long recvWindow,
+			Json::Value &json_result ); 
+
+		static void get_depositAddress( 
+			const char *asset,
+			long recvWindow,
+			Json::Value &json_result );
 
     };
 

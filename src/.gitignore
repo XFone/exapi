@@ -4,3 +4,5 @@ obj.debug.*
 bin.opt.*
 obj.opt.*
 .DS_Store
+github
+*.key

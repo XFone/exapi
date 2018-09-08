@@ -19,6 +19,7 @@
 
 using namespace exapi;
 
+#define _OKEX_(api_type)         (int)(QuoteApiType::EX_TYPE_OKEX + api_type)
 
 /**
  * Internal class implemented DAQuoteOkexApi
@@ -79,7 +80,7 @@ public:
         return 0;
     }
 
-    virtual int GetQuote(int quoteType, const char *symbol, 
+    virtual int GetQuote(QuoteApiType quoteType, const char *symbol, 
                          const char *range, size_t max_size) override {
         //TODO: use Rest API
         return 0;
@@ -123,7 +124,7 @@ int DAQuoteOkexApi::GetTicker(const char *symbol)
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_TICKER, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_TICKER), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -142,7 +143,7 @@ int DAQuoteOkexApi::GetDepth(const char *symbol, const char *range, char *merge)
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_DEPTH, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_DEPTH), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -160,7 +161,7 @@ int DAQuoteOkexApi::GetTrades(const char *symbol, const char *since)
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_TRADES, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_TRADES), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -180,7 +181,7 @@ int DAQuoteOkexApi::GetKline(int quoteType, const char *symbol, const char *rang
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_KLINE, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_KLINE), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -200,7 +201,7 @@ int DAQuoteOkexApi::GetFutureTicker(const char *symbol, const char *contract_typ
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_TICKER, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_TICKER), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -220,7 +221,7 @@ int DAQuoteOkexApi::GetFutureDepth(const char *symbol, const char *contract_type
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_DEPTH, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_DEPTH), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -238,7 +239,7 @@ int DAQuoteOkexApi::GetFutureTrades(const char *symbol, const char *contract_typ
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_TRADES, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_TRADES), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -255,7 +256,7 @@ int DAQuoteOkexApi::GetFutureIndex(const char *symbol)
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_INDEX, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_INDEX), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -277,7 +278,7 @@ int DAQuoteOkexApi::GetFutureKline(int quoteType, const char *symbol, const char
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_KLINE, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_KLINE), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -294,7 +295,7 @@ int DAQuoteOkexApi::GetExchangeRate()
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_EXCHANGE_RATE, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_EXCHANGE_RATE), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -311,7 +312,7 @@ int DAQuoteOkexApi::GetFutureEstimatedPrice(const char *symbol)
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_ESTIMATED_PRICE, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_ESTIMATED_PRICE), const_cast<char *>(json.c_str()));
     });
 }
 
@@ -329,6 +330,6 @@ int DAQuoteOkexApi::GetFutureHoldAmount(const char *symbol, const char *contract
       [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnQuoteUpdated(HTTP_API_TYPE_FUTURE_HOLD_AMOUNT, const_cast<char *>(json.c_str()));
+        impl->m_spi->OnQuoteUpdated(_OKEX_(HTTP_API_TYPE_FUTURE_HOLD_AMOUNT), const_cast<char *>(json.c_str()));
     });
 }

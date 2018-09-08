@@ -1,7 +1,7 @@
 #
 # $Id: $
 #
-# Makefile for Digital Currency Exchange - OKEX/OKCoin
+# Makefile for Digital Currency Exchange - Binance
 #
 # Copyright (c) 2014-2018 . All rights reserved.
 #
@@ -20,7 +20,7 @@ include $(BUILD)/Makefile.pre
 -include config.mk
 
 # Build target (TARGET_LIB, TARGET_SHLIB or TARGET_PRG)
-TARGET_LIB = libexapi-okex
+TARGET_LIB = libexapi-binance
 BUILD_SHARED_LIBRARY := 1
 
 # Depended Modules (libraries)
@@ -36,7 +36,7 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 
 # Sources to build
 SOURCES = $(wildcard *.cc *.cxx ../common/*.cc)
-INCDIRS  += ./include ../common/include
+INCDIRS += ./include ../common/include
 
 # All
 all::
@@ -52,10 +52,10 @@ agent_bin:
 INSTALL_ROOT=$(ROOT)/dist
 
 install: all agent_bin
-	@mkdir -p $(INSTALL_ROOT)/include/okex
+	@mkdir -p $(INSTALL_ROOT)/include/binance
 	@mkdir -p $(INSTALL_ROOT)/$(OSTYPE)/bin 
 	@mkdir -p $(INSTALL_ROOT)/$(OSTYPE)/lib
-	@cp -a include/*  $(INSTALL_ROOT)/include/okex/
+	@cp -a include/*  $(INSTALL_ROOT)/include/binance/
 	-@cp -a ./agent/$(BINDIR)/*     $(INSTALL_ROOT)/$(OSTYPE)/bin
 	-@cp -a $(BINDIR)/*             $(INSTALL_ROOT)/$(OSTYPE)/lib
 	-@cp -a $(OBJDIR)/*.a           $(INSTALL_ROOT)/$(OSTYPE)/lib
