@@ -277,232 +277,6 @@ int DATraderOkexApi::GetOrdersInfo(const char *type, const char *symbol, const c
     });
 }
 
-int DATraderOkexApi::DoWithdraw(const char *symbol, d_price_t chargefee, const char *tradepwd,
-                                const char *withdrawAddress, d_amount_t withdrawAmount)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_WITHDRAW);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("chargefee", Price2String(chargefee))
-        .AddParam("trade_pwd", tradepwd)
-        .AddParam("withdraw_address", withdrawAddress)
-        .AddParam("withdraw_amount", Amount2String(withdrawAmount))
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_WITHDRAW), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::DoCancelWithdraw(const char *symbol, const char *withdrawid)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_CANCEL_WITHDRAW);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("withdraw_id", withdrawid)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_CANCEL_WITHDRAW), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::GetOrderFee(const char *symbol, const char *orderid)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_ORDER_FEE);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("order_id", orderid)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_ORDER_FEE), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::GetLendDepth(const char *symbol)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_LEND_DEPTH);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_LEND_DEPTH), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::GetBorrowsInfo(const char *symbol)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_BORROWS_INFO);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_BORROWS_INFO), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::DoBorrowMoney(const char *symbol, const char *days, d_amount_t amount, d_price_t rate)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_BORROW_MONEY);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("days", days)
-        .AddParam("amount", Amount2String(amount))
-        .AddParam("rate", Price2String(rate))
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_BORROW_MONEY), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::DoCancelBorrow(const char *symbol, const char *borrowid)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_CANCEL_BORROW);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("borrow_id", borrowid)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_CANCEL_BORROW), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::GetBorrowOrderinfo(const char *borrowid)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_BORROW_ORDER_INFO);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("borrow_id", borrowid)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_BORROW_ORDER_INFO), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::DoRepayment(const char *borrowid)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_REPAYMENT);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("borrow_id", borrowid)
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_REPAYMENT), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::GetUnrepaymentsInfo(const char *symbol, size_t currentpage, size_t pagelength)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_UNREPAYMENTS_INFO);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("current_page", std::to_string(currentpage))
-        .AddParam("page_length", std::to_string(pagelength))
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_UNREPAYMENTS_INFO), const_cast<char *>(json.c_str()));
-    });
-}
-
-int DATraderOkexApi::GetAccountRecords(const char *symbol, const char *type, 
-                                       size_t currentpage, size_t pagelength)
-{
-    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
-
-    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_ACCOUNT_RECORDS);
-
-    request->Init()
-        .AddParam("api_key", impl->m_api_key)
-        .AddParam("symbol", symbol)
-        .AddParam("type", type)
-        .AddParam("current_page", std::to_string(currentpage))
-        .AddParam("page_length", std::to_string(pagelength))
-        .Sign(impl->m_secret_key);
-
-    return RestRequest::SendAsync(request, 
-      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
-        std::string json;
-        RestRequest::ParseReponse(rsp, json);
-        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_ACCOUNT_RECORDS), const_cast<char *>(json.c_str()));
-    });
-}
-
 //-------- Spot Trade History ---------
 
 int DATraderOkexApi::GetTradeHistory(const char *symbol, const char *range)
@@ -789,5 +563,233 @@ int DATraderOkexApi::GetFutureTradeHistory(const char *symbol, const char *date,
         std::string json;
         RestRequest::ParseReponse(rsp, json);
         impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_FUTURE_TRADES_HISTORY), const_cast<char *>(json.c_str()));
+    });
+}
+
+//---------- Wallet Access -------------
+
+int DATraderOkexApi::DoWithdraw(const char *symbol, d_price_t chargefee, const char *tradepwd,
+                                const char *withdrawAddress, d_amount_t withdrawAmount)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_WITHDRAW);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("chargefee", Price2String(chargefee))
+        .AddParam("trade_pwd", tradepwd)
+        .AddParam("withdraw_address", withdrawAddress)
+        .AddParam("withdraw_amount", Amount2String(withdrawAmount))
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_WITHDRAW), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::DoCancelWithdraw(const char *symbol, const char *withdrawid)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_CANCEL_WITHDRAW);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("withdraw_id", withdrawid)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_CANCEL_WITHDRAW), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::GetOrderFee(const char *symbol, const char *orderid)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_ORDER_FEE);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("order_id", orderid)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_ORDER_FEE), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::GetLendDepth(const char *symbol)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_LEND_DEPTH);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_LEND_DEPTH), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::GetBorrowsInfo(const char *symbol)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_BORROWS_INFO);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_BORROWS_INFO), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::DoBorrowMoney(const char *symbol, const char *days, d_amount_t amount, d_price_t rate)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_BORROW_MONEY);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("days", days)
+        .AddParam("amount", Amount2String(amount))
+        .AddParam("rate", Price2String(rate))
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_BORROW_MONEY), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::DoCancelBorrow(const char *symbol, const char *borrowid)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_CANCEL_BORROW);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("borrow_id", borrowid)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_CANCEL_BORROW), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::GetBorrowOrderinfo(const char *borrowid)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_BORROW_ORDER_INFO);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("borrow_id", borrowid)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_BORROW_ORDER_INFO), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::DoRepayment(const char *borrowid)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_REPAYMENT);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("borrow_id", borrowid)
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_REPAYMENT), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::GetUnrepaymentsInfo(const char *symbol, size_t currentpage, size_t pagelength)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_UNREPAYMENTS_INFO);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("current_page", std::to_string(currentpage))
+        .AddParam("page_length", std::to_string(pagelength))
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_UNREPAYMENTS_INFO), const_cast<char *>(json.c_str()));
+    });
+}
+
+int DATraderOkexApi::GetAccountRecords(const char *symbol, const char *type, 
+                                       size_t currentpage, size_t pagelength)
+{
+    _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
+
+    auto request = RestRequest::CreateBuilder(impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_POST, HTTP_API_ACCOUNT_RECORDS);
+
+    request->Init()
+        .AddParam("api_key", impl->m_api_key)
+        .AddParam("symbol", symbol)
+        .AddParam("type", type)
+        .AddParam("current_page", std::to_string(currentpage))
+        .AddParam("page_length", std::to_string(pagelength))
+        .Sign(impl->m_secret_key);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const shared_ptr<restbed::Request>req, const shared_ptr<restbed::Response>rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnResponse(_OKEX_(HTTP_API_TYPE_ACCOUNT_RECORDS), const_cast<char *>(json.c_str()));
     });
 }

@@ -25,7 +25,13 @@ namespace exapi {
 
     enum HTTP_METHOD {
         METHOD_GET,
-        METHOD_POST
+        METHOD_POST,
+        METHOD_PUT,
+        METHOD_HEAD,
+        METHOD_DELETE,
+        METHOD_TRACE,
+        METHOD_OPTIONS,
+        METHOD_CONNECT
     };
 
     /**
@@ -132,10 +138,18 @@ namespace exapi {
             return *this;
         }
 
-        //---------------------------  Sign request --------------------------
+        //---------------------- API-key and Signature  ----------------------
 
-        /** Sign request with MD5 signature
+        /**
+         * Add a HTTP Header field with given api-key
+         * @param api_key the api_key assigned by the exchange site
+         */
+        RestRequest &ApiKey(const std::string &api_key);
+
+        /** 
+         * Sign request with MD5 or SHA256 signature (depends on server)
          * MUST be called after all setters
+         * @param secret_key the secret key assigned by the exchange site
          */
         RestRequest &Sign(const std::string &secret_key);
 

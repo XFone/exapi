@@ -107,7 +107,7 @@ namespace exapi {
          */
         virtual int Join() = 0;
 
-        //-------------------------  Spot Trade -------------------------------
+        //-------------------------  Spot Trade ------------------------------
 
         /**
          * 获取用户信息
@@ -137,65 +137,7 @@ namespace exapi {
         /**
          * 批量获取用户订单
          */
-        int GetOrdersInfo(const char *type, const char *symbol, const char *orderid);	
-
-        /**
-         * 提币 BTC/LTC
-         */
-        int DoWithdraw(const char *symbol, d_price_t chargefee, const char *tradepwd,
-                       const char *withdrawAddress, d_amount_t withdrawAmount);
-
-        /**
-         * 取消提币BTC/LTC
-         */
-        int DoCancelWithdraw(const char *symbol, const char *withdrawid);
-
-        /**
-         * 查询手续费
-         */
-        int GetOrderFee(const char *symbol,const char *orderid);
-
-        /**
-         * 获取放款深度前10
-         */
-        int GetLendDepth(const char *symbol);
-
-        /**
-         * 查询用户借款信息
-         */
-        int GetBorrowsInfo(const char *symbol);
-
-        /**
-         * 申请借款
-         */
-        int DoBorrowMoney(const char *symbol, const char *days, d_amount_t amount, d_price_t rate);
-
-        /**
-         * 取消借款申请
-         */
-        int DoCancelBorrow(const char *symbol, const char *borrowid);
-
-        /**
-         * 获取借款订单记录
-         */
-        int GetBorrowOrderinfo(const char *borrowid);
-
-        /**
-         * 用户还全款
-         */
-        int DoRepayment(const char *borrowid);
-
-        /**
-         * 未还款列表
-         */
-        int GetUnrepaymentsInfo(const char *symbol, 
-                                size_t currentpage, size_t pagelength);
-        
-        /**
-         * 获取用户提现/充值记录
-         */
-        int GetAccountRecords(const char *symbol, const char *type, 
-                              size_t currentpage, size_t pagelength);
+        int GetOrdersInfo(const char *type, const char *symbol, const char *orderid);
 
         //--------------------  Spot Trade History ---------------------------
 
@@ -275,6 +217,65 @@ namespace exapi {
          */
         int GetFutureTradeHistory(const char *symbol, const char *date, const char *range);
 
+        //------------------------- Wallet Access ----------------------------
+
+        /**
+         * 提币 BTC/LTC
+         */
+        int DoWithdraw(const char *symbol, d_price_t chargefee, const char *tradepwd,
+                       const char *withdrawAddress, d_amount_t withdrawAmount);
+
+        /**
+         * 取消提币BTC/LTC
+         */
+        int DoCancelWithdraw(const char *symbol, const char *withdrawid);
+
+        /**
+         * 查询手续费
+         */
+        int GetOrderFee(const char *symbol,const char *orderid);
+
+        /**
+         * 获取放款深度前10
+         */
+        int GetLendDepth(const char *symbol);
+
+        /**
+         * 查询用户借款信息
+         */
+        int GetBorrowsInfo(const char *symbol);
+
+        /**
+         * 申请借款
+         */
+        int DoBorrowMoney(const char *symbol, const char *days, d_amount_t amount, d_price_t rate);
+
+        /**
+         * 取消借款申请
+         */
+        int DoCancelBorrow(const char *symbol, const char *borrowid);
+
+        /**
+         * 获取借款订单记录
+         */
+        int GetBorrowOrderinfo(const char *borrowid);
+
+        /**
+         * 用户还全款
+         */
+        int DoRepayment(const char *borrowid);
+
+        /**
+         * 未还款列表
+         */
+        int GetUnrepaymentsInfo(const char *symbol, 
+                                size_t currentpage, size_t pagelength);
+        
+        /**
+         * 获取用户提现/充值记录
+         */
+        int GetAccountRecords(const char *symbol, const char *type, 
+                              size_t currentpage, size_t pagelength);
     };
 
 } // namespace exapi

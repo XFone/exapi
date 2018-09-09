@@ -1,7 +1,7 @@
 /*
  * $Id: $
  *
- * RestRequest class implementation
+ * RestRequest class implementation for OKex
  * 
  * Copyright (c) 2014-2018 Zerone.IO . All rights reserved.
  *
@@ -14,7 +14,6 @@
 #include "Trace.h"
 #include "DumpFunc.h"
 
-#include "urlhelp.h"
 #include "RestRequest.h"
 using namespace exapi;
 
@@ -62,8 +61,9 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
     try {
         TRACE(7, "<<<\n%s\n<<<", 
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
-    
+
         req->m_sent_time = std::chrono::steady_clock::now();
+
 #if 0
         auto ssl_settings = std::make_shared<restbed::SSLSettings>();
         ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
@@ -98,7 +98,7 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
 
         req->m_sent_time = std::chrono::steady_clock::now();
         restbed::Http::async(req, callback);
-        
+
     } catch (std::system_error ex) {
         LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
     }
@@ -115,8 +115,9 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
     LOGFILE(LOG_DEBUG, "Response: HTTP/%1.1f %d %s", 
             rsp->get_version(), rsp->get_status_code(), rsp->get_status_message().data());
 
+    auto headers = rsp->get_headers();
+
     TRACE_IF(8, {
-        auto headers = rsp->get_headers();
         for (const auto header : headers) {
             _trace_impl(8, "  Header| %s: %s", header.first.data(), header.second.data());
         }
@@ -149,7 +150,7 @@ RestRequest::Sign(const std::string &secret_key) {
     unsigned char md[MD5_DIGEST_LENGTH];
     char strMd5[2 * MD5_DIGEST_LENGTH + 1];
 
-    AddParam("secret_key", secret_key);
+    // AddParam("secret_key", secret_key);
 
     std::string params;
 
@@ -158,7 +159,9 @@ RestRequest::Sign(const std::string &secret_key) {
                    restbed::Uri::encode_parameter(qp.second) + "&";
     }
 
-    (void)MD5((const unsigned char *)params.c_str(), params.size() - 1, md);
+    params += "secret_key=";
+    params += secret_key;
+    (void)MD5((const unsigned char *)params.c_str(), params.size(), md);
 
     // output in upper case
     for (int n = 0; n < MD5_DIGEST_LENGTH; n++) {
