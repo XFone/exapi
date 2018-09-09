@@ -28,6 +28,92 @@
 namespace exapi {
 
     /**
+     * DAFilterBinance
+     * Filters (PRICE_FILTER, LOT_SIZE, MIN_NOTIONAL, MAX_NUM_ORDERS, MAX_NUM_ALGO_ORDERS, ICEBERG_PARTS)
+     * Exchange Filters (EXCHANGE_MAX_NUM_ORDERS, EXCHANGE_MAX_NUM_ALGO_ORDERS)
+     */
+    class DAFilterBinance {
+    public:
+        /** The PRICE_FILTER defines the price rules for a symbol */
+        struct PRICE_FILTER {
+            d_price_t minPrice;
+            d_price_t maxPrice;
+            d_price_t tickSize;
+        };
+
+        /** The LOT_SIZE filter defines the quantity rules for a symbol */
+        struct LOT_SIZE {
+            quantity_t minQty;
+            quantity_t maxQty;
+            quantity_t stepSize;
+        };
+
+        /** The MIN_NOTIONAL filter defines the minimum notional value allowed 
+         *  for an order on a symbol
+         */
+        struct MIN_NOTIONAL {
+            d_amount_t minNotional;
+        };
+
+        /** The MAX_NUM_ORDERS filter defines the maximum number of orders an 
+         * account is allowed to have open on a symbol
+         */
+        struct MAX_NUM_ORDERS {
+            size_t limit;
+        };
+
+        /** The MAX_ALGO_ORDERS filter defines the maximum number of "algo" 
+         * orders an account is allowed to have open on a symbol
+         */
+        struct MAX_NUM_ALGO_ORDERS {
+            size_t maxNumAlgoOrders;
+        };
+
+        /** The ICEBERG_PARTS filter defines the maximum parts an iceberg order
+         * can have
+         */
+        struct ICEBERG_PARTS {
+            size_t limit;
+        };
+
+        /** The MAX_NUM_ORDERS filter defines the maximum number of orders an 
+         * account is allowed to have open on the exchange
+         */
+        struct EXCHANGE_MAX_NUM_ORDERS {
+            size_t limit;
+        };
+
+        /** The MAX_ALGO_ORDERS filter defines the maximum number of "algo" 
+         * orders an account is allowed to have open on the exchange
+         */
+        struct EXCHANGE_MAX_NUM_ALGO_ORDERS {
+            size_t limit;
+        };
+
+    protected:
+        bool                            has_pf;
+        bool                            has_ls;
+        bool                            has_mn;
+        bool                            has_no;
+        bool                            has_ao;
+        bool                            has_ip;
+        bool                            has_ex_o;
+        bool                            has_ex_ao;
+
+        PRICE_FILTER                    m_pf;
+        LOT_SIZE                        m_ls;
+        MIN_NOTIONAL                    m_mn;
+        MAX_NUM_ORDERS                  m_no;
+        MAX_NUM_ALGO_ORDERS             m_ao;
+        ICEBERG_PARTS                   m_ip;
+        EXCHANGE_MAX_NUM_ORDERS         m_ex_o;
+        EXCHANGE_MAX_NUM_ALGO_ORDERS    m_ex_ao;
+
+    public:
+        DAFilterBinance() {}
+    };
+
+    /**
      * DAQuoteBinanceSpi
      * Binance quotation interface for async callback
      */
@@ -52,21 +138,41 @@ namespace exapi {
          * @param quoteType quote type
          * @param pQuoteData union of quotation data
          */
-        virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) {}
+        virtual void OnQuoteUpdated(QuoteApiType quoteType, void *pQuoteData) {}
     
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) {}
+        virtual void OnSymbolSubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {}
 
         /**
          * @param quoteType quote type
          * @param psymbol quote symbol
          * @param status symbol subscription status
          */
-        virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) {}
+        virtual void OnSymbolUnsubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {}
+
+        //------------------------- Stream Data ------------------------------
+        
+        virtual void OnStartUserDataStream(const char *listenKey) {}
+
+        virtual void OnCloseUserDataStream(const char *listenKey) {}
+
+        //-------------------------- Extra Data ------------------------------
+
+        /**
+         * Current server time
+         * @param serverTime in miliseconds time_since_epoch (e.g., "1499827319559")
+         */
+        virtual void OnServerTime(const char *serverTime) {}
+
+        /** 
+         * Current exchange trading rules and symbol information
+         */
+        virtual void OnExchangeInfo(const char *exinfo) {}
+
     };
 
     /**
@@ -102,83 +208,123 @@ namespace exapi {
          */
         virtual int Join() = 0;
 
-        //----------------------  Spot Data ----------------------------------
+        //------------------------  Spot Data --------------------------------
+
+        /** 
+         * Order book
+         * @param symbol e.g., "ETHBTC"
+         * @param limit default 100; max 1000. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
+         * @return 0 for success, or errno
+         */
+        int QueryDepth(const char *symbol, size_t limit);
+
+        /** 
+         * Recent trades list
+         * @param symbol
+         * @param limit default 500; max 1000.
+         * @return 0 for success, or errno
+         */
+        int QueryTrades(const char *symbol, size_t limit);
+
+        /** 
+         * Historical trades list
+         * @param symbol
+         * @param limit default 500; max 1000.
+         * @param fromId TradeId to fetch from. Default gets most recent trades.
+         * @return 0 for success, or errno
+         */
+        int QueryTradesHistory(const char *symbol, size_t limit, long fromId);
+
+        /** 
+         * Get compressed, aggregate trades list
+         * @param symbol
+         * @param limit default 500; max 1000.
+         * @param fromId TradeId to fetch from. Default gets most recent trades.
+         * @param startTime timestamp in ms to get aggregate trades from INCLUSIVE
+         * @param endTime timestamp in ms to get aggregate trades until INCLUSIVE
+         * @return 0 for success, or errno
+         */
+        int QueryTradesAggregate(const char *symbol, size_t limit, long fromId, timestamp_t startTime, timestamp_t endTime);
+       
+        /**
+         * Kline/candlestick bars for a symbol
+         * @param symbol
+         * @param limit default 500; max 1000.
+         * @oaram interval 
+         * @param startTime timestamp in ms to get aggregate trades from INCLUSIVE
+         * @param endTime timestamp in ms to get aggregate trades until INCLUSIVE
+         * @return 0 for success, or errno
+         */
+        int QueryKline(const char *symbol, size_t limit, size_t interval, timestamp_t startTime, timestamp_t endTime);
 
         /**
-         * 获取OKCoin行情
+         * 24 hour price change statistics
+         * @param symbol
+         * @return 0 for success, or errno
          */
-        int GetTicker(const char *symbol);
+        int QueryTicker(const char *symbol);
 
         /**
-         * 获取OKCoin市场深度
+         * Latest price for a symbol or symbols
+         * @param symbol
+         * @return 0 for success, or errno
          */
-        int GetDepth(const char *symbol, const char *range, char *merge);
+        int QueryPrices(const char *symbol);
 
         /**
-         * 获取OKCoin最近600交易信息
+         * Best price/qty on the order book for a symbol or symbols
+         * @param symbol
+         * @return 0 for success, or errno
          */
-        int GetTrades(const char *symbol, const char *since);
+        int QueryBookTicker(const char *symbol);
+
+        //------------------------- Stream Data ------------------------------
 
         /**
-         * 获取K线数据
+         * Start a new user data stream
+         * The stream will close after 60 minutes unless a keepalive is sent.
          */
-        int GetKline(int quoteType, const char *symbol, const char *range, size_t max_size);
-
-        //----------------------- Future Data --------------------------------
+        int StartUserDataStream();
 
         /**
-         * 获取OKCoin期货行情
+         * Keepalive a user data stream to prevent a time out.
+         * It's recommended to call this about every 30 minutes
+         * @param listenKey the listenKey is returned by \ref StartUserDataStream
+         * @return 0 for success, or errno
          */
-        int GetFutureTicker(const char *symbol, const char *contract_type);
+        int KeepAliveUserDataStream(const char *listenKey);
 
         /**
-         * 获取OKCoin期货深度信息
+         * Close out a user data stream.
+         * @param listenKey the listenKey is returned by \ref StartUserDataStream
+         * @return 0 for success, or errno
          */
-        int GetFutureDepth(const char *symbol, const char *contract_type, const char *range, char *merge);
-        
-        /**
-         * 获取OKCoin期货交易记录信息
-         */
-        int GetFutureTrades(const char *symbol, const char *contract_type);
+        int CloseUserDataStream(const char *listenKey);
 
-        /**
-         * 获取OKCoin期货指数信息
-         */
-        int GetFutureIndex(const char *symbol);	
+        //-------------------------- Future Data -----------------------------
+
+        // NOTHING
+
+        //-------------------------- Extra Data ------------------------------
 
         /**
-         * 获取期货合约的K线数据
+         * Test connectivity to the Rest API
+         * synchronized
+         * @return 0 for sucessfully receiving server response, elsewise errno 
          */
-        int GetFutureKline(int quoteType, const char *symbol, const char *contract_type,
-                           const char *range, size_t max_size);
-
-        //--------------------------  Extra Data -----------------------------
-
-		// Public API
-		static void get_serverTime( Json::Value &json_result); 	
-
-		static void get_allPrices( Json::Value &json_result );
-		static double get_price( const char *symbol );
-
-		static void get_allBookTickers( Json::Value &json_result );
-		static void get_bookTicker( const char *symbol, Json::Value &json_result ) ;
-
-		static void get_depth( const char *symbol, int limit, Json::Value &json_result );
-		static void get_aggTrades( const char *symbol, int fromId, time_t startTime, time_t endTime, int limit, Json::Value &json_result ); 
-		static void get_24hr( const char *symbol, Json::Value &json_result ); 
-		static void get_klines( const char *symbol, const char *interval, int limit, time_t startTime, time_t endTime,  Json::Value &json_result );
-
-
-		// API key required
-		static void start_userDataStream( Json::Value &json_result );
-		static void keep_userDataStream( const char *listenKey  );
-		static void close_userDataStream( const char *listenKey );
-
+        int PingServer();
 
         /**
-         * 获取当前可用合约总持仓量
+         * Get the current server time.
+         * \ref OnServerTime
          */
-        int GetFutureHoldAmount(const char *symbol, const char *contract_type);
+        int GetServerTime();
+
+        /** 
+         * Current exchange trading rules and symbol information
+         * \ref OnExchangeInfo
+         */
+        int GetExchangeInfo();
 
     };
 

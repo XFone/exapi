@@ -38,31 +38,22 @@ int checkopt(int opt, char *parg)
     return result;
 }
 
-/*----------------------------- sync mode -----------------------------------*/
-
-#include "okcoinapi.h"
-
-void test_okex_quote_sync()
-{
-    OKCoinApiCom api("", "");
-
-    std::string symbol = "eth_btc";
-    std::string json = api.GetTicker(symbol);
-}
-
 /*---------------------------- async mode -----------------------------------*/
 
-#include "MyQuoteOkexSpi.h"
+#include "MyQuoteBinanceSpi.h"
 
-void test_okex_quote_spi()
+void test_binance_quote_spi()
 {
-    DAQuoteOkexApi *api = DAQuoteOkexApi::CreateApi();
-    MyQuoteOkexSpi spi;
+    DAQuoteBinanceApi *api = DAQuoteBinanceApi::CreateApi("", "");
+    MyDAQuoteBinanceSpi spi;
 
     api->ConnServer(nullptr, &spi);
     api->Init();
 
-    api->GetTicker("etc_btc");
+    api->GetServerTime();
+    sleep(3);
+
+    api->GetExchangeInfo();
 
     api->Join();
     api->Dispose();
@@ -70,22 +61,7 @@ void test_okex_quote_spi()
 
 /*----------------------------- Websocket -----------------------------------*/
 
-#include "okcoinwsapi.h"
-
-void test_okex_websocket()
-{
-    std::string com_apiKey      = "";                       //请到www.okcoin.com申请
-    std::string com_secretKey   = "";                       //请到www.okcoin.com申请
-    OKCoinWebSocketApiCom api(com_apiKey, com_secretKey);   //国际站
-
-    api.Run();                              //启动连接服务器线程
-
-    api.ok_spotusd_btc_ticker();            // 订阅行情
-
-    sleep(20);
-
-    api.remove_ok_spotusd_btc_ticker();     // 取消订阅
-}
+// TODO
 
 int main(int argc, char *argv[])
 {
@@ -100,14 +76,11 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // test sync mode
-    test_okex_quote_sync();
-
     // test async mode
-    test_okex_quote_spi();
+    test_binance_quote_spi();
 
     // test websocket
-    test_okex_websocket();
+    // test_binance_websocket();
     
     return 0;
 }

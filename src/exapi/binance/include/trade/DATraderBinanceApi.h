@@ -32,7 +32,7 @@ namespace exapi {
      */
     class DATraderBinanceSpi : public ITraderSpi {
     public:
-        virtual ~DATraderOkexSpi() {}
+        virtual ~DATraderBinanceSpi() {}
 
         /**
          * On server connected (not used in HTTP/1.1)
@@ -54,11 +54,11 @@ namespace exapi {
 
         /**
          * Response is received for a pending command
-         * @param cmdType command type
+         * @param apiType api command type
          * @param pRespData response data
          * @return process status (0 for success)
          */
-        virtual int OnResponse(int cmdType, void *pRespData);
+        virtual int OnResponse(TraderApiType apiType, void *pRespData);
  
         //------------------ spot callbacks ----------------------
 
@@ -110,260 +110,84 @@ namespace exapi {
         //-------------------------  Spot Trade -------------------------------
 
         /**
-         * 获取用户信息
+         * Send order
          */
-        int GetUserInfo();
+        int EnterOrder(const char *symbol, const char *type, const char *side,
+                       const char *timeInForce, 
+                       d_price_t price, quantity_t quantity,
+                       const char *newClientOrderId, 
+                       d_price_t stopPrice, quantity_t icebergQty,
+                       size_t recvWindow);
 
         /**
-         * 下单交易
          */
-        int DoTrade(const char *symbol, const char *type, price_t price, amount_t amount);
+        int TestOrder();
 
         /**
-         * 批量下单
          */
-        int DoBatchTrade(const char *symbol, const char *type, const char *ordersdata);
+        int CancelOrder(const char *symbol, const char *orderId, 
+                       const char *origClientOrderId, const char *newClientOrderId,
+                       size_t recvWindow);
 
         /**
-         * 撤销订单
          */
-        int DoCancelOrder(const char *symbol, const char *orderid);
+        int QueryOrder(const char *symbol, const char *orderId,
+                       const char *origClientOrderId,
+                       size_t recvWindow);
 
-        /**
-         * 获取用户的订单信息
-         */
-        int GetOrderInfo(const char *symbol, const char *orderid);
-
-        /**
-         * 批量获取用户订单
-         */
-        int GetOrdersInfo(const char *type, const char *symbol, const char *orderid);	
-
-        /**
-         * 提币 BTC/LTC
-         */
-        int DoWithdraw(const char *symbol, price_t chargefee, const char *tradepwd,
-                       const char *withdrawAddress, amount_t withdrawAmount);
-
-        /**
-         * 取消提币BTC/LTC
-         */
-        int DoCancelWithdraw(const char *symbol, const char *withdrawid);
-
-        /**
-         * 查询手续费
-         */
-        int GetOrderFee(const char *symbol,const char *orderid);
-
-        /**
-         * 获取放款深度前10
-         */
-        int GetLendDepth(const char *symbol);
-
-        /**
-         * 查询用户借款信息
-         */
-        int GetBorrowsInfo(const char *symbol);
-
-        /**
-         * 申请借款
-         */
-        int DoBorrowMoney(const char *symbol, const char *days, amount_t amount, price_t rate);
-
-        /**
-         * 取消借款申请
-         */
-        int DoCancelBorrow(const char *symbol, const char *borrowid);
-
-        /**
-         * 获取借款订单记录
-         */
-        int GetBorrowOrderinfo(const char *borrowid);
-
-        /**
-         * 用户还全款
-         */
-        int DoRepayment(const char *borrowid);
-
-        /**
-         * 未还款列表
-         */
-        int GetUnrepaymentsInfo(const char *symbol, 
-                                size_t currentpage, size_t pagelength);
-        
-        /**
-         * 获取用户提现/充值记录
-         */
-        int GetAccountRecords(const char *symbol, const char *type, 
-                              size_t currentpage, size_t pagelength);
 
         //--------------------  Spot Trade History ---------------------------
 
         /**
-         * 获取OKCoin历史交易信息
          */
-        int GetTradeHistory(const char *symbol, const char *range);
+        int QueryOpenOrders(const char *symbol, size_t recvWindow);
 
         /**
-         * 获取历史订单信息，只返回最近七天的信息
          */
-        int GetOrderHistory(const char *symbol, const char *status,
-                            size_t currentpage, size_t pagelength);
+        int QueryAllOrders(const char *symbol, const char *orderId,
+                           size_t limit, size_t recvWindow);
 
         //------------------------- Future Trade -----------------------------
 
-        /**
-         * 获取OKCoin期货账户信息（全仓）
-         */
-        int GetFutureUserinfo();
+        // NOTHING
+
+        //------------------------ Account Endpoints -------------------------
 
         /**
-         * 获取用户持仓获取OKCoin期货账户信息（全仓）
          */
-        int GetFuturePosition(const char *symbol, const char *contracttype);	
+        int QueryUserAccount(size_t recvWindow);
 
         /**
-         * 期货下单
          */
-        int DoFutureTrade(const char *symbol, const char *contracttype, 
-                          price_t price, amount_t amount,
-                          const char *type, price_t matchprice, price_t leverrate);
+        int QueryAccountTrades(const char *symbol, size_t limit, 
+                               const char *fromId, size_t recvWindow);
+        
 
-        /**
-         * 批量下单
-         */
-        int DoFutureBatchtrade(const char *symbol, const char *contracttype,
-                               const char *ordersdata, price_t leverrate);
+        //------------------------- Wallet Access ----------------------------
 
-        /**
-         * 取消期货订单
-         */
-        int DoFutureCancel(const char *symbol, const char *orderid, const char *contracttype);
+        int DoAccountWithdraw(const char *asset, const char *address,
+                              const char *addressTag, amount_t amount,
+                              const char *name, size_t recvWindow);
 
-        /**
-         * 获取期货订单信息
-         */
-        int GetFutureOrderinfo(const char *symbol, const char *contracttype, const char *status,
-                               const char *orderid, 
-                               size_t currentpage, size_t pagelength);
+        int QueryAccountDeposit(const char *asset, int status,
+                                timestamp_t startTime, timestamp_t endTime,
+                                size_t recvWindow);
 
-        /**
-         * 批量获取期货订单信息
-         */
-        int GetFutureOrdersinfo(const char *symbol, const char *contracttype, const char *orderid);
+        int QueryAccountWithdraw(const char *asset, int status,
+                                 timestamp_t startTime, timestamp_t endTime,
+                                 size_t recvWindow);
 
-        /**
-         * 获取逐仓期货账户信息
-         */
-        int GetFutureUserinfo4fix();
+        int GetDepositAddress(const char *asset, size_t recvWindow);
 
-        /**
-         * 逐仓用户持仓查询
-         */
-        int GetFuturePosition4fix(const char *symbol, const char *contracttype, const char *type);
+        int QueryAccountStatus();
+        
+        int QuerySystemStatus();
 
-        /**
-         * 获取期货爆仓单
-         */
-        int GetFutureExplosive(const char *symbol, const char *contracttype, const char *status,
-                               size_t currentpage, size_t pagelength);
+        int GetAccountAssetDribbletLog();
 
-        //-------------------- Future Trade History --------------------------
+        int QueryAccountTradeFee();
 
-        /**
-         * 获取OKCoin期货交易历史
-         */
-        int GetFutureTradeHistory(const char *symbol, const char *date, const char *range);
-
-
-		static void get_account( long recvWindow , Json::Value &json_result );
-		
-		static void get_myTrades( 
-			const char *symbol, 
-			int limit,
-			long fromId,
-			long recvWindow, 
-			Json::Value &json_result 
-		);
-		
-		static void get_openOrders(  
-			const char *symbol, 
-			long recvWindow,   
-			Json::Value &json_result 
-		) ;
-		
-
-		static void get_allOrders(   
-			const char *symbol, 
-			long orderId,
-			int limit,
-			long recvWindow,
-			Json::Value &json_result 
-		);
-
-
-		static void send_order( 
-			const char *symbol, 
-			const char *side,
-			const char *type,
-			const char *timeInForce,
-			double quantity,
-			double price,
-			const char *newClientOrderId,
-			double stopPrice,
-			double icebergQty,
-			long recvWindow,
-			Json::Value &json_result ) ;
-
-
-		static void get_order( 
-			const char *symbol, 
-			long orderId,
-			const char *origClientOrderId,
-			long recvWindow,
-			Json::Value &json_result ); 
-
-
-		static void cancel_order( 
-			const char *symbol, 
-			long orderId,
-			const char *origClientOrderId,
-			const char *newClientOrderId,
-			long recvWindow,
-			Json::Value &json_result 
-		);
-
-
-		// WAPI
-		static void withdraw( 
-			const char *asset,
-			const char *address,
-			const char *addressTag,
-			double amount, 
-			const char *name,
-			long recvWindow,
-			Json::Value &json_result );
-
-		static void get_depositHistory( 
-			const char *asset,
-			int  status,
-			long startTime,
-			long endTime, 
-			long recvWindow,
-			Json::Value &json_result );
-
-		static void get_withdrawHistory( 
-			const char *asset,
-			int  status,
-			long startTime,
-			long endTime, 
-			long recvWindow,
-			Json::Value &json_result ); 
-
-		static void get_depositAddress( 
-			const char *asset,
-			long recvWindow,
-			Json::Value &json_result );
+        int QueryAssetDetail();
 
     };
 

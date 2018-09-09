@@ -1,23 +1,24 @@
 /*
- * MyQuoteOkexSpi implements DAQuoteOkexSpi
+ * MyDAQuoteBinanceSpi implements DAQuoteBinanceSpi
  */
 
 #pragma once
 
-#include "quote/DAQuoteOkexApi.h"
+#include "quote/DAQuoteBinanceApi.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace exapi;
 
-class MyQuoteOkexSpi : public DAQuoteOkexSpi {
+class MyDAQuoteBinanceSpi : public DAQuoteBinanceSpi {
 public:
-    MyQuoteOkexSpi() {
-        cout << "** MyQuoteOkexSpi created" << endl;
+    MyDAQuoteBinanceSpi() {
+        cout << "** MyDAQuoteBinanceSpi created" << endl;
     }
 
-    virtual ~MyQuoteOkexSpi() {
-        cout << "** MyQuoteOkexSpi deleted" << endl;
+    virtual ~MyDAQuoteBinanceSpi() {
+        cout << "** MyDAQuoteBinanceSpi deleted" << endl;
     }
 
     virtual void OnConnected(const char *addr) {
@@ -28,17 +29,26 @@ public:
         cout << "** OnDisconnected" << endl;
     }
 
-    virtual void OnQuoteUpdated(int quoteType, void *pQuoteData) {
-        cout << "** OnQuoteUpdated - type: " << quoteType << ", json:\n"
+    virtual void OnQuoteUpdated(QuoteApiType quoteType, void *pQuoteData) {
+        cout << "** OnQuoteUpdated - type: " << (int)quoteType << ", json:\n"
              << (const char *)pQuoteData << "\n"
              << endl;
     }
 
-    virtual void OnSymbolSubscribed(int quoteType, const char *pSymbol, unsigned status) {
+    virtual void OnSymbolSubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {
         cout << "** OnSymbolSubscribed" << endl;
     }
 
-    virtual void OnSymbolUnsubscribed(int quoteType, const char *pSymbol, unsigned status) {
+    virtual void OnSymbolUnsubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {
         cout << "** OnSymbolUnsubscribed" << endl;
+    }
+
+    virtual void OnServerTime(const char *serverTime) {
+        cout << "** OnServerTime - serverTime: " << serverTime << endl;
+    }
+
+    virtual void OnExchangeInfo(const char *exinfo) {
+        cout << "** OnExchangeInfo\n" 
+             << exinfo << endl;
     }
 };

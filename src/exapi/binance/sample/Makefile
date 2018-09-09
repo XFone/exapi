@@ -23,7 +23,7 @@ include $(BUILD)/Makefile.pre
 TARGET_PRG = test-binance-spi
 
 # Depended Modules (libraries)
-MODULES += PTHREAD IUTILS UUID OPENSSL RESTBED
+MODULES += PTHREAD IUTILS UUID CJSON OPENSSL RESTBED
 
 # CFLAGS, CXXFLAGS and STDCCFLAGS
 CXXFLAGS += -std=c++0x             # for <atomic> and lambda

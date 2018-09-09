@@ -1,7 +1,7 @@
 /*
  * $Id: $
  *
- * RestRequest class implementation
+ * RestRequest class implementation for Binance
  * 
  * Copyright (c) 2014-2018 Zerone.IO . All rights reserved.
  *
@@ -14,19 +14,43 @@
 #include "Trace.h"
 #include "DumpFunc.h"
 
+#include "JsonUtils.h"
 #include "RestRequest.h"
 using namespace exapi;
 
 #ifdef USE_OPENSSL
-#include <openssl/md5.h>
+#include <openssl/hmac.h>
 #endif
+
+static const char *GetHttpMethod(HTTP_METHOD method)
+{
+    const char *str = "GET";
+
+    switch (method) {
+    case METHOD_GET:
+        break;
+    case METHOD_POST:
+        str = "POST";
+        break;
+    case METHOD_PUT:
+        str = "PUT";
+        break;
+    case METHOD_DELETE:
+        str = "DELETE";
+        break;
+    default:
+        LOGFILE(LOG_ALERT, "Unsupported HTTP_METHOD %d", method);
+        assert(0);
+        break;
+    }
+
+    return str;
+}
 
 std::shared_ptr<RestRequest> 
 RestRequest::CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path) {
     const char *proto_str = ((protocol == HTTP_PROTOCOL_HTTP) ? "HTTP" : "HTTPS");
-    const char *method_str = ((method == METHOD_GET) ? "GET" : "POST");
 
-    //std::string _uri = proto_str + domain + path;
     auto req = std::make_shared<RestRequest>(/*restbed::Uri(_uri)*/);
 
     req->set_host(domain);
@@ -34,12 +58,12 @@ RestRequest::CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METH
     req->set_port((protocol == HTTP_PROTOCOL_HTTPS) ? 443 : 80);
     //req->set_version(1.1);
     req->set_path(path);
-    req->set_method(method_str);
+    req->set_method(GetHttpMethod(method));
 
     req->add_header("Host", domain);
     //req->add_header("Accept", "text/html,application/json,application/xml,*/*");
     //req->add_header("User-Agent", "Mozilla/5.0 (exapi; rv:1.0.0) exapi");
-    req->add_header("Connection", "keep-alive");
+    //req->add_header("Connection", "keep-alive");
 
     return req;
 }
@@ -62,6 +86,7 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
         TRACE(7, "<<<\n%s\n<<<", 
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
     
+        req->m_sent_time = std::chrono::steady_clock::now();
 #if 0
         auto ssl_settings = std::make_shared<restbed::SSLSettings>();
         ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
@@ -94,7 +119,9 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
         TRACE(7, "<<<\n%s\n<<<", 
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
 
+        req->m_sent_time = std::chrono::steady_clock::now();
         restbed::Http::async(req, callback);
+        
     } catch (std::system_error ex) {
         LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
     }
@@ -105,12 +132,32 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
 std::string &
 RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::string &body)
 {
-    LOGFILE(LOG_DEBUG, "Response: HTTP/%1.1f %d %s", 
-            rsp->get_version(), rsp->get_status_code(), rsp->get_status_message().data());
+    // TODO
+    // StatsLatency(rsp, std::chrono::steady_clock::now(), req->m_sent_time);
 
-    auto headers = rsp->get_headers();
+    /* 
+     * Binance specific reponse code, see
+     * https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#limits
+     */
+    int status_code = rsp->get_status_code();
+    switch (status_code) {
+    case 429:   // rate limit is violated
+        LOGFILE(LOG_ALERT, "received status code 429 - rate limit is violated: %s", 
+                rsp->get_status_message().data());
+        break;
+    case 418:   // IP is banned
+        LOGFILE(LOG_EMERG, "received status code 418 - IP is banned: %s", 
+                rsp->get_status_message().data());
+        break;
+    default:
+        break;
+    } // (status_code)
+
+    LOGFILE(LOG_DEBUG, "Response: HTTP/%1.1f %d %s", 
+            rsp->get_version(), status_code, rsp->get_status_message().data());
 
     TRACE_IF(8, {
+        auto headers = rsp->get_headers();
         for (const auto header : headers) {
             _trace_impl(8, "  Header| %s: %s", header.first.data(), header.second.data());
         }
@@ -138,13 +185,14 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
     return body;
 }
 
-RestRequest &
-RestRequest::Sign(const std::string &secret_key) {
-    unsigned char md[MD5_DIGEST_LENGTH];
-    char strMd5[2 * MD5_DIGEST_LENGTH + 1];
+RestRequest &RestRequest::ApiKey(const std::string &api_key)
+{
+    AddHeader("X-MBX-APIKEY", api_key);
+    return *this;
+}
 
-    AddParam("secret_key", secret_key);
-
+RestRequest &RestRequest::Sign(const std::string &secret_key)
+{
     std::string params;
 
     for (const auto qp : this->get_query_parameters()) {
@@ -152,14 +200,17 @@ RestRequest::Sign(const std::string &secret_key) {
                    restbed::Uri::encode_parameter(qp.second) + "&";
     }
 
-    (void)MD5((const unsigned char *)params.c_str(), params.size() - 1, md);
+    unsigned char digest[32];
+    unsigned int  digest_size;
+    (void)HMAC(EVP_sha256(), 
+               secret_key.c_str(), secret_key.size(),
+               (const unsigned char *)params.c_str(), params.size() - 1,
+               digest, &digest_size);
 
-    // output in upper case
-    for (int n = 0; n < MD5_DIGEST_LENGTH; n++) {
-        sprintf(&strMd5[n << 1], "%02X", md[n]);
-    }
+    char signature[HMAC_MAX_MD_CBLOCK];
+    JsonUtils::to_hexstring(signature, (char *)digest, digest_size);
 
-    AddParam("sign", strMd5);
+    AddParam("signature", signature);
 
     return *this;
 }

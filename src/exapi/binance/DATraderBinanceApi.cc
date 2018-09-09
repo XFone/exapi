@@ -13,6 +13,7 @@
 #include "Log.h"
 
 #include "RestRequest.h"
+#include "BinanceApi.h"
 #include "trade/DATraderBinanceApi.h"
 using namespace exapi;
 
@@ -22,14 +23,14 @@ using namespace exapi;
 class _DATraderBinanceApiImpl : public DATraderBinanceApi {
 private:
     friend class DATraderBinanceApi;
-    const char      *m_domain;
-    DATraderOkexSpi *m_spi;
-    std::string      m_api_key;
-    std::string      m_secret_key;
+    const char         *m_domain;
+    std::string         m_api_key;
+    std::string         m_secret_key;
+    DATraderBinanceSpi *m_spi;
 
     _DATraderBinanceApiImpl(const char *api_key, const char *secret_key)
-      : m_domain(URL_DOMAIN_COM), m_spi(nullptr), 
-        m_api_key(api_key), m_secret_key(secret_key) {
+      : m_domain(BINANCE_REST_URL), 
+        m_api_key(api_key), m_secret_key(secret_key), m_spi(nullptr) {
         // TODO
     }
 
@@ -73,16 +74,19 @@ public:
 
 //------------------------- DATraderBinanceSpi -----------------------------
 
-int DATraderBinanceSpi::OnResponse(int cmdType, void *pRespData)
+int DATraderBinanceSpi::OnResponse(TraderApiType apiType, void *pRespData)
 {
     int res = 0;
-    switch (cmdType) {
-    case HTTP_API_TYPE_USERINFO:
+    int api = (int)apiType - TraderApiType::EX_TYPE_BINANCE;
+
+    switch (api) {
+    case BINANCE_TYPE_ACCOUNT_INFO:
         OnUserInfo(pRespData);
         break;
 
     default:
-        LOGFILE(LOG_INFO, "DATraderBinanceSpi::OnResponse unknown command %d", cmdType);
+        LOGFILE(LOG_INFO, "DATraderBinanceSpi::OnResponse unknown command %d", 
+                (int)apiType);
         res = -1; // CONTINUE
         break;
     }

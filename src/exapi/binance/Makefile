@@ -24,7 +24,7 @@ TARGET_LIB = libexapi-binance
 BUILD_SHARED_LIBRARY := 1
 
 # Depended Modules (libraries)
-MODULES += PTHREAD IUTILS UUID OPENSSL RESTBED
+MODULES += PTHREAD IUTILS UUID CJSON OPENSSL RESTBED
 
 # CFLAGS, CXXFLAGS and STDCCFLAGS
 CXXFLAGS += -fPIC                  # for linking to shared library
