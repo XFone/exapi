@@ -77,12 +77,16 @@ public:
 
 };
 
-static inline std::string Price2String(price_t price) {
+static inline std::string Price2String(d_price_t price) {
     return std::to_string(price); // = (float)price / algoapi::PRICE_BASE
 }
 
-static inline std::string Amount2String(amount_t amount) {
+static inline std::string Amount2String(d_amount_t amount) {
     return std::to_string(amount);
+}
+
+static inline std::string Quantity2String(quantity_t quantity) {
+    return std::to_string(quantity);
 }
 
 //------------------------- DATraderOkexSpi -------------------------------
@@ -169,7 +173,7 @@ int DATraderOkexApi::GetUserInfo()
     });
 }
 
-int DATraderOkexApi::DoTrade(const char *symbol, const char *type, price_t price, amount_t amount)
+int DATraderOkexApi::DoTrade(const char *symbol, const char *type, d_price_t price, d_amount_t amount)
 {
     _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
 
@@ -273,8 +277,8 @@ int DATraderOkexApi::GetOrdersInfo(const char *type, const char *symbol, const c
     });
 }
 
-int DATraderOkexApi::DoWithdraw(const char *symbol, price_t chargefee, const char *tradepwd,
-                                const char *withdrawAddress, amount_t withdrawAmount)
+int DATraderOkexApi::DoWithdraw(const char *symbol, d_price_t chargefee, const char *tradepwd,
+                                const char *withdrawAddress, d_amount_t withdrawAmount)
 {
     _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
 
@@ -375,7 +379,7 @@ int DATraderOkexApi::GetBorrowsInfo(const char *symbol)
     });
 }
 
-int DATraderOkexApi::DoBorrowMoney(const char *symbol, const char *days, amount_t amount, price_t rate)
+int DATraderOkexApi::DoBorrowMoney(const char *symbol, const char *days, d_amount_t amount, d_price_t rate)
 {
     _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
 
@@ -585,8 +589,8 @@ int DATraderOkexApi::GetFuturePosition(const char *symbol, const char *contractt
 }
 
 int DATraderOkexApi::DoFutureTrade(const char *symbol, const char *contracttype, 
-                                   price_t price, amount_t amount,
-                                   const char *type, price_t matchprice, price_t leverrate)
+                                   d_price_t price, d_amount_t amount,
+                                   const char *type, d_price_t matchprice, d_price_t leverrate)
 {
     _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
 
@@ -612,7 +616,7 @@ int DATraderOkexApi::DoFutureTrade(const char *symbol, const char *contracttype,
 }
 
 int DATraderOkexApi::DoFutureBatchtrade(const char *symbol, const char *contracttype,
-                                        const char *ordersdata, price_t leverrate)
+                                        const char *ordersdata, d_price_t leverrate)
 {
     _DATraderOkexApiImpl *impl = static_cast<_DATraderOkexApiImpl *>(this);
 

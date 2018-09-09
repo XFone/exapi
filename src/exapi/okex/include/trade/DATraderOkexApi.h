@@ -117,7 +117,7 @@ namespace exapi {
         /**
          * 下单交易
          */
-        int DoTrade(const char *symbol, const char *type, price_t price, amount_t amount);
+        int DoTrade(const char *symbol, const char *type, d_price_t price, d_amount_t amount);
 
         /**
          * 批量下单
@@ -142,8 +142,8 @@ namespace exapi {
         /**
          * 提币 BTC/LTC
          */
-        int DoWithdraw(const char *symbol, price_t chargefee, const char *tradepwd,
-                       const char *withdrawAddress, amount_t withdrawAmount);
+        int DoWithdraw(const char *symbol, d_price_t chargefee, const char *tradepwd,
+                       const char *withdrawAddress, d_amount_t withdrawAmount);
 
         /**
          * 取消提币BTC/LTC
@@ -168,7 +168,7 @@ namespace exapi {
         /**
          * 申请借款
          */
-        int DoBorrowMoney(const char *symbol, const char *days, amount_t amount, price_t rate);
+        int DoBorrowMoney(const char *symbol, const char *days, d_amount_t amount, d_price_t rate);
 
         /**
          * 取消借款申请
@@ -226,14 +226,14 @@ namespace exapi {
          * 期货下单
          */
         int DoFutureTrade(const char *symbol, const char *contracttype, 
-                          price_t price, amount_t amount,
-                          const char *type, price_t matchprice, price_t leverrate);
+                          d_price_t price, d_amount_t amount,
+                          const char *type, d_price_t matchprice, d_price_t leverrate);
 
         /**
          * 批量下单
          */
         int DoFutureBatchtrade(const char *symbol, const char *contracttype,
-                               const char *ordersdata, price_t leverrate);
+                               const char *ordersdata, d_price_t leverrate);
 
         /**
          * 取消期货订单

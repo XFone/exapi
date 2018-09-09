@@ -26,14 +26,17 @@ namespace exapi {
 #ifndef DEF_TRADE_TYPES
 #define DEF_TRADE_TYPES
     typedef int32_t quantity_t;
-    typedef int32_t price_t;
+    typedef int32_t price_t;                /**< d_price_t  * PRICE_BASE */
+    typedef int64_t amount_t;               /**< d_amount_t * PRICE_BASE */
+    typedef double  d_price_t;
+    typedef double  d_amount_t;
     typedef int64_t volume_t;
-    typedef int64_t amount_t;
     typedef int32_t timestamp_t;
 #endif // DEF_TRADE_TYPES
 
     /**
      * QuoteApiType
+     * {QuoteApiType} = ({ExType} << 16) + {server_specific_api_enum_value}
      */
     class QuoteApiType {
     private:
