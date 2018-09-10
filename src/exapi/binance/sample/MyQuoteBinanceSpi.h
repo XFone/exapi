@@ -43,7 +43,7 @@ public:
         cout << "** OnSymbolUnsubscribed" << endl;
     }
 
-    virtual void OnServerTime(const char *serverTime) {
+    virtual void OnServerTime(time_t serverTime) {
         cout << "** OnServerTime - serverTime: " << serverTime << endl;
     }
 

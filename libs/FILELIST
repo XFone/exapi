@@ -4,7 +4,7 @@ This folder contains following compiled libraries (static link only):
 
 [libs]
 boost-1.66.0
-cjson-1.0
+cjson-1.7.7
 googletest-1.8.0
 iconv-1.14
 libevent-2.1.8

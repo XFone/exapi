@@ -11,6 +11,7 @@
 
 #include "Base.h"
 #include "Log.h"
+#include "Trace.h"
 
 #include <cerrno>
 
@@ -64,6 +65,9 @@ public:
         m_spi = dynamic_cast<DAQuoteBinanceSpi *>(pEventHandler);
         if (m_spi == nullptr) {
             assert(0);
+        }
+        if (nullptr != slist) {
+            m_domain = slist[0];    // TODO: try fastest server
         }
         return 0;
     }
@@ -259,8 +263,8 @@ int DAQuoteBinanceApi::GetServerTime()
       [impl](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
-        std::string srvtime = JsonUtils::GetItem(jsonstr, "serverTime");
-        impl->m_spi->OnServerTime(srvtime.c_str());
+        time_t srvtime = JsonUtils::GetItemUint64(jsonstr, "serverTime");
+        impl->m_spi->OnServerTime(srvtime);
     });
 }
 
@@ -279,6 +283,6 @@ int DAQuoteBinanceApi::GetExchangeInfo()
       [impl](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
-        impl->m_spi->OnServerTime(jsonstr.c_str());
+        impl->m_spi->OnExchangeInfo(jsonstr.c_str());
     });
 }

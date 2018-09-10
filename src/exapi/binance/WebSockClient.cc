@@ -36,13 +36,22 @@ namespace exapi {
         std::shared_ptr<restbed::Request>                      m_request;
         std::shared_ptr<std::thread>                           m_worker;
         bool                                                   is_start;
+        std::string                                            m_sec_key;
 
-        static std::string assign_key() {
-            // TODO
+        static std::string generate_key() {
+        #if 0
+            unsigned char raw_key[16];
+
+            for (int i = 0; i < 4; i++) {
+                conv.i = m_rng();
+                std::copy(conv.c, conv.c + 4, &raw_key[i * 4]);
+            }
+            return base64_encode(raw_key, size_of(raw_key));
+        #endif
             return std::string("UxbkqrAEToZeKbwSTU0TCg==");
         }
 
-        static void set_websocket_headers(const std::string &url, const std::shared_ptr<restbed::Request> &req) {
+        void set_websocket_headers(const std::string &url, const std::shared_ptr<restbed::Request> &req) {
             std::string host_port(req->get_host()); 
             host_port += ":"; 
             host_port += std::to_string(req->get_port());
@@ -51,18 +60,20 @@ namespace exapi {
             //req->set_host("localhost");
             //req->set_port(1984);
             //req->set_path("/chat");
-            req->set_header("Host", host_port);
-            req->set_header("Connection", "Upgrade");
-            req->set_header("Pragma", "no-cache");
-            req->set_header("Cache-Control", "no-cache");
-            req->set_header("Upgrade", "websocket");
-            req->set_header("Sec-WebSocket-Version", "13");
-            req->set_header("Sec-WebSocket-Key", assign_key());
-            req->set_header("Sec-WebSocket-Extensions", "permessage-deflate; client_max_window_bits");
+            req->add_header("Host", host_port);
+            req->add_header("Connection", "Upgrade");
+            req->add_header("Pragma", "no-cache");
+            req->add_header("Cache-Control", "no-cache");
+            req->add_header("Upgrade", "websocket");
+            req->add_header("Sec-WebSocket-Version", "13");
+            req->add_header("Sec-WebSocket-Key", m_sec_key);
+            req->add_header("Sec-WebSocket-Extensions", "permessage-deflate; client_max_window_bits");
         }
 
     public:
-        WebSocketClientImpl() : is_start(false) {}
+        WebSocketClientImpl() : is_start(false) {
+            m_sec_key = generate_key(); 
+        }
         
         ~WebSocketClientImpl() {}
 
@@ -70,54 +81,63 @@ namespace exapi {
          * Start websocket connection and io processing
          * @param url websocket server address, e.g.m "ws://localhost:1984/chat"
          */
-        void connect(std::string url) {
+        int connect(std::string url) {
             if (nullptr == m_request) {
                 m_request = std::make_shared<restbed::Request>(restbed::Uri(url));
                 set_websocket_headers(url, m_request);
             }
 
-            // init socket and tls settings
-            // set_socket_init_handler(bind(&type::on_socket_init,this,::_1));
-            // set_tls_init_handler(bind(&type::on_tls_init,this,::_1));
-            // set_open_handshake_timeout(3000);
-            // set_close_handshake_timeout(3000);
-
             TRACE(7, "<<<\n%s\n<<<", 
                   restbed::String::to_string(restbed::Http::to_bytes(m_request)).c_str());
 
-            auto response = restbed::Http::sync(m_request);
+            auto settings = std::make_shared<restbed::Settings>();
+            settings->set_connection_timeout(std::chrono::seconds(30));
+            auto response = restbed::Http::sync(m_request, settings);
 
             TRACE(7, ">>>\n%s\n>>>", 
                   restbed::String::to_string(restbed::Http::to_bytes(response)).c_str());
 
             if (response->get_status_code() != restbed::SWITCHING_PROTOCOLS ||
                 response->get_header("upgrade", restbed::String::lowercase ) != "websocket") {
-                LOGFILE(LOG_ERROR, "invalid response status in websocket");
-                return;
+                LOGFILE(LOG_ERROR, "Invalid response status in websocket");
+                return -EPROTO;
             }
 
             if (nullptr == m_ws_mgnr) {
                 m_ws_mgnr = std::make_shared<restbed::detail::WebSocketManagerImpl>();
+                m_ws_mgnr->set_logger(LoggerImpl::GetInstance());
             }
 
-            m_socket = m_ws_mgnr->create(m_request);
-            m_socket->set_logger(LoggerImpl::GetInstance());
+            if (nullptr == m_socket) {
+                m_socket = m_ws_mgnr->create(m_request);
+            } else {
+                m_ws_mgnr->update(m_socket, m_request);
+            }
+
+            // init socket and tls settings
+            // m_socket->get_socket()->
+            // set_socket_init_handler(bind(&type::on_socket_init,this,::_1));
+            // set_tls_init_handler(bind(&type::on_tls_init,this,::_1));
+            // set_open_handshake_timeout(3000);
+            // set_close_handshake_timeout(3000);
+
+            return 0;
         }
 
         void start() {
+            is_start = true;
             m_worker = std::make_shared<std::thread>([this]() {
                 LOGFILE(LOG_INFO, "websocket worker starting...");
 
-                while (this->m_socket->is_open()) {
-                    this->m_ws_mgnr->process_io(this->m_request);
-                    // TODO sleep
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                while (this->is_start) {
+                    int res = this->m_ws_mgnr->process_io(this->m_request);
+                    TRACE(7, "- %d -", res);
+                    std::this_thread::sleep_for(std::chrono::seconds(3));
                 }
 
                 LOGFILE(LOG_INFO, "websocket worker exiting...");
             });
             // this->m_ws_mgnr->process_io(this->m_request);
-            is_start = true;
         }
 
         void stop() {
@@ -136,12 +156,9 @@ namespace exapi {
 
 WebSocketClient::WebSocketClient(const std::string url)
   : m_url(url), cb_open(nullptr), cb_close(nullptr), cb_message(nullptr),
-    m_client(new WebSocketClientImpl)
+    m_client(new WebSocketClientImpl())
 {
-    // m_url = "ws://localhost:1984/chat"; // TESTING
-    // to check this:
-    //m_pimpl->m_manager = make_shared<restbed::detail::WebSocketManagerImpl>();
-    //m_client = new WebSocketClientImpl();
+    // m_url = "ws://localhost:1984/chat"; // for testing
 }
 
 WebSocketClient::~WebSocketClient() {
@@ -153,21 +170,26 @@ void WebSocketClient::start()
 {
     LOGFILE(LOG_DEBUG, "server '%s'...", m_url.c_str());
 
-    m_client->connect(m_url);
+    if (m_client->connect(m_url) != 0) 
+        return;
 
     auto socket = m_client->m_socket;
 
     LOGFILE(LOG_DEBUG, "websocket is %s", socket->is_open() ? "open" : "closed");
 
     // open_handler
+#if 0
     socket->set_open_handler([this](const std::shared_ptr<restbed::WebSocket> &ws) {
         LOGFILE(LOG_INFO, "ws[%s] opened connection", ws->get_key().data());
 
         if (nullptr != this->cb_open) this->cb_open();
     });
+#else
+    if (nullptr != this->cb_open) this->cb_open();
+#endif
 
     // close_handler
-    socket->set_close_handler([this](const std::shared_ptr<restbed::WebSocket> &ws) {        
+    socket->set_close_handler([this](const std::shared_ptr<restbed::WebSocket> &ws) {
         if (ws->is_open()) {
             auto response = std::make_shared<restbed::WebSocketMessage>(
                 restbed::WebSocketMessage::CONNECTION_CLOSE_FRAME,
@@ -182,12 +204,15 @@ void WebSocketClient::start()
     });
 
     // error_handler
-    socket->set_error_handler([](const std::shared_ptr<restbed::WebSocket> &ws, 
-                         const std::error_code &ec) {
-        LOGFILE(LOG_WARN, "ws[%s] error - %s", 
-                ws->get_key().data(), ec.message().data());
-        if (ws->is_closed()) {
-            // TODO: re-connecting
+    socket->set_error_handler([this](const std::shared_ptr<restbed::WebSocket> &ws, 
+                                     const std::error_code &ec) {
+        if (this->m_client->is_start) {
+            LOGFILE(LOG_WARN, "ws[%s] error - %s", 
+                    ws->get_key().data(), ec.message().data());
+            if (ws->is_closed()) {
+                // re-connecting
+                this->m_client->connect(this->m_url);
+            }
         }
     });
 
@@ -220,7 +245,7 @@ void WebSocketClient::start()
         } else if (opcode == restbed::WebSocketMessage::CONNECTION_CLOSE_FRAME) {
             ws->close();
         } else if (opcode == restbed::WebSocketMessage::BINARY_FRAME) {
-            //We don't support binary data.
+            // We don't support binary data.
             auto response = std::make_shared<restbed::WebSocketMessage>(
                 restbed::WebSocketMessage::CONNECTION_CLOSE_FRAME, 
                 restbed::Bytes( { 10, 03 } )
@@ -231,8 +256,7 @@ void WebSocketClient::start()
             response->set_mask(0);
 
             auto msgdata = msg->get_data();
-            TRACE(7, ">>>[%s]>>>\n%s\n>>>", ws->get_key().data(), 
-                  restbed::String::to_string(msgdata).c_str());
+            TRACE(7, ">>>\n%s\n>>>", restbed::String::to_string(msgdata).c_str());
 
             if (nullptr != this->cb_message) {
                 this->cb_message((char *)msgdata.data());
@@ -277,8 +301,6 @@ void WebSocketClient::emit(const std::string channel, std::string &parameter)
         LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' emitted", 
                 ws->get_key().data(), channel.c_str());
     });
-    //send("{'event':'addChannel','channel':'ok_btcusd_ticker'}");
-    //send("{'event':'addChannel','channel':'ok_btcusd_depth'}");
 }
 
 void WebSocketClient::remove(std::string channel)

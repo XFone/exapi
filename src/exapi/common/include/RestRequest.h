@@ -52,7 +52,9 @@ namespace exapi {
         std::chrono::steady_clock::time_point m_sent_time;
 
     public:
-        RestRequest(): restbed::Request() {}
+        RestRequest() : restbed::Request() {}
+
+        RestRequest(const std::string &srv) : restbed::Request(restbed::Uri(srv)) {}
 
         static std::shared_ptr<RestRequest>
         CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path);

@@ -18,8 +18,47 @@ JsonUtils::GetItem(const std::string &jsonstr, const char *name)
     if (!jsonstr.empty()) {
         cJSON *pjson = cJSON_Parse(jsonstr.c_str());
         if (nullptr != pjson) {
-            auto obj = cJSON_GetObjectItem(pjson, name);
-            if (nullptr != obj) result = obj->valuestring;
+            cJSON *obj = cJSON_GetObjectItem(pjson, name);
+            if (nullptr != obj) {
+                switch (obj->type) {
+                case cJSON_String:
+                case cJSON_Raw:
+                    result = obj->valuestring;
+                    break;
+                case cJSON_Number: 
+                    result = std::to_string(obj->valuedouble);
+                    break;
+                default: 
+                    break;
+                } // switch (obj->type)
+            }
+            cJSON_Delete(pjson);
+        }
+    }
+    return result;
+}
+
+double 
+JsonUtils::GetItemDouble(const std::string &jsonstr, const char *name)
+{
+    double result = 0;
+    if (!jsonstr.empty()) {
+        cJSON *pjson = cJSON_Parse(jsonstr.c_str());
+        if (nullptr != pjson) {
+            cJSON *obj = cJSON_GetObjectItem(pjson, name);
+            if (nullptr != obj) {
+                switch (obj->type) {
+                case cJSON_String:
+                case cJSON_Raw:
+                    result = atof(obj->valuestring);
+                    break;
+                case cJSON_Number: 
+                    result = obj->valuedouble;
+                    break;
+                default: 
+                    break;
+                } // switch (obj->type)
+            }
             cJSON_Delete(pjson);
         }
     }

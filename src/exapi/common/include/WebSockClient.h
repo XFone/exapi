@@ -15,6 +15,7 @@
 
 #include <string>
 #include <chrono>
+#include <vector>
 
 namespace exapi {
 
@@ -36,7 +37,7 @@ namespace exapi {
         ws_callback_message  cb_message;
 
         /** pointer to implementation class */
-        std::unique_ptr<WebSocketClientImpl> m_client;
+        std::unique_ptr<WebSocketClientImpl>  m_client;
   
         /** time_point for latency management */
         std::chrono::steady_clock::time_point m_sent_time;
@@ -46,7 +47,7 @@ namespace exapi {
     public:
         WebSocketClient(const std::string url);
 
-        ~WebSocketClient();
+        virtual ~WebSocketClient();
 
         void start();
 

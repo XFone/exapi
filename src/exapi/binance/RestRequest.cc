@@ -22,6 +22,8 @@ using namespace exapi;
 #include <openssl/hmac.h>
 #endif
 
+static std::shared_ptr<restbed::Settings> _binance_settings;
+
 static const char *GetHttpMethod(HTTP_METHOD method)
 {
     const char *str = "GET";
@@ -48,22 +50,32 @@ static const char *GetHttpMethod(HTTP_METHOD method)
 }
 
 std::shared_ptr<RestRequest> 
-RestRequest::CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path) {
+RestRequest::CreateBuilder(const char *url, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path) {
     const char *proto_str = ((protocol == HTTP_PROTOCOL_HTTP) ? "HTTP" : "HTTPS");
 
-    auto req = std::make_shared<RestRequest>(/*restbed::Uri(_uri)*/);
+    auto req = std::make_shared<RestRequest>(url);
 
-    req->set_host(domain);
+    //req->set_host(strstr(url, "://") + 3, false);
     req->set_protocol(proto_str);
     req->set_port((protocol == HTTP_PROTOCOL_HTTPS) ? 443 : 80);
     //req->set_version(1.1);
     req->set_path(path);
     req->set_method(GetHttpMethod(method));
 
-    req->add_header("Host", domain);
+    req->add_header("Host", req->get_host());
     //req->add_header("Accept", "text/html,application/json,application/xml,*/*");
-    //req->add_header("User-Agent", "Mozilla/5.0 (exapi; rv:1.0.0) exapi");
+    //req->add_header("User-Agent", "curl/7.54.0");
     //req->add_header("Connection", "keep-alive");
+
+    if (_binance_settings == nullptr) {
+        auto ssl_settings = std::make_shared<restbed::SSLSettings>();
+        //ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
+        ssl_settings->set_http_disabled(true);
+        ssl_settings->set_tlsv12_enabled(true);
+        //ssl_settings->set_default_workarounds_enabled(true);
+        _binance_settings = std::make_shared<restbed::Settings>();
+        _binance_settings->set_ssl_settings(ssl_settings);
+    }
 
     return req;
 }
@@ -85,19 +97,12 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
     try {
         TRACE(7, "<<<\n%s\n<<<", 
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
-    
+
         req->m_sent_time = std::chrono::steady_clock::now();
-#if 0
-        auto ssl_settings = std::make_shared<restbed::SSLSettings>();
-        ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
-        ssl_settings->set_http_disabled(true);
-        ssl_settings->set_tlsv12_enabled(true);
-        auto settings = std::make_shared<restbed::Settings>();
-        settings->set_ssl_settings(ssl_settings);
-        auto response = restbed::Http::sync(req, settings);
-#else
-        auto rsp = restbed::Http::sync(req);
-#endif
+
+
+
+        auto rsp = restbed::Http::sync(req, _binance_settings);
 
         (void)ParseReponse(rsp, body);
 
@@ -120,8 +125,9 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
 
         req->m_sent_time = std::chrono::steady_clock::now();
-        restbed::Http::async(req, callback);
-        
+
+        restbed::Http::async(req, callback, _binance_settings);
+
     } catch (std::system_error ex) {
         LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
     }

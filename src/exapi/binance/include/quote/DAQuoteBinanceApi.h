@@ -166,7 +166,7 @@ namespace exapi {
          * Current server time
          * @param serverTime in miliseconds time_since_epoch (e.g., "1499827319559")
          */
-        virtual void OnServerTime(const char *serverTime) {}
+        virtual void OnServerTime(time_t serverTime) {}
 
         /** 
          * Current exchange trading rules and symbol information

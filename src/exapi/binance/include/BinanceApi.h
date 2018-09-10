@@ -13,7 +13,9 @@
  */
 
 #define BINANCE_REST_URL            "https://api.binance.com"
-#define BINANCE_WEBSOCKET_URL       "wss://stream.binance.com:9443"
+#define BINANCE_REST_URL_CO         "https://www.binance.co"
+#define BINANCE_WSS_URL             "wss://stream.binance.com:9443"
+#define BINANCE_WSS_URL_CO          "wss://stream.binance.co:9443"
 
 #include <map>
 

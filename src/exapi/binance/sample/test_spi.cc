@@ -47,13 +47,15 @@ void test_binance_quote_spi()
     DAQuoteBinanceApi *api = DAQuoteBinanceApi::CreateApi("", "");
     MyDAQuoteBinanceSpi spi;
 
-    api->ConnServer(nullptr, &spi);
+    const char *slist[] = { "https://www.binance.co", "\0" };
+    api->ConnServer(slist, &spi);
     api->Init();
 
     api->GetServerTime();
     sleep(3);
 
     api->GetExchangeInfo();
+    sleep(3);
 
     api->Join();
     api->Dispose();

@@ -23,5 +23,19 @@ public:
 
     static std::string GetItem(const std::string &jsonstr, const char *name);
 
+    static double GetItemDouble(const std::string &jsonstr, const char *name);
+
+    static int64_t GetItemInt64(const std::string &jsonstr, const char *name) {
+        return (int64_t)GetItemDouble(jsonstr, name);
+    }
+
+    static uint64_t GetItemUint64(const std::string &jsonstr, const char *name) {
+        return (uint64_t)GetItemDouble(jsonstr, name);
+    }
+
+    static std::string GetItemString(const std::string &jsonstr, const char *name) {
+        return GetItem(jsonstr, name);
+    }
+
     static int to_hexstring(char *out, const char *buf, size_t size);
 };

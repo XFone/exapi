@@ -23,7 +23,7 @@ include $(BUILD)/Makefile.pre
 TARGET_PRG = exapi-binance
 
 # Depended Modules (libraries)
-MODULES += PTHREAD IUTILS UUID OPENSSL RESTBED PROTOBUF ZMQ4
+MODULES += PTHREAD IUTILS UUID CJSON OPENSSL RESTBED PROTOBUF ZMQ4
 
 # CFLAGS, CXXFLAGS and STDCCFLAGS
 CXXFLAGS += -std=c++0x             # for <atomic> and lambda
