@@ -1,0 +1,199 @@
+diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.new/source/corvusoft/restbed/detail/http_impl.cpp
+*** restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp	Mon Jul 17 16:49:17 2017
+--- restbed-4.6.new/source/corvusoft/restbed/detail/http_impl.cpp	Mon Sep 10 18:51:11 2018
+***************
+*** 175,181 ****
+                  {
+                      context.add_verify_path( settings->get_certificate_authority_pool( ) );
+                  }
+!                 
+                  socket = make_shared< asio::ssl::stream< asio::ip::tcp::socket > >( *request->m_pimpl->m_io_service, context );
+                  socket->set_verify_mode( asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert );
+              }
+--- 175,192 ----
+                  {
+                      context.add_verify_path( settings->get_certificate_authority_pool( ) );
+                  }
+!                 // xiaofeng 2018-09-10 added ssl settings
+!                 asio::ssl::context::options options = 0;
+!                 options = ( settings->has_enabled_tlsv1( ) ) ? options : options | asio::ssl::context::no_tlsv1;
+!                 options = ( settings->has_enabled_sslv2( ) ) ? options : options | asio::ssl::context::no_sslv2;
+!                 options = ( settings->has_enabled_sslv3( ) ) ? options : options | asio::ssl::context::no_sslv3;
+!                 options = ( settings->has_enabled_tlsv11( ) ) ? options : options | asio::ssl::context::no_tlsv1_1;
+!                 options = ( settings->has_enabled_tlsv12( ) ) ? options : options | asio::ssl::context::no_tlsv1_2;
+!                 options = ( settings->has_enabled_compression( ) ) ? options : options | asio::ssl::context::no_compression;
+!                 options = ( settings->has_enabled_default_workarounds( ) ) ? options | asio::ssl::context::default_workarounds : options;
+!                 options = ( settings->has_enabled_single_diffie_hellman_use( ) ) ? options | asio::ssl::context::single_dh_use : options;
+!                 context.set_options( options );
+!                 // xiaofeng 2018-09-10 end
+                  socket = make_shared< asio::ssl::stream< asio::ip::tcp::socket > >( *request->m_pimpl->m_io_service, context );
+                  socket->set_verify_mode( asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert );
+              }
+***************
+*** 185,192 ****
+                  socket->set_verify_mode( asio::ssl::verify_none );
+              }
+              
+!             socket->set_verify_callback( asio::ssl::rfc2818_verification( request->get_host( ) ) );
+              request->m_pimpl->m_socket = make_shared< SocketImpl >( socket );
+          }
+  #endif
+          void HttpImpl::request_handler( const error_code& error, const shared_ptr< Request >& request, const function< void ( const shared_ptr< Request >, const shared_ptr< Response > ) >& callback   )
+--- 196,205 ----
+                  socket->set_verify_mode( asio::ssl::verify_none );
+              }
+              
+!             socket->set_verify_callback( asio::ssl::rfc2818_verification( /*request->get_host( )*/ request->get_header("Host") ) );
+              request->m_pimpl->m_socket = make_shared< SocketImpl >( socket );
++             // xiaofeng 2018-09-10 added ssl handshaking
++             // socket->handshake(asio::ssl::stream_base::client);
+          }
+  #endif
+          void HttpImpl::request_handler( const error_code& error, const shared_ptr< Request >& request, const function< void ( const shared_ptr< Request >, const shared_ptr< Response > ) >& callback   )
+***************
+*** 239,249 ****
+              getline( response_stream, status_line );
+              
+              smatch matches;
+!             static const regex status_line_pattern( "^([a-zA-Z]+)\\/(\\d*\\.?\\d*) (-?\\d+) (.+)\\r$" );
+!             
+!             if ( not regex_match( status_line, matches, status_line_pattern ) or matches.size( ) not_eq 5 )
+              {
+!                 const auto body = String::format( "HTTP response status line malformed: '%s'", status_line.data( ) );
+                  return callback( request, create_error_response( request, body ) );
+              }
+              
+--- 252,264 ----
+              getline( response_stream, status_line );
+              
+              smatch matches;
+!            
+!             // xiaofeng 2018-08-28 fix bug: response status line without status_message ('HTTP/1.1 200', instead of 'HTTP/1.1 200 OK')
+!             static const regex status_line_pattern( "^([a-zA-Z]+)\\/(\\d*\\.?\\d*) (-?\\d+) (.*)\\r$" );
+! 
+!             if ( not regex_match( status_line, matches, status_line_pattern ) or (matches.size( ) < 4) )
+              {
+!                 const auto body = String::format( "HTTP response status line malformed: '%s'?%d", status_line.data(), matches.size() );
+                  return callback( request, create_error_response( request, body ) );
+              }
+              
+***************
+*** 251,258 ****
+              response->set_protocol( matches[ 1 ].str( ) );
+              response->set_version( stod( matches[ 2 ].str( ) ) );
+              response->set_status_code( stoi( matches[ 3 ].str( ) ) );
+!             response->set_status_message( matches[ 4 ].str( ) );
+!             
+              request->m_pimpl->m_socket->read( request->m_pimpl->m_buffer, "\r\n\r\n", bind( read_headers_handler, _1, _2, request, callback ) );
+          }
+          
+--- 266,274 ----
+              response->set_protocol( matches[ 1 ].str( ) );
+              response->set_version( stod( matches[ 2 ].str( ) ) );
+              response->set_status_code( stoi( matches[ 3 ].str( ) ) );
+!             if (matches.size() == 5) response->set_status_message( matches[ 4 ].str( ) );
+!             // xiaofeng 2018-08-28 end
+!        
+              request->m_pimpl->m_socket->read( request->m_pimpl->m_buffer, "\r\n\r\n", bind( read_headers_handler, _1, _2, request, callback ) );
+          }
+          
+diff -rc restbed-4.6/source/corvusoft/restbed/detail/socket_impl.cpp restbed-4.6.new/source/corvusoft/restbed/detail/socket_impl.cpp
+*** restbed-4.6/source/corvusoft/restbed/detail/socket_impl.cpp	Mon Jul 17 16:49:17 2017
+--- restbed-4.6.new/source/corvusoft/restbed/detail/socket_impl.cpp	Mon Sep 10 19:11:12 2018
+***************
+*** 138,144 ****
+                      asio::async_connect( socket, endpoint_iterator, [ this, callback ]( const error_code & error, tcp::resolver::iterator )
+                      {
+  #ifdef BUILD_SSL
+-                     
+                          if ( m_ssl_socket not_eq nullptr )
+                          {
+                              m_ssl_socket->handshake( asio::ssl::stream_base::client );
+--- 138,143 ----
+diff -rc restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp
+*** restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp	Mon Jul 17 16:49:17 2017
+--- restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp	Mon Sep 10 06:44:38 2018
+***************
+*** 282,287 ****
+--- 282,314 ----
+              return socket;
+          }
+          
++         // added by xiaofeng 2018-08-31
++         std::shared_ptr< WebSocket > WebSocketManagerImpl::create( const std::shared_ptr< Request >& request ) {
++             auto key = request->get_header( "Sec-WebSocket-Key" );
++             auto socket = std::make_shared< WebSocket >();
++             socket->set_key( key );
++             socket->set_logger( m_logger );
++             socket->set_socket( request->m_pimpl->m_socket );
++             socket->m_pimpl->m_manager = shared_from_this();
++ 
++             return socket;
++         }
++ 
++         void WebSocketManagerImpl::update( const std::shared_ptr< WebSocket >& socket, 
++                                            const std::shared_ptr< Request >& request ) {
++             auto key = request->get_header( "Sec-WebSocket-Key" );
++             socket->set_key( key );
++             socket->set_socket( request->m_pimpl->m_socket );
++             socket->m_pimpl->m_manager = shared_from_this();
++         }
++ 
++         // added by xiaofeng 2018-08-31
++         int WebSocketManagerImpl::process_io( const std::shared_ptr< Request >& request ) {
++             auto io_service = request->m_pimpl->m_io_service;
++             io_service->run();
++             return io_service->stopped() ? 1 : 0;
++         }
++ 
+          shared_ptr< WebSocket > WebSocketManagerImpl::read( const string& key )
+          {
+              auto socket = m_sockets.find( key );
+diff -rc restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp
+*** restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp	Mon Jul 17 16:49:17 2017
+--- restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp	Mon Sep 10 06:42:37 2018
+***************
+*** 12,17 ****
+--- 12,19 ----
+  
+  //Project Includes
+  #include "corvusoft/restbed/byte.hpp"
++ #include "corvusoft/restbed/session.hpp"
++ #include "corvusoft/restbed/request.hpp"
+  
+  //External Includes
+  
+***************
+*** 53,58 ****
+--- 55,65 ----
+  
+                  std::shared_ptr< WebSocket > create( const std::shared_ptr< Session >& session );
+  
++                 // added by xiaofeng 2018-08-31
++                 std::shared_ptr< WebSocket > create( const std::shared_ptr< Request >& request );
++                 void update( const std::shared_ptr< WebSocket >& socket, const std::shared_ptr< Request >& request );
++                 int process_io( const std::shared_ptr< Request >& request );
++ 
+                  std::shared_ptr< WebSocket > read( const std::string& key );
+  
+                  std::shared_ptr< WebSocket > update( const std::shared_ptr< WebSocket >& socket );
+diff -rc restbed-4.6/source/corvusoft/restbed/string.cpp restbed-4.6.new/source/corvusoft/restbed/string.cpp
+*** restbed-4.6/source/corvusoft/restbed/string.cpp	Mon Jul 17 16:49:17 2017
+--- restbed-4.6.new/source/corvusoft/restbed/string.cpp	Wed Aug 29 15:30:03 2018
+***************
+*** 139,145 ****
+          }
+          
+          static const regex escape( "([.^$|()\\[\\]{}*+?\\\\])" );
+!         const auto expression = regex_replace( target, escape, "\\$1" );
+          auto pattern = regex( expression );
+          
+          if ( option & String::Option::CASE_INSENSITIVE )
+--- 139,145 ----
+          }
+          
+          static const regex escape( "([.^$|()\\[\\]{}*+?\\\\])" );
+!         const auto expression = regex_replace( target, escape, string("\\$1") );
+          auto pattern = regex( expression );
+          
+          if ( option & String::Option::CASE_INSENSITIVE )
