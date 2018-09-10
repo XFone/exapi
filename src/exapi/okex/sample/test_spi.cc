@@ -15,7 +15,7 @@
 #include "Trace.h"
 
 #include <cstdio>
-#include <cstring>
+#include <string>
 #include <iostream>
 
 #include "okcoinapi.h"
@@ -28,7 +28,6 @@ int checkopt(int opt, char *parg)
     int result = 0;
     switch (opt) {
     case 'c':
-        LOGFILE(LOG_INFO, "loadling config file '%s'", parg);
         // read_config_file(parg, on_read_keyval);
         break;
 
@@ -48,8 +47,8 @@ void test_okex_quote_sync()
 {
     OKCoinApiCom api("", "");
 
-    std::string symbol = "eth_btc";
-    std::string json = api.GetTicker(symbol);
+    string symbol = "eth_btc";
+    string json = api.GetTicker(symbol);
 }
 
 /*---------------------------- async mode -----------------------------------*/
@@ -76,11 +75,11 @@ void test_okex_quote_spi()
 
 void test_okex_websocket()
 {
-    std::string com_apiKey      = "";                       //请到www.okcoin.com申请
-    std::string com_secretKey   = "";                       //请到www.okcoin.com申请
-    OKCoinWebSocketApiCom api(com_apiKey, com_secretKey);   //国际站
+    OKCoinWebSocketApiCom api("", "");      //国际站
 
-    api.Run();                              //启动连接服务器线程
+    api.Run();                              // 启动连接服务器线程
+
+    sleep(3);
 
     api.ok_spotusd_btc_ticker();            // 订阅行情
 

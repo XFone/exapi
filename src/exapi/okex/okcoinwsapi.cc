@@ -30,7 +30,7 @@ OKCoinWebSocketApi::~OKCoinWebSocketApi()
 void OKCoinWebSocketApi::SetKey(string api_key, string secret_key)
 {
     m_api_key    = api_key;
-    m_secret_key = secret_key;	
+    m_secret_key = secret_key;
 }
 
 void OKCoinWebSocketApi::SetUri(string uri)

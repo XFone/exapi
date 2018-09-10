@@ -14,6 +14,7 @@
 #include "Trace.h"
 #include "DumpFunc.h"
 
+#include "JsonUtils.h"
 #include "RestRequest.h"
 using namespace exapi;
 
@@ -21,13 +22,13 @@ using namespace exapi;
 #include <openssl/md5.h>
 #endif
 
+static std::shared_ptr<restbed::Settings> _okex_settings;
 std::shared_ptr<RestRequest> 
 RestRequest::CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path) {
     const char *proto_str = ((protocol == HTTP_PROTOCOL_HTTP) ? "HTTP" : "HTTPS");
     const char *method_str = ((method == METHOD_GET) ? "GET" : "POST");
 
-    //std::string _uri = proto_str + domain + path;
-    auto req = std::make_shared<RestRequest>(/*restbed::Uri(_uri)*/);
+    auto req = std::make_shared<RestRequest>( /* domain */);
 
     req->set_host(domain);
     req->set_protocol(proto_str);
@@ -36,10 +37,20 @@ RestRequest::CreateBuilder(const char *domain, HTTP_PROTOCOL protocol, HTTP_METH
     req->set_path(path);
     req->set_method(method_str);
 
-    req->add_header("Host", domain);
+    req->add_header("Host", req->get_host());
     //req->add_header("Accept", "text/html,application/json,application/xml,*/*");
     //req->add_header("User-Agent", "Mozilla/5.0 (exapi; rv:1.0.0) exapi");
-    req->add_header("Connection", "keep-alive");
+    //req->add_header("Connection", "keep-alive");
+
+    if (_okex_settings == nullptr) {
+        auto ssl_settings = std::make_shared<restbed::SSLSettings>();
+        //ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
+        //ssl_settings->set_http_disabled(true);
+        //ssl_settings->set_tlsv12_enabled(true);
+        ssl_settings->set_default_workarounds_enabled(true);
+        _okex_settings = std::make_shared<restbed::Settings>();
+        _okex_settings->set_ssl_settings(ssl_settings);
+    }
 
     return req;
 }
@@ -64,17 +75,8 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
 
         req->m_sent_time = std::chrono::steady_clock::now();
 
-#if 0
-        auto ssl_settings = std::make_shared<restbed::SSLSettings>();
-        ssl_settings->set_certificate_authority_pool(restbed::Uri( "file://certificates", restbed::Uri::Relative));
-        ssl_settings->set_http_disabled(true);
-        ssl_settings->set_tlsv12_enabled(true);
-        auto settings = std::make_shared<restbed::Settings>();
-        settings->set_ssl_settings(ssl_settings);
-        auto response = restbed::Http::sync(req, settings);
-#else
-        auto rsp = restbed::Http::sync(req);
-#endif
+
+        auto rsp = restbed::Http::sync(req /*, _okex_settings */);
 
         (void)ParseReponse(rsp, body);
 
@@ -97,7 +99,8 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
               restbed::String::to_string(restbed::Http::to_bytes(req)).c_str());
 
         req->m_sent_time = std::chrono::steady_clock::now();
-        restbed::Http::async(req, callback);
+
+        restbed::Http::async(req, callback /*, _okex_settings */);
 
     } catch (std::system_error ex) {
         LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
@@ -115,9 +118,8 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
     LOGFILE(LOG_DEBUG, "Response: HTTP/%1.1f %d %s", 
             rsp->get_version(), rsp->get_status_code(), rsp->get_status_message().data());
 
-    auto headers = rsp->get_headers();
-
     TRACE_IF(8, {
+        auto headers = rsp->get_headers();
         for (const auto header : headers) {
             _trace_impl(8, "  Header| %s: %s", header.first.data(), header.second.data());
         }
