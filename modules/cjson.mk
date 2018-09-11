@@ -23,4 +23,4 @@ ifeq (, $(CJSON_ROOT))
 endif
 
 $(CJSON_DEPENDS):
-	$(call make_module,CJSON,$(CJSON_SDK))
+	$(call make_module,CJSON,$(CJSON_SDK),$(CJSON_ROOT))

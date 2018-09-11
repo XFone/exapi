@@ -25,5 +25,5 @@ ifeq (, $(RESTBED_ROOT))
 endif
 
 $(RESTBED_DEPENDS):
-	$(call make_module,RESTBED,$(RESTBED_SDK))
+	$(call make_module,RESTBED,$(RESTBED_SDK),$(RESTBED_ROOT))
 

@@ -171,7 +171,14 @@ define make_module
 	@echo "---------------------------------------------------------------"
 	@printf "Building module %b in %b ...\n" $(MK_COLOR)$1$(NO_COLOR) $2
 	@echo "---------------------------------------------------------------"
-	- TARGET_ARCH=$(TARGET_ARCH) $(MAKE) --no-print-directory -C $2
+	-@TARGET_ARCH=$(TARGET_ARCH) make -C $2
+	-@if [ ! -z $3 ] ; then \
+	 echo "---------------------------------------------------------------"; \
+	 printf "Installing module %b to %b ...\n" $(MK_COLOR)$1$(NO_COLOR) $3 ; \
+	 echo "---------------------------------------------------------------"; \
+	 $(MAKE) install -C $2 ; fi
+	@echo "Cleaning built files..."
+	-@$(MAKE) clean -C $2
 endef
 
 

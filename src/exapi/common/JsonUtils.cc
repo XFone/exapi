@@ -11,6 +11,8 @@
 #include "JsonUtils.h"
 #include "cJSON.h"
 
+#include <cstdlib>
+
 std::string 
 JsonUtils::GetItem(const std::string &jsonstr, const char *name)
 {
