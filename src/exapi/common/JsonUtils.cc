@@ -12,57 +12,131 @@
 #include "cJSON.h"
 
 #include <cstdlib>
+#include <memory>
 
-std::string 
-JsonUtils::GetItem(const std::string &jsonstr, const char *name)
-{
-    std::string result;
-    if (!jsonstr.empty()) {
-        cJSON *pjson = cJSON_Parse(jsonstr.c_str());
-        if (nullptr != pjson) {
-            cJSON *obj = cJSON_GetObjectItem(pjson, name);
-            if (nullptr != obj) {
-                switch (obj->type) {
-                case cJSON_String:
-                case cJSON_Raw:
-                    result = obj->valuestring;
-                    break;
-                case cJSON_Number: 
-                    result = std::to_string(obj->valuedouble);
-                    break;
-                default: 
-                    break;
-                } // switch (obj->type)
-            }
-            cJSON_Delete(pjson);
+//------------------------ JsonUtils::JsonImpl ----------------------------
+
+class JsonUtils::JsonImpl : public cJSON {
+public:
+    static void *g_cjson_mpool;
+
+    JsonImpl() {
+        if (nullptr == g_cjson_mpool) {
+            g_cjson_mpool = &g_cjson_mpool; // TODO: using TBB memory pool
+            cJSON_Hooks hooks = {
+                .malloc_fn = JsonUtils::FastAlloc,
+                .free_fn   = JsonUtils::FastFree
+            };
+            cJSON_InitHooks(&hooks);
         }
+    }
+
+    ~JsonImpl() {}
+};
+
+void *JsonUtils::JsonImpl::g_cjson_mpool = nullptr;
+
+//------------------------- JsonUtils::Json -------------------------------
+
+JsonUtils::Json &JsonUtils::Json::parse(const std::string &jsonstr)
+{
+    cJSON *pjson = cJSON_Parse(jsonstr.c_str());
+    if (nullptr != this->m_ctx_root) {
+        cJSON_Delete(m_ctx_root);
+    }
+    m_ctx_root = reinterpret_cast<JsonImpl *>(pjson);
+    m_pointer  = m_ctx_root;
+    return *this;
+}
+
+JsonUtils::Json::~Json()
+{
+    if (nullptr != m_ctx_root) {
+        cJSON_Delete(m_ctx_root);
+    }
+}
+
+JsonUtils::Json &JsonUtils::Json::at(const char *name) throw(std::runtime_error)
+{
+    if (m_pointer == nullptr)
+        m_pointer = m_ctx_root;
+    assert(m_pointer != nullptr);
+    cJSON *obj = cJSON_GetObjectItem(m_pointer, name);
+    m_pointer = reinterpret_cast<JsonImpl *>(obj);
+
+    if (m_pointer == nullptr) {
+        throw std::runtime_error(
+            std::string("json item ") + name + "not found"
+        );
+    }
+    return *this;
+}
+
+template <>
+bool JsonUtils::Json::get() throw(std::runtime_error)
+{
+    if (m_pointer->type == cJSON_False) {
+        return false;
+    } else if (m_pointer->type == cJSON_True) {
+        return true;
+    }
+    throw std::runtime_error(
+        std::string("json item ") + m_pointer->string + "is not boolean"
+    );
+}
+
+template <>
+double JsonUtils::Json::get() throw(std::runtime_error)
+{
+    if (m_pointer->type == cJSON_Number) {
+        return m_pointer->valuedouble;
+    }
+    throw std::runtime_error(
+        std::string("json item ") + m_pointer->string + "is not double"
+    );
+}
+
+template <>
+std::string JsonUtils::Json::get() throw(std::runtime_error)
+{
+    if (m_pointer->type == cJSON_String || m_pointer->type == cJSON_Raw) {
+        return m_pointer->valuestring;
+    }
+    throw std::runtime_error(
+        std::string("json item") + m_pointer->string + "is not string"
+    );
+}
+
+//---------------------------- JsonUtils ----------------------------------
+
+void *JsonUtils::FastAlloc(size_t size)
+{
+    // TODO: using TBB memory pool
+    return std::malloc(size);
+}
+
+void JsonUtils::FastFree(void *ptr)
+{
+    // TODO: using TBB memory pool
+    std::free(ptr);
+}
+
+double
+JsonUtils::GetItemDouble(const std::string &jsonstr, const char *name) {
+    double result = 0.0;
+    if (!jsonstr.empty()) {
+        Json json;
+        result = json.parse(jsonstr).at(name).get<double>();
     }
     return result;
 }
 
-double 
-JsonUtils::GetItemDouble(const std::string &jsonstr, const char *name)
-{
-    double result = 0;
+std::string
+JsonUtils::GetItemString(const std::string &jsonstr, const char *name) {
+    std::string result;
     if (!jsonstr.empty()) {
-        cJSON *pjson = cJSON_Parse(jsonstr.c_str());
-        if (nullptr != pjson) {
-            cJSON *obj = cJSON_GetObjectItem(pjson, name);
-            if (nullptr != obj) {
-                switch (obj->type) {
-                case cJSON_String:
-                case cJSON_Raw:
-                    result = atof(obj->valuestring);
-                    break;
-                case cJSON_Number: 
-                    result = obj->valuedouble;
-                    break;
-                default: 
-                    break;
-                } // switch (obj->type)
-            }
-            cJSON_Delete(pjson);
-        }
+        Json json;
+        result = json.parse(jsonstr).at(name).get<std::string>();
     }
     return result;
 }
