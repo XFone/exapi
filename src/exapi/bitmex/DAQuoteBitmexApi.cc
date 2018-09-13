@@ -94,6 +94,8 @@ public:
     }
 };
 
+#define GET_IMPL(p, i) _DAQuoteBitmexApiImpl *i = static_cast<_DAQuoteBitmexApiImpl *>(p)
+
 //------------------------- DAQuoteBitmexApi ------------------------------
 
 DAQuoteBitmexApi *DAQuoteBitmexApi::CreateApi(const char *api_key, const char *secret_key, const char *dpath)
@@ -109,31 +111,113 @@ int DAQuoteBitmexApi::QueryDepth(const char *symbol, size_t limit)
     return 0; //TODO
 }
 
-int DAQuoteBitmexApi::QueryTrades(const char *symbol, size_t limit)
+//------- Funding ------
+
+int DAQuoteBitmexApi::QueryFundingHistory(const char *symbol, const char *filter, 
+                                          const char *columns[], size_t count, 
+                                          size_t start, bool reverse, 
+                                          time_t startTime, time_t endTime)
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/funding"
+    );
+
+    request->Init()
+        .AddParam("symbol", symbol)
+        .AddParam("filter", filter)
+        .AddParam("count", std::to_string(count))
+        .AddParam("start", std::to_string(start))
+        .AddParam("reverse", std::to_string(reverse))
+        .AddParam("startTime", JsonUtils::to_json(startTime))
+        .AddParam("endTime", JsonUtils::to_json(endTime));
+
+    if (nullptr != columns) {
+        request->AddParam("columns", JsonUtils::to_json(columns));
+    }
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnFundingHistory(json.c_str());
+    });
 }
 
-int DAQuoteBitmexApi::QueryTradesHistory(const char *symbol, size_t limit, long fromId)
+int DAQuoteBitmexApi::QueryInsuranceHistory(const char *symbol, const char *filter, 
+                                            const char *columns[], size_t count, 
+                                            size_t start, bool reverse, 
+                                            time_t startTime, time_t endTime)
 {
-    return 0; //TODO
-}
+    GET_IMPL(this, impl);
 
-int DAQuoteBitmexApi::QueryTicker(const char *symbol)
-{
-    return 0; //TODO
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/insurance"
+    );
+
+    request->Init()
+        .AddParam("symbol", symbol)
+        .AddParam("filter", filter)
+        .AddParam("count", std::to_string(count))
+        .AddParam("start", std::to_string(start))
+        .AddParam("reverse", std::to_string(reverse))
+        .AddParam("startTime", JsonUtils::to_json(startTime))
+        .AddParam("endTime", JsonUtils::to_json(endTime));
+
+    if (nullptr != columns) {
+        request->AddParam("columns", JsonUtils::to_json(columns));
+    }
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnInsuranceHistory(json.c_str());
+    });
 }
 
 //----- Extra Data -------
 
-int DAQuoteBitmexApi::GetAnnouncement()
+int DAQuoteBitmexApi::GetAnnouncement(const char *columns[])
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/announcement"
+    );
+
+    request->Init();
+
+    if (nullptr != columns) {
+        request->AddParam("columns", JsonUtils::to_json(columns));
+    }
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnAnnouncement(json.c_str());
+    });
 }
 
 int DAQuoteBitmexApi::GetAnnouncementUrgent()
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/announcement/urgent"
+    );
+
+    request->Init();
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        const char *data = json.c_str();
+        impl->m_spi->OnAnnouncementUrgent(data);
+    });
 }
 
 int DAQuoteBitmexApi::GetSchema()

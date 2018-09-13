@@ -40,7 +40,7 @@ enum BitmexApiType {
     BITMEX_TYPE_CHAT_SEND_MSG,                  ///< POST /api/v1/chat
 
     // Execution - Raw Order and Balance Data
-    BITMEX_TYPE_EXECUTIONS,                     ///< GET /api/v1/execution
+    BITMEX_TYPE_EXECUTION,                      ///< GET /api/v1/execution
     BITMEX_TYPE_TRADE_HISTORY,                  ///< GET /api/v1/execution/tradeHistory
 
     // Funding - Swap Funding History

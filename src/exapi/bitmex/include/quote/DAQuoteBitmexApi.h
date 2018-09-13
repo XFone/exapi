@@ -68,21 +68,21 @@ namespace exapi {
          */
         virtual void OnSymbolUnsubscribed(QuoteApiType quoteType, const char *pSymbol, unsigned status) {}
 
-        //------------------------- Stream Data ------------------------------
+        //-------------------------- Quote Data ------------------------------
         
+        virtual void OnFundingHistory(const void *fundings) {}
+
+        virtual void OnInsuranceHistory(const void *insurances) {}
 
         //-------------------------- Extra Data ------------------------------
 
         /**
-         * Current server time
-         * @param serverTime in miliseconds time_since_epoch (e.g., "1499827319559")
+         * Received site announcements
+         * @data array of announcements
          */
-        virtual void OnServerTime(time_t serverTime) {}
+        virtual void OnAnnouncement(const void *data) {}
 
-        /** 
-         * Current exchange trading rules and symbol information
-         */
-        virtual void OnExchangeInfo(const char *exinfo) {}
+        virtual void OnAnnouncementUrgent(const void *data) {}
 
     };
 
@@ -128,66 +128,55 @@ namespace exapi {
          * @return 0 for success, or errno
          */
         int QueryDepth(const char *symbol, size_t limit);
+
         int QueryOrderBookLevel2(const char *symbol);
 
-        /** 
-         * Recent trades list
-         * @param symbol
-         * @param limit default 500; max 1000.
-         * @return 0 for success, or errno
-         */
-        int QueryTrades(const char *symbol, size_t limit);
-
-        /** 
-         * Historical trades list
-         * @param symbol
-         * @param limit default 500; max 1000.
-         * @param fromId TradeId to fetch from. Default gets most recent trades.
-         * @return 0 for success, or errno
-         */
-        int QueryTradesHistory(const char *symbol, size_t limit, long fromId);
-       
+        //--------------- Funding -------------------
         /**
-         * 24 hour price change statistics
-         * @param symbol
-         * @return 0 for success, or errno
+         * Get funding history
+         * \ref OnFundingHistory
          */
-        int QueryTicker(const char *symbol);
-
-        int QueryCompositeIndex();
+        int QueryFundingHistory(const char *symbol, const char *filter, 
+                                const char *columns[], size_t count = 100, 
+                                size_t start = 0, bool reverse = false, 
+                                time_t startTime = 0,
+                                time_t endTime = 0);
 
         /**
-         * Latest price for a symbol or symbols
-         * @param symbol
-         * @return 0 for success, or errno
+         * Get insurance fund history
+         * \ref OnInsuranceHistory
          */
-        int QueryPriceIndices(const char *symbol);
-
-        int QueryInstrument();
-        int QueryInstrumentsActive();
-        int QueryInstrumentActiveAndIndices();
-        int QueryInstrumentActiveIntervals();
-
-        int QueryFundingHistory();
-
-        int QueryInsuranceHistory();
+        int QueryInsuranceHistory(const char *symbol, const char *filter, 
+                                  const char *columns[], size_t count = 100, 
+                                  size_t start = 0, bool reverse = false, 
+                                  time_t startTime = 0,
+                                  time_t endTime = 0);
 
         //-------------------------- Extra Data ------------------------------
 
-        //---------- Public Announcement --------------
+        //---------- Public Announcement ------------
 
-        int GetAnnouncement();
+        /**
+         * Get site announcements.
+         * \ref OnAnnouncement
+         * @param columns array of column names to fetch
+         */
+        int GetAnnouncement(const char *columns[] = nullptr);
 
+        /**
+         * Get urgent (banner) announcements.
+         * \ref OnAnnouncementUrgent
+         */
         int GetAnnouncementUrgent();
 
 
-        //------ Dynamic Schemata for Developers ------
+        //------ Dynamic Schemata for Developers ----
 
         int GetSchema();
 
         int GetSchemaWebsocket();
 
-        //---------- Exchange Statistics --------------
+        //---------- Exchange Statistics ------------
 
         int GetStats();
 
