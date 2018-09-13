@@ -280,11 +280,71 @@ int DATraderBitmexApi::SendMessage(const char *message, double channelID)
 
 //-------- Trade ---------
 
+int DATraderBitmexApi::PlaceOrder(const OrderParams &params)
+{
+    return 0; // TODO
+}
 
-int DATraderBitmexApi::QueryExecutions(const char *symbol, const char *filter, 
-                                       const char *columns[], size_t count, 
-                                       size_t start, bool reverse, 
-                                       time_t startTime, time_t endTime)
+int DATraderBitmexApi::PlaceOrdersBulk(const OrderParams *orders[])
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::CancelOrder(const char *orders[])
+{
+    return 0; // TODO
+}
+
+int CancelOrdersAll(const char *symbol, const char *filter, const char *text)
+{
+    return 0; // TODO
+}
+
+int CancelOrdersAfter(timestamp_t timeout)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::UpdateOrder(const OrderAmendParams &params)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::UpdateOrders(const char *orders[])
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::QueryLiquidationOrders(const QueryFilterParams &params)
+{
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/liquidation"
+    );
+
+    request->Init()
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
+
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
+    }
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnLiquidation(json.c_str());
+    });
+}
+
+int DATraderBitmexApi::QueryExecutions(const QueryFilterParams &params)
 {
     GET_IMPL(this, impl);
 
@@ -293,33 +353,29 @@ int DATraderBitmexApi::QueryExecutions(const char *symbol, const char *filter,
     );
 
     request->Init()
-        .AddParam("symbol", symbol)
-        .AddParam("filter", filter)
-        .AddParam("count", std::to_string(count))
-        .AddParam("start", std::to_string(start))
-        .AddParam("reverse", std::to_string(reverse))
-        .AddParam("startTime", JsonUtils::to_json(startTime))
-        .AddParam("endTime", JsonUtils::to_json(endTime));
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
 
-    if (nullptr != columns) {
-        request->AddParam("columns", JsonUtils::to_json(columns));
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
     }
 
     return RestRequest::SendAsync(request, 
       [impl](const request_t req, const response_t rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
-        const char *data = json.c_str();
-        impl->m_spi->OnExecutions(data);
+        impl->m_spi->OnExecutions(json.c_str());
     });
 }
 
 //------ Instruments -----
 
-int DATraderBitmexApi::QueryInstruments(const char *symbol, const char *filter, 
-                                        const char *columns[], size_t count, 
-                                        size_t start, bool reverse, 
-                                        time_t startTime, time_t endTime)
+int DATraderBitmexApi::QueryInstruments(const QueryFilterParams &params)
 {
     GET_IMPL(this, impl);
 
@@ -328,16 +384,16 @@ int DATraderBitmexApi::QueryInstruments(const char *symbol, const char *filter,
     );
 
     request->Init()
-        .AddParam("symbol", symbol)
-        .AddParam("filter", filter)
-        .AddParam("count", std::to_string(count))
-        .AddParam("start", std::to_string(start))
-        .AddParam("reverse", std::to_string(reverse))
-        .AddParam("startTime", JsonUtils::to_json(startTime))
-        .AddParam("endTime", JsonUtils::to_json(endTime));
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
 
-    if (nullptr != columns) {
-        request->AddParam("columns", JsonUtils::to_json(columns));
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
     }
 
     return RestRequest::SendAsync(request, 
@@ -440,28 +496,54 @@ int DATraderBitmexApi::QueryPriceIndices()
 
 //----- Trade History ----
 
-int DATraderBitmexApi::QueryTradeHistory(const char *symbol, const char *filter, 
-                                         const char *columns[], size_t count, 
-                                         size_t start, bool reverse, 
-                                         time_t startTime, time_t endTime)
+int DATraderBitmexApi::QueryOrders(const QueryFilterParams &params)
 {
     GET_IMPL(this, impl);
 
     auto request = RestRequest::CreateBuilder(
-        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/tradeHistory"
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/order"
     );
 
     request->Init()
-        .AddParam("symbol", symbol)
-        .AddParam("filter", filter)
-        .AddParam("count", std::to_string(count))
-        .AddParam("start", std::to_string(start))
-        .AddParam("reverse", std::to_string(reverse))
-        .AddParam("startTime", JsonUtils::to_json(startTime))
-        .AddParam("endTime", JsonUtils::to_json(endTime));
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
 
-    if (nullptr != columns) {
-        request->AddParam("columns", JsonUtils::to_json(columns));
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
+    }
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnQueryOrders(json.c_str());
+    });
+}
+
+int DATraderBitmexApi::QueryTradeHistory(const QueryFilterParams &params)
+{
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/execution/tradeHistory"
+    );
+
+    request->Init()
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
+
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
     }
 
     return RestRequest::SendAsync(request, 
@@ -474,5 +556,80 @@ int DATraderBitmexApi::QueryTradeHistory(const char *symbol, const char *filter,
 
 //------- Future ---------
 
+int DATraderBitmexApi::QueryPosition(const QueryPositionParams &params)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::SetPositionIsolateMargin(const char *symbol, bool enable)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::SetPositionTransferMargin(const char *symbol, amount_t amount)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::SetPositionLeverage(const char *symbol, double leverage)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::SetPositionRiskLimit(const char *symbol, amount_t riskLimit)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::ClosePosition(const char *symbol, d_price_t price)
+{
+    return 0; // TODO
+}
+
+int DATraderBitmexApi::QuerySettlement(const QueryFilterParams &params)
+{
+    return 0; // TODO
+}
 
 //------- Wallet ---------
+
+
+//------ Top Users -------
+
+int DATraderBitmexApi::GetLeadboard(const char *method)
+{
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/leaderboard"
+    );
+
+    request->Init()
+        .AddParam("method", method);
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnLeadboard(json.c_str());
+    });
+}
+
+int DATraderBitmexApi::GetLeadboardName()
+{
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/leaderboard/name"
+    );
+
+    request->Init();
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        std::string name = JsonUtils::GetItemString(json, "name");
+        impl->m_spi->OnLeadboardName(name.c_str());
+    });
+}

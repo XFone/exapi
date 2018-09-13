@@ -143,6 +143,26 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
 
     int status_code = rsp->get_status_code();
 
+    switch (status_code) {
+    case 429:   // rate limit is violated
+        LOGFILE(LOG_ALERT, "received status code 429 - rate limit is violated: %s, Retry-After=%s", 
+                rsp->get_status_message().data(),
+                rsp->get_header("Retry-After").c_str());
+        break;
+    case 418:   // IP is banned
+        LOGFILE(LOG_EMERG, "received status code 418 - IP is banned: %s", 
+                rsp->get_status_message().data());
+        break;
+
+    case 503:   // system busy
+        LOGFILE(LOG_ALERT, "received status code 503 - System busy: %s", 
+                rsp->get_status_message().data());
+        break;
+
+    default:
+        break;
+    } // (status_code)
+
     LOGFILE(LOG_DEBUG, "Response: HTTP/%1.1f %d %s", 
             rsp->get_version(), status_code, rsp->get_status_message().data());
 

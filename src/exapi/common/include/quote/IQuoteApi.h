@@ -28,6 +28,7 @@ namespace exapi {
     typedef int32_t quantity_t;
     typedef int32_t price_t;                /**< d_price_t  * PRICE_BASE */
     typedef int64_t amount_t;               /**< d_amount_t * PRICE_BASE */
+    typedef double  d_quantity_t;           /**< quantity in units of the underlying instrument */
     typedef double  d_price_t;
     typedef double  d_amount_t;
     typedef int64_t volume_t;

@@ -24,6 +24,7 @@
 #endif
 
 #include "quote/IQuoteApi.h"
+#include "quote/DAQuoteBitmexDef.h"
 
 namespace exapi {
 
@@ -70,9 +71,19 @@ namespace exapi {
 
         //-------------------------- Quote Data ------------------------------
         
+        virtual void OnOrderBook(const void *l2data) {}
+
+        //------------------------- Funding callbacks ------------------------
+
         virtual void OnFundingHistory(const void *fundings) {}
 
         virtual void OnInsuranceHistory(const void *insurances) {}
+
+        //-------------------------- Trades Data -----------------------------
+
+        virtual void OnTrades(const void *trades) {}
+
+        virtual void OnTradesBucketd(const void *tradebin) {}
 
         //-------------------------- Extra Data ------------------------------
 
@@ -83,6 +94,12 @@ namespace exapi {
         virtual void OnAnnouncement(const void *data) {}
 
         virtual void OnAnnouncementUrgent(const void *data) {}
+
+        virtual void OnStats(const void *stats) {}
+
+        virtual void OnStatsHistory(const void *statsHist) {}
+
+        virtual void OnStatsHistoryUsd(const void *statsUsd) {}
 
     };
 
@@ -127,30 +144,64 @@ namespace exapi {
          * @param limit default 100; max 1000. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
          * @return 0 for success, or errno
          */
-        int QueryDepth(const char *symbol, size_t limit);
+        int QueryDepth(const char *symbol, size_t limit) {
+            return QueryOrderBookLevel2(symbol, 0);
+        }
 
-        int QueryOrderBookLevel2(const char *symbol);
+        /**
+         * Get current orderbook in vertical format. 
+         * \ref OnOrderBook
+         * @param symbol Instrument symbol. Send a series (e.g. XBT) to get data for the nearest contract in that series.
+         * @param depth Orderbook depth per side. Send 0 for full depth. default: 25
+         */
+        int QueryOrderBookLevel2(const char *symbol, size_t depth);
 
-        //--------------- Funding -------------------
+        /**
+         * Get Quotes
+         * \ref OnQuotes
+         */
+        int QueryQuotes(const QueryFilterParams &params);
+
+        /**
+         * Get previous quotes in time buckets.
+         * \ref OnQuotesBucketed
+         * @param binSize Time interval to bucket by. Available options: [1m,5m,1h,1d]. default: 1m
+         * @param partial If true, will send in-progress (incomplete) bins for the current time period. default: false
+         * @param params query and filter parameters
+         */
+        int QueryQuotesBucketed(const char *binSize, bool partial,
+                                const QueryFilterParams &params);
+
+        //---------------------------- Funding -------------------------------
+
         /**
          * Get funding history
          * \ref OnFundingHistory
+         * @param params query or filter parameters
          */
-        int QueryFundingHistory(const char *symbol, const char *filter, 
-                                const char *columns[], size_t count = 100, 
-                                size_t start = 0, bool reverse = false, 
-                                time_t startTime = 0,
-                                time_t endTime = 0);
+        int QueryFundingHistory(const QueryFilterParams &params);
 
         /**
          * Get insurance fund history
          * \ref OnInsuranceHistory
+         * @param params query or filter parameters
          */
-        int QueryInsuranceHistory(const char *symbol, const char *filter, 
-                                  const char *columns[], size_t count = 100, 
-                                  size_t start = 0, bool reverse = false, 
-                                  time_t startTime = 0,
-                                  time_t endTime = 0);
+        int QueryInsuranceHistory(const QueryFilterParams &params);
+
+        //-------------------------- Trades Data------------------------------
+
+        /**
+         * Get Trades.
+         * \ref OnQueryTrades
+         */
+        int QueryTrades(const QueryFilterParams &params);
+
+        /**
+         * Get previous trades in time buckets.
+         * \ref OnQueryTradesBucketd
+         */
+        int QueryTradesBucketed(const char *binSize, bool partial,
+                                const QueryFilterParams &params);
 
         //-------------------------- Extra Data ------------------------------
 
@@ -172,24 +223,38 @@ namespace exapi {
 
         //------ Dynamic Schemata for Developers ----
 
-        int GetSchema();
+        /**
+         * Get model schemata for data objects returned by this API.
+         * \ref OnSchema
+         * @param model model filter. If omitted, will return all models.
+         */
+        int GetSchema(const char *model = nullptr);
 
+        /**
+         * Returns help text & subject list for websocket usage.
+         * \ref OnSchemaWebsocket
+         */
         int GetSchemaWebsocket();
 
         //---------- Exchange Statistics ------------
 
+        /**
+         * Get exchange-wide and per-series turnover and volume statistics.
+         * \ref OnStats
+         */
         int GetStats();
 
+        /**
+         * Get historical exchange-wide and per-series turnover and volume statistics. 
+         * \ref OnStatsHistory
+         */
         int GetStatsHistory();
 
-        int GetStatsHistoryUsd();
-
         /**
-         * Get the current server time.
-         * \ref OnServerTime
+         * Get a summary of exchange statistics in USD. 
+         * \ref OnStatsHistoryUsd
          */
-        int GetServerTime();
-
+        int GetStatsHistoryUsd();
 
     };
 

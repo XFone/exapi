@@ -5,7 +5,33 @@ _last updated by xiaofeng 2018-09-07_
 
 ## Instro
 
-- [BitMEX](https://github.com/BitMEX/api-connectors)
+- Online Documents
+    - [HTTP API](https://testnet.bitmex.com/app/security)
+    - [REST API](https://testnet.bitmex.com/app/restAPI)
+    - [WebSocket API](https://testnet.bitmex.com/app/wsAPI)
+
+- [BitMEX api-connectors](https://github.com/BitMEX/api-connectors)
+
+### Limits
+
+REST API: 300 requests every 5 minutes
+
+```
+"x-ratelimit-limit": 300
+"x-ratelimit-remaining": 297
+"x-ratelimit-reset": 1489791662
+```
+
+Code 429 - Retry-After
+
+- 委托数量限制
+    为了保持有序的市场，BitMEX 就每个账户的待交易委托数量设置上限。这些限制是：
+    - 每个账户每个合约最多 200 笔未执行交易委托数量;
+    - 每个账户每个合约最多 10 笔止损交易委托数量;
+    - 每个账户每个合约最多 10 笔条件委托数量.
+
+- 最小交易限制
+    - 未执行交易订单过多且总值低于 0.0025 XBT ，则每个账户都会被标记为垃圾账户
 
 ### BitMEX-Delta-Server
 

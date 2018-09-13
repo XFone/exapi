@@ -89,7 +89,7 @@ public:
 
     virtual int GetQuote(QuoteApiType quoteType, const char *symbol, 
                          const char *range, size_t max_size) override {
-        //TODO: use Rest API
+        //TODO: call QueryQuotes();
         return 0;
     }
 };
@@ -103,20 +103,27 @@ DAQuoteBitmexApi *DAQuoteBitmexApi::CreateApi(const char *api_key, const char *s
     return new _DAQuoteBitmexApiImpl(api_key, secret_key);
 }
 
+//----- Quote Data ------
 
-//------- Spot --------
+int DAQuoteBitmexApi::QueryOrderBookLevel2(const char *symbol, size_t depth)
+{
+    return 0; //TODO
+}
 
-int DAQuoteBitmexApi::QueryDepth(const char *symbol, size_t limit)
+int DAQuoteBitmexApi::QueryQuotes(const QueryFilterParams& params)
+{
+    return 0; //TODO
+}
+
+int DAQuoteBitmexApi::QueryQuotesBucketed(const char *binSize, bool partial,
+                                          const QueryFilterParams &params)
 {
     return 0; //TODO
 }
 
 //------- Funding ------
 
-int DAQuoteBitmexApi::QueryFundingHistory(const char *symbol, const char *filter, 
-                                          const char *columns[], size_t count, 
-                                          size_t start, bool reverse, 
-                                          time_t startTime, time_t endTime)
+int DAQuoteBitmexApi::QueryFundingHistory(const QueryFilterParams &params)
 {
     GET_IMPL(this, impl);
 
@@ -125,16 +132,16 @@ int DAQuoteBitmexApi::QueryFundingHistory(const char *symbol, const char *filter
     );
 
     request->Init()
-        .AddParam("symbol", symbol)
-        .AddParam("filter", filter)
-        .AddParam("count", std::to_string(count))
-        .AddParam("start", std::to_string(start))
-        .AddParam("reverse", std::to_string(reverse))
-        .AddParam("startTime", JsonUtils::to_json(startTime))
-        .AddParam("endTime", JsonUtils::to_json(endTime));
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
 
-    if (nullptr != columns) {
-        request->AddParam("columns", JsonUtils::to_json(columns));
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
     }
 
     return RestRequest::SendAsync(request, 
@@ -145,10 +152,7 @@ int DAQuoteBitmexApi::QueryFundingHistory(const char *symbol, const char *filter
     });
 }
 
-int DAQuoteBitmexApi::QueryInsuranceHistory(const char *symbol, const char *filter, 
-                                            const char *columns[], size_t count, 
-                                            size_t start, bool reverse, 
-                                            time_t startTime, time_t endTime)
+int DAQuoteBitmexApi::QueryInsuranceHistory(const QueryFilterParams &params)
 {
     GET_IMPL(this, impl);
 
@@ -157,16 +161,16 @@ int DAQuoteBitmexApi::QueryInsuranceHistory(const char *symbol, const char *filt
     );
 
     request->Init()
-        .AddParam("symbol", symbol)
-        .AddParam("filter", filter)
-        .AddParam("count", std::to_string(count))
-        .AddParam("start", std::to_string(start))
-        .AddParam("reverse", std::to_string(reverse))
-        .AddParam("startTime", JsonUtils::to_json(startTime))
-        .AddParam("endTime", JsonUtils::to_json(endTime));
+        .AddParam("symbol", params.symbol)
+        .AddParam("filter", JsonUtils::to_json(params.filter))
+        .AddParam("count", std::to_string(params.count))
+        .AddParam("start", std::to_string(params.start))
+        .AddParam("reverse", std::to_string(params.reverse))
+        .AddParam("startTime", JsonUtils::to_json(params.startTime))
+        .AddParam("endTime", JsonUtils::to_json(params.endTime));
 
-    if (nullptr != columns) {
-        request->AddParam("columns", JsonUtils::to_json(columns));
+    if (nullptr != params.columns) {
+        request->AddParam("columns", JsonUtils::to_json(params.columns));
     }
 
     return RestRequest::SendAsync(request, 
@@ -175,6 +179,19 @@ int DAQuoteBitmexApi::QueryInsuranceHistory(const char *symbol, const char *filt
         RestRequest::ParseReponse(rsp, json);
         impl->m_spi->OnInsuranceHistory(json.c_str());
     });
+}
+
+//------- Trades Data ----
+
+int DAQuoteBitmexApi::QueryTrades(const QueryFilterParams &params)
+{
+    return 0;   // TODO
+}
+
+int DAQuoteBitmexApi::QueryTradesBucketed(const char *binSize, bool partial,
+                                          const QueryFilterParams &params)
+{
+    return 0;   // TODO
 }
 
 //----- Extra Data -------
@@ -220,7 +237,7 @@ int DAQuoteBitmexApi::GetAnnouncementUrgent()
     });
 }
 
-int DAQuoteBitmexApi::GetSchema()
+int DAQuoteBitmexApi::GetSchema(const char *model)
 {
     return 0; //TODO
 }

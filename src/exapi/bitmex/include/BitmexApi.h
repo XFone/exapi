@@ -15,9 +15,13 @@
 #define BITMEX_REST_URL            "https://www.bitmex.com"
 #define BITMEX_WSS_URL             "wss://www.bitmex.com"
 
+#define BITMEX_TEST_NET            "https://testnet.bitmex.com/"
+
+#define SATOSHI                    0.00000001
+
 /** 
  * Rest API for Bitmex
- * ref <a href="https://github.com/BitMEX/api-connectors/blob/master/swagger.json">Swagger Json File</a>
+ * ref [REST API](https://testnet.bitmex.com/app/restAPI)
  */
 enum BitmexApiType {
     BITMEX_TYPE_UNKNOWN    = 0,
@@ -135,8 +139,10 @@ enum BitmexApiType {
 
 /**
  * Web Socket Streams for Bitmex
- * ref <a href="">web-socket-streams.md</a>
+ * ref [WebSocket API]("https://testnet.bitmex.com/app/wsAPI")
  */
 #define BITMEX_WSS_PATH         "/app/wsAPI"
+
+#define BITMEX_WSS_TESTPATH     "/realtime"
 
 #endif /* __BITMEX_API_H__ */

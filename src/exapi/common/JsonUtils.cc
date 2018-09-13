@@ -190,6 +190,14 @@ std::string JsonUtils::to_json(const char *values[])
 }
 
 template <>
+std::string JsonUtils::to_json(const void *object)
+{
+    // TODO: need serializing object
+    const char *str = reinterpret_cast<const char *>(object);
+    return std::string(str);
+}
+
+template <>
 std::string JsonUtils::to_json(std::vector<std::string> &values)
 {
     std::ostringstream ss;

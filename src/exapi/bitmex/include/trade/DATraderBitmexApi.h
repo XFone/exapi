@@ -22,7 +22,10 @@
 #else
 # define  API_EXPORT 
 #endif
+
 #include "trade/ITraderApi.h"
+#include "trade/DATraderBitmexDef.h"
+#include "quote/DAQuoteBitmexDef.h"
 
 namespace exapi {
 
@@ -62,48 +65,77 @@ namespace exapi {
  
         //--------------------- Callbacks ------------------------
 
-        void OnApiKey(const void *pRespData) {}
+        virtual void OnApiKey(const void *pRespData) {}
 
         //------------------ Chat callbacks ----------------------
 
-        void OnChatMessages(const void *msgs) {}
+        virtual void OnChatMessages(const void *msgs) {}
 
-        void OnChatChannels(const void *channels) {}
+        virtual void OnChatChannels(const void *channels) {}
 
-        void OnConnectedUsers(const void *users) {}
+        virtual void OnConnectedUsers(const void *users) {}
 
-        void OnSentMessage(const void *chat) {}
+        virtual void OnSentMessage(const void *chat) {}
 
-        //------------------ spot callbacks ----------------------
+        //------------------ Account callbacks ------------------
 
         /**
          * Callback to GetUserInfo
          * @param pUserInfo struct of exapi::UserInfo (TODO)
          */
-        void OnUserInfo(const void *pUserInfo) {}
+        virtual void OnUserInfo(const void *pUserInfo) {}
 
         //...MORE
 
+        virtual void OnNotification(const void *notifies) {}
+
         //--------------------- Trade callbacks ------------------
 
-        void OnExecutions(const void *executions) {}
+        virtual void OnOrderPlaced(const void *orders) {}
+
+        virtual void OnOrderCancelled(const void *orders) {}
+
+        virtual void OnOrderUpdated(const void *orders) {}
+
+        virtual void OnExecutions(const void *executions) {}
+
+        virtual void OnLiquidation(const void *liquidation) {}
 
         //------------------ Instrument callbacks ----------------
-        
-        void OnInstruments(const void *instruments) {}
 
-        void OnPriceIndices(const void *instruments) {}
+        virtual void OnInstruments(const void *instruments) {}
 
-        void OnActiveIntervals(const void *instruments) {}
+        virtual void OnPriceIndices(const void *instruments) {}
 
-        void OnCompositeIndex(const void *instruments) {}
+        virtual void OnActiveIntervals(const void *instruments) {}
+
+        virtual void OnCompositeIndex(const void *instruments) {}
 
         //----------------- Trade history callbacks --------------
 
-        void OnTradeHistory(const void *executions) {}
+        virtual void OnQueryOrders(const void *orders) {}
 
-        //----------------- future callbacks ---------------------
+        virtual void OnTradeHistory(const void *executions) {}
 
+        //----------------- Future callbacks ---------------------
+
+        virtual void OnQueryPositions(const void *positions) {}
+
+        virtual void OnPositionIsolateMargin(const void *position) {}
+
+        virtual void OnPositionTransferMargin(const void *position) {}
+
+        virtual void OnPositionLeverage(const void *position) {}
+
+        virtual void OnPositionRiskLimit(const void *position) {}
+
+        virtual void OnQuerySettlement(const void *settlements) {}
+
+        //----------------- Top user callbacks -------------------
+
+        virtual void OnLeadboard(const void *leaderboards) {}
+
+        virtual void OnLeadboardName(const char *name) {}
     };
 
     /**
@@ -210,35 +242,67 @@ namespace exapi {
         //----------------------------- Trade --------------------------------
 
         /**
-         * Send order
+         * Create a new order.
+         * \ref OnOrderPlaced
+         * @param params fields for placing order
          */
-        int EnterOrder();
-
-        int EnterOrderBulk();
+        int PlaceOrder(const OrderParams &params);
 
         /**
+         * Create multiple new orders for the same symbol.
+         * This endpoint is much faster for getting many orders into the book at once. 
+         * \ref OnOrderPlaced
+         * @param params fields for placing order
          */
-        int CancelOrder();
+        int PlaceOrdersBulk(const OrderParams *orders[]);
 
-        int CancelOrdersAll();
-        int CancelOrdersAfter();
+        /**
+         * Cancel order(s). Send multiple order IDs to cancel in bulk.
+         * \ref OnOrderCancelled
+         */
+        int CancelOrder(const char *orders[]);
 
+        /**
+         * Cancels all of your orders.
+         * \ref OnOrderCancelled
+         */
+        int CancelOrdersAll(const char *symbol, const char *filter, const char *text);
 
-        int UpdateOrder();
-        int UpdateOrders();
+        /**
+         * Automatically cancel all your orders after a specified timeout
+         * \ref OnOrderCancelled
+         * @param timeout Timeout in ms. Set to 0 to cancel this timer.
+         */
+        int CancelOrdersAfter(timestamp_t timeout);
 
-        int QueryLiquidationOrders();
+        /**
+         * Amend the quantity or price of an open order
+         * Send an orderID or origClOrdID to identify the order you wish to amend.
+         * Both order quantity and price can be amended. Only one qty field 
+         * can be used to amend.
+         * \ref OnOrderUpdated
+         */
+        int UpdateOrder(const OrderAmendParams &params);
+        
+        /**
+         * Amend multiple orders for the same symbol.
+         * \ref OnOrdersUpdated
+         */
+        int UpdateOrders(const char *orders[]);
+
+        /**
+         * Get liquidation orders.
+         * \ref OnLiquidation
+         * @param qfilter query filter and parameters
+         */
+        int QueryLiquidationOrders(const QueryFilterParams &qfilter);
 
         /**
          * Get all raw executions for user account.
          * \ref OnExecutions
-         * @param symbol e.g. bare series (e.g. "XBU"), or with timestamp ("XBU:monthly")
+         * @param qfilter query filter and parameters
          */
-        int QueryExecutions(const char *symbol, const char *filter, 
-                            const char *columns[], size_t count = 100, 
-                            size_t start = 0, bool reverse = false, 
-                            time_t startTime = 0,
-                            time_t endTime = 0);
+        int QueryExecutions(const QueryFilterParams &qfilter);
 
         //-------------------------  Instruments ------------------------------
  
@@ -248,11 +312,7 @@ namespace exapi {
          * settled or are unlisted.
          * \ref OnInstruments
          */
-        int QueryInstruments(const char *symbol, const char *filter, 
-                             const char *columns[], size_t count = 100, 
-                             size_t start = 0, bool reverse = false, 
-                             time_t startTime = 0,
-                             time_t endTime = 0);
+        int QueryInstruments(const QueryFilterParams &qfilter);
 
         /**
          * Get all active instruments and instruments that have expired in <24hrs.
@@ -287,37 +347,71 @@ namespace exapi {
 
         //------------------------  Trade History -----------------------------
 
-        int QueryOrder();
-
-        int QueryOrders();
+        /**
+         * Get your orders.
+         * \ref OnQueryOrders
+         */
+        int QueryOrders(const QueryFilterParams &qfilter);
 
         /**
          * Get all balance-affecting executions.
          * This includes each trade, insurance charge, and settlement. 
          * \ref OnTradeHistory
-         * @param symbol e.g. bare series (e.g. "XBU"), or with timestamp ("XBU:monthly")
+         * @param qfilter filter and query parameters
          */
-        int QueryTradeHistory(const char *symbol, const char *filter, 
-                              const char *columns[], size_t count = 100, 
-                              size_t start = 0, bool reverse = false, 
-                              time_t startTime = 0,
-                              time_t endTime = 0);
+        int QueryTradeHistory(const QueryFilterParams &qfilter);
 
         //------------------------- Future Trade -----------------------------
 
-        int QueryPosition();
+        /**
+         * Get your positions.
+         * \ref OnQueryPositions
+         */
+        int QueryPosition(const QueryPositionParams &params);
 
-        int SetPositionIsolateMargin();
+        /**
+         * Enable isolated margin or cross margin per-position.
+         * \ref OnPositionIsolateMargin
+         */
+        int SetPositionIsolateMargin(const char *symbol, bool enable = true);
 
-        int SetPositionTransferMargin();
+        /**
+         * Transfer equity in or out of a position
+         * \ref OnPositionTransferMargin
+         * @param symbol
+         * @param amount Amount to transfer, in Satoshis. May be negative. 
+         */
+        int SetPositionTransferMargin(const char *symbol, amount_t amount);
 
-        int SetPositionLeverage();
+        /**
+         * Choose leverage for a position.
+         * \ref OnPositionLeverage
+         * @param symbol
+         * @param leverage Leverage value. Send a number between 0.01 and 100 to 
+         *        enable isolated margin with a fixed leverage. Send 0 to enable
+         *        cross margin.
+         */
+        int SetPositionLeverage(const char *symbol, double leverage);
 
-        int SetPositionRiskLimit();
+        /**
+         * Update your risk limit.
+         * \ref OnPositionRiskLimit
+         * @param symbol Symbol of position to update risk limit on.
+         * @param riskLimit New Risk Limit, in Satoshis.
+         */
+        int SetPositionRiskLimit(const char *symbol, amount_t riskLimit);
 
-        int ClosePosition();
+        /**
+         * Close a position.
+         * [Deprecated, use POST /order with execInst: 'Close']
+         */
+        int ClosePosition(const char *symbol, d_price_t price);
 
-        int QuerySettlement();
+        /**
+         * Get settlement history.
+         * \ref OnQuerySettlement
+         */
+        int QuerySettlement(const QueryFilterParams &params);
 
         //-------------------- User Account Operations ----------------------
 
@@ -339,24 +433,44 @@ namespace exapi {
 
         int QueryUserPreferences();
 
+        /**
+         * Get your current notifications.
+         * This is an upcoming feature and currently does not return data.
+         * \ref OnNotification
+         */
         int GetNotification();
 
         //----------------- Account: Wallet Access ---------------------------
 
         int RequestWithdraw();
+
         int CancelWithdraw();
+
         int ConfirmWithdraw();
+
         int QueryDepositAddress();
+
         int QueryWallet();
+
         int QueryWalletHistory();
+
         int QueryWalletSummary();
 
         int QueryMinWithdrawalFee();
 
         //--------------------- Account: Top Users ---------------------------
 
-        int GetLeadboard();
+        /**
+         * Get current leaderboard
+         * \ref OnLeadboard
+         * @param method ranking type, options: "notional", "ROE"
+         */
+        int GetLeadboard(const char *method);
 
+        /**
+         * Get your alias on the leaderboard.
+         * \ref OnLeadboardName
+         */
         int GetLeadboardName();
 
     };
