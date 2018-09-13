@@ -34,6 +34,9 @@ namespace exapi {
         METHOD_CONNECT
     };
 
+    typedef std::shared_ptr<restbed::Request>  request_t;
+    typedef std::shared_ptr<restbed::Response> response_t;
+
     /**
      * RestRequest
      * Wrap class of restbed::Request to let setters in builder style:
@@ -132,6 +135,15 @@ namespace exapi {
 
         RestRequest &AddParam(const std::string&name, const std::string&value) {
             set_query_parameter(name, value);
+            return *this;
+        }
+
+        /**
+         * Add form parameter if only value is NOT null
+         */
+        RestRequest &AddParam(const std::string&name, const char *value) {
+            if (nullptr != value)
+                set_query_parameter(name, value);
             return *this;
         }
         

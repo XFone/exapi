@@ -13,6 +13,9 @@
 
 #include <cstdlib>
 #include <memory>
+#include <sstream>
+#include <chrono>
+#include <iomanip>
 
 //------------------------ JsonUtils::JsonImpl ----------------------------
 
@@ -157,4 +160,45 @@ JsonUtils::to_hexstring(char *out, const char *buf, size_t size)
         *p++ = (val >= 0x0A) ? (val + 'A' - 0x0A) : ('0' + val);
     }
     return (p - out);
+}
+
+template <>
+std::string JsonUtils::to_json(time_t datetime)
+{
+    // ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z')
+    std::ostringstream ss;
+    ss << std::put_time(gmtime(&datetime), "%FT%TZ");
+    return ss.str();
+}
+
+template <>
+std::string JsonUtils::to_json(const char *values[])
+{
+    std::ostringstream ss;
+    ss << "[ ";
+    if (nullptr != values) {
+        const char **pv = &values[0];
+        const char *value;
+        while ((value = *pv++) != nullptr) {
+            ss << "\"" << value << "\",";
+        }
+    }
+    ss.seekp(-1, std::ios_base::end);
+    ss.put(']');
+
+    return ss.str();
+}
+
+template <>
+std::string JsonUtils::to_json(std::vector<std::string> &values)
+{
+    std::ostringstream ss;
+    ss << "[ ";
+    for (auto v : values) {
+        ss << "\"" << v << "\",";
+    }
+    ss.seekp(-1, std::ios_base::end);
+    ss.put(']');
+
+    return ss.str();
 }

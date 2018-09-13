@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include <vector>
 #include <stdexcept>
 
 /**
@@ -70,6 +71,8 @@ public:
 
 public:
 
+    //-------------------------- Json Decode ------------------------------
+
     static std::string GetItem(const std::string &jsonstr, const char *name) {
         return GetItemString(jsonstr, name);
     }
@@ -86,5 +89,23 @@ public:
 
     static std::string GetItemString(const std::string &jsonstr, const char *name);
 
+    //-------------------------- Json Encode ------------------------------
+
+    /**
+     * binary buffer to hexstring
+     * @out output character buffer
+     * @buf input binary buffer
+     * @size size if input buffer
+     * @return sizeof of output buffer in chars
+     */
     static int to_hexstring(char *out, const char *buf, size_t size);
+
+    /**
+     * Serialize data to json string
+     */
+    template <typename T>
+    static std::string to_json(T value);
+
+    template <typename T>
+    static std::string to_json(std::vector< T > values);
 };
