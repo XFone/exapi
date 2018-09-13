@@ -29,7 +29,8 @@ CONF_ENV = CC=clang CXX=clang++ CXXFLAGS="-std=c++0x -fPIC"
 $(CJSON_SRC):
 	@echo "⬇️  Downloading $(SRC_URL)..."
 	@wget -c $(SRC_URL) -O $(CJSON_VER).tgz
-	@tar zxf $(CJSON_VER).tgz
+	@mkdir -p $(CJSON_VER)
+	@tar zxf $(CJSON_VER).tgz -C $(CJSON_VER) --strip-components 1
 
 $(CJSON_SRC)/build/Makefile:
 	@mkdir -p $(CJSON_SRC)/build
