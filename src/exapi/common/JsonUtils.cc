@@ -12,6 +12,7 @@
 #include "cJSON.h"
 
 #include <cstdlib>
+#include <cassert>
 #include <memory>
 #include <sstream>
 #include <chrono>
@@ -167,7 +168,13 @@ std::string JsonUtils::to_json(time_t datetime)
 {
     // ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z')
     std::ostringstream ss;
+#if 1
+    char buf[sizeof "2012-04-23T18:25:43Z"];
+    strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&datetime));
+    ss << buf;
+#else
     ss << std::put_time(gmtime(&datetime), "%FT%TZ");
+#endif
     return ss.str();
 }
 

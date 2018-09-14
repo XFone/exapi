@@ -16,6 +16,7 @@
 #include <string>
 #include <chrono>
 #include <vector>
+#include <memory>
 
 namespace exapi {
 

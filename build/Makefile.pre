@@ -176,9 +176,7 @@ define make_module
 	 echo "---------------------------------------------------------------"; \
 	 printf "Installing module %b to %b ...\n" $(MK_COLOR)$1$(NO_COLOR) $3 ; \
 	 echo "---------------------------------------------------------------"; \
-	 $(MAKE) install -C $2 ; fi
-	@echo "Cleaning built files..."
-	-@$(MAKE) clean -C $2
+	 $(MAKE) -C $2 install clean ; fi
 endef
 
 

@@ -46,4 +46,4 @@ ifeq (, $(TBB_ROOT))
 endif
 
 $(TBB_DEPENDS):
-	$(call make_module,TBB,$(TBB_SDK))
+	$(call make_module,TBB,$(TBB_SDK),$(TBB_ROOT))
