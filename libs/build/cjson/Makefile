@@ -23,9 +23,9 @@ CJSON_SRC = $(abspath ./$(CJSON_VER))
 CJSON_DST = $(abspath ../../$(CJSON_VER))
 
 # configure env
-CONF_ENV = CC=clang CXX=clang++ CXXFLAGS="-std=c++0x -fPIC"
+CONF_ENV = CC=clang CXX=clang++ CXXFLAGS="-std=c++0x -fPIC" CFLAGS="-fPIC"
 
-# restbed source
+# cJSON source
 $(CJSON_SRC):
 	@echo "⬇️  Downloading $(SRC_URL)..."
 	@wget -c $(SRC_URL) -O $(CJSON_VER).tgz

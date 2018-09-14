@@ -4,10 +4,8 @@
 
 Source-Latest: http://sourceforge.net/projects/boost/files/latest/download
 
+[Source-1.68](https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz)
 [Source-1.66](http://sourceforge.net/projects/boost/files/boost/1.66.0/)
-
-[Source-1.59](http://sourceforge.net/projects/boost/files/boost/1.59.0/)
-[Source-1.55](http://sourceforge.net/projects/boost/files/boost/1.55.0/)
 
 ## Build in Linux or MacOS
 

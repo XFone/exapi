@@ -32,7 +32,7 @@ namespace exapi {
     typedef double  d_price_t;
     typedef double  d_amount_t;
     typedef int64_t volume_t;
-    typedef int32_t timestamp_t;
+    typedef int64_t timestamp_t;            /**< timestamp in millisecond(ms) */
 #endif // DEF_TRADE_TYPES
 
     /**

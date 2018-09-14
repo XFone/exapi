@@ -101,6 +101,18 @@ public:
     static int to_hexstring(char *out, const char *buf, size_t size);
 
     /**
+     * @param time seconds 
+     * @return string in ISO 8601 format (e.g. '2012-04-23T18:25:43Z')
+     */
+    static std::string to_datetime(time_t time);
+
+    /**
+     * @param ms milli-seconds 
+     * @return string in ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z')
+     */
+    static std::string to_datetime_ms(int64_t ms);
+
+    /**
      * Serialize data to json string
      */
     template <typename T>

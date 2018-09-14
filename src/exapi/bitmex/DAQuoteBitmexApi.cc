@@ -137,8 +137,8 @@ int DAQuoteBitmexApi::QueryFundingHistory(const QueryFilterParams &params)
         .AddParam("count", std::to_string(params.count))
         .AddParam("start", std::to_string(params.start))
         .AddParam("reverse", std::to_string(params.reverse))
-        .AddParam("startTime", JsonUtils::to_json(params.startTime))
-        .AddParam("endTime", JsonUtils::to_json(params.endTime));
+        .AddParam("startTime", JsonUtils::to_datetime(params.startTime))
+        .AddParam("endTime", JsonUtils::to_datetime(params.endTime));
 
     if (nullptr != params.columns) {
         request->AddParam("columns", JsonUtils::to_json(params.columns));
@@ -166,8 +166,8 @@ int DAQuoteBitmexApi::QueryInsuranceHistory(const QueryFilterParams &params)
         .AddParam("count", std::to_string(params.count))
         .AddParam("start", std::to_string(params.start))
         .AddParam("reverse", std::to_string(params.reverse))
-        .AddParam("startTime", JsonUtils::to_json(params.startTime))
-        .AddParam("endTime", JsonUtils::to_json(params.endTime));
+        .AddParam("startTime", JsonUtils::to_datetime(params.startTime))
+        .AddParam("endTime", JsonUtils::to_datetime(params.endTime));
 
     if (nullptr != params.columns) {
         request->AddParam("columns", JsonUtils::to_json(params.columns));

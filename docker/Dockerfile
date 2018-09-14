@@ -25,6 +25,9 @@ RUN yum install -y gcc-c++ clang
 # RUM yum install -y llvm-toolset-7
 # RUN scl enable llvm-toolset-7 bash
 
+# Install tools for building third-party libs
+RUN yum install -y cmake wget patch git
+
 RUN yum clean all
 
 # EXPOSE 80
