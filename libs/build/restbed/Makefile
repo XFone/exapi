@@ -26,9 +26,10 @@ RESTBED_DST = $(abspath ../../$(RESTBED_VER))
 
 # Depend third-party libraries
 # MODULES += BOOST
+BOOST_ROOT = $(ROOT)/libs/boost-1.66.0/include
 
 # configure env
-CONF_ENV = CC=clang CXX=clang++ CXXFLAGS="-std=c++0x -fPIC" BOOST_ROOT=$(BOOST_ROOT)
+CONF_ENV = CC=clang CXX=clang++ CXXFLAGS="-std=c++11 -fPIC -I$(BOOST_ROOT)" BOOST_ROOT=$(BOOST_ROOT)
 
 # restbed dependancy
 RESTBED_DEPENDS = $(RESTBED_SRC)/dependency/asio/asio       \

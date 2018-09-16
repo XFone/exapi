@@ -1,6 +1,46 @@
+Only in restbed-4.6.new/dependency/asio: asio
+Only in restbed-4.6.new/dependency/catch: include
+Only in restbed-4.6.new/dependency/kashmir: kashmir
 diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.new/source/corvusoft/restbed/detail/http_impl.cpp
-*** restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp	Mon Jul 17 16:49:17 2017
---- restbed-4.6.new/source/corvusoft/restbed/detail/http_impl.cpp	Mon Sep 10 18:51:11 2018
+*** restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp	2017-07-17 16:49:17.000000000 +0800
+--- restbed-4.6.new/source/corvusoft/restbed/detail/http_impl.cpp	2018-09-17 04:06:25.000000000 +0800
+***************
+*** 4,10 ****
+  
+  //System Includes
+  #include <map>
+! #include <regex>
+  #include <sstream>
+  #include <cstdlib>
+  #include <clocale>
+--- 4,11 ----
+  
+  //System Includes
+  #include <map>
+! //#include <regex>
+! #include <boost/regex.hpp>
+  #include <sstream>
+  #include <cstdlib>
+  #include <clocale>
+***************
+*** 35,42 ****
+  using std::free;
+  using std::bind;
+  using std::stod;
+! using std::regex;
+! using std::smatch;
+  using std::string;
+  using std::istream;
+  using std::function;
+--- 36,43 ----
+  using std::free;
+  using std::bind;
+  using std::stod;
+! using boost::regex;
+! using boost::smatch;
+  using std::string;
+  using std::istream;
+  using std::function;
 ***************
 *** 175,181 ****
                   {
@@ -10,7 +50,7 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.n
                   socket = make_shared< asio::ssl::stream< asio::ip::tcp::socket > >( *request->m_pimpl->m_io_service, context );
                   socket->set_verify_mode( asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert );
               }
---- 175,192 ----
+--- 176,193 ----
                   {
                       context.add_verify_path( settings->get_certificate_authority_pool( ) );
                   }
@@ -39,7 +79,7 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.n
           }
   #endif
           void HttpImpl::request_handler( const error_code& error, const shared_ptr< Request >& request, const function< void ( const shared_ptr< Request >, const shared_ptr< Response > ) >& callback   )
---- 196,205 ----
+--- 197,206 ----
                   socket->set_verify_mode( asio::ssl::verify_none );
               }
               
@@ -63,7 +103,7 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.n
                   return callback( request, create_error_response( request, body ) );
               }
               
---- 252,264 ----
+--- 253,265 ----
               getline( response_stream, status_line );
               
               smatch matches;
@@ -87,7 +127,7 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.n
               request->m_pimpl->m_socket->read( request->m_pimpl->m_buffer, "\r\n\r\n", bind( read_headers_handler, _1, _2, request, callback ) );
           }
           
---- 266,274 ----
+--- 267,275 ----
               response->set_protocol( matches[ 1 ].str( ) );
               response->set_version( stod( matches[ 2 ].str( ) ) );
               response->set_status_code( stoi( matches[ 3 ].str( ) ) );
@@ -98,8 +138,8 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/http_impl.cpp restbed-4.6.n
           }
           
 diff -rc restbed-4.6/source/corvusoft/restbed/detail/socket_impl.cpp restbed-4.6.new/source/corvusoft/restbed/detail/socket_impl.cpp
-*** restbed-4.6/source/corvusoft/restbed/detail/socket_impl.cpp	Mon Jul 17 16:49:17 2017
---- restbed-4.6.new/source/corvusoft/restbed/detail/socket_impl.cpp	Mon Sep 10 19:11:12 2018
+*** restbed-4.6/source/corvusoft/restbed/detail/socket_impl.cpp	2017-07-17 16:49:17.000000000 +0800
+--- restbed-4.6.new/source/corvusoft/restbed/detail/socket_impl.cpp	2018-09-17 02:55:50.000000000 +0800
 ***************
 *** 138,144 ****
                       asio::async_connect( socket, endpoint_iterator, [ this, callback ]( const error_code & error, tcp::resolver::iterator )
@@ -111,8 +151,8 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/socket_impl.cpp restbed-4.6
                               m_ssl_socket->handshake( asio::ssl::stream_base::client );
 --- 138,143 ----
 diff -rc restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp
-*** restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp	Mon Jul 17 16:49:17 2017
---- restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp	Mon Sep 10 06:44:38 2018
+*** restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp	2017-07-17 16:49:17.000000000 +0800
+--- restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp	2018-09-17 02:55:50.000000000 +0800
 ***************
 *** 282,287 ****
 --- 282,314 ----
@@ -150,8 +190,8 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.cpp
           {
               auto socket = m_sockets.find( key );
 diff -rc restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp
-*** restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp	Mon Jul 17 16:49:17 2017
---- restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp	Mon Sep 10 06:42:37 2018
+*** restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp	2017-07-17 16:49:17.000000000 +0800
+--- restbed-4.6.new/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp	2018-09-17 02:55:50.000000000 +0800
 ***************
 *** 12,17 ****
 --- 12,19 ----
@@ -178,8 +218,61 @@ diff -rc restbed-4.6/source/corvusoft/restbed/detail/web_socket_manager_impl.hpp
   
                   std::shared_ptr< WebSocket > update( const std::shared_ptr< WebSocket >& socket );
 diff -rc restbed-4.6/source/corvusoft/restbed/string.cpp restbed-4.6.new/source/corvusoft/restbed/string.cpp
-*** restbed-4.6/source/corvusoft/restbed/string.cpp	Mon Jul 17 16:49:17 2017
---- restbed-4.6.new/source/corvusoft/restbed/string.cpp	Wed Aug 29 15:30:03 2018
+*** restbed-4.6/source/corvusoft/restbed/string.cpp	2017-07-17 16:49:17.000000000 +0800
+--- restbed-4.6.new/source/corvusoft/restbed/string.cpp	2018-09-17 04:06:11.000000000 +0800
+***************
+*** 3,9 ****
+   */
+  
+  //System Includes
+! #include <regex>
+  #include <memory>
+  #include <ciso646>
+  #include <algorithm>
+--- 3,10 ----
+   */
+  
+  //System Includes
+! //#include <regex>
+! #include <boost/regex.hpp>
+  #include <memory>
+  #include <ciso646>
+  #include <algorithm>
+***************
+*** 14,29 ****
+  //External Includes
+  
+  //System Namespaces
+! using std::regex;
+  using std::string;
+  using std::vector;
+! using std::smatch;
+  using std::multimap;
+  using std::transform;
+  using std::unique_ptr;
+! using std::regex_match;
+! using std::regex_replace;
+! using std::regex_constants::icase;
+  
+  //Project Namespaces
+  
+--- 15,30 ----
+  //External Includes
+  
+  //System Namespaces
+! using boost::regex;
+  using std::string;
+  using std::vector;
+! using boost::smatch;
+  using std::multimap;
+  using std::transform;
+  using std::unique_ptr;
+! using boost::regex_match;
+! using boost::regex_replace;
+! using boost::regex_constants::icase;
+  
+  //Project Namespaces
+  
 ***************
 *** 139,145 ****
           }
@@ -189,7 +282,7 @@ diff -rc restbed-4.6/source/corvusoft/restbed/string.cpp restbed-4.6.new/source/
           auto pattern = regex( expression );
           
           if ( option & String::Option::CASE_INSENSITIVE )
---- 139,145 ----
+--- 140,146 ----
           }
           
           static const regex escape( "([.^$|()\\[\\]{}*+?\\\\])" );
@@ -197,3 +290,43 @@ diff -rc restbed-4.6/source/corvusoft/restbed/string.cpp restbed-4.6.new/source/
           auto pattern = regex( expression );
           
           if ( option & String::Option::CASE_INSENSITIVE )
+diff -rc restbed-4.6/source/corvusoft/restbed/uri.cpp restbed-4.6.new/source/corvusoft/restbed/uri.cpp
+*** restbed-4.6/source/corvusoft/restbed/uri.cpp	2017-07-17 16:49:17.000000000 +0800
+--- restbed-4.6.new/source/corvusoft/restbed/uri.cpp	2018-09-17 04:06:44.000000000 +0800
+***************
+*** 3,9 ****
+   */
+  
+  //System Includes
+! #include <regex>
+  #include <cstdio>
+  #include <cstdlib>
+  #include <stdexcept>
+--- 3,10 ----
+   */
+  
+  //System Includes
+! //#include <regex>
+! #include <boost/regex.hpp>
+  #include <cstdio>
+  #include <cstdlib>
+  #include <stdexcept>
+***************
+*** 27,34 ****
+  
+  //System Namespaces
+  using std::stoi;
+! using std::regex;
+! using std::smatch;
+  using std::strtol;
+  using std::string;
+  using std::multimap;
+--- 28,35 ----
+  
+  //System Namespaces
+  using std::stoi;
+! using boost::regex;
+! using boost::smatch;
+  using std::strtol;
+  using std::string;
+  using std::multimap;

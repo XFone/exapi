@@ -24,6 +24,9 @@ ifeq (, $(RESTBED_ROOT))
   RESTBED_DEPENDS := $(RESTBED_LIBDIRS)/librestbed.a
 endif
 
+MODULES  += BOOST
+LIBNAMES += boost_regex
+
 $(RESTBED_DEPENDS):
 	$(call make_module,RESTBED,$(RESTBED_SDK),$(RESTBED_ROOT))
 
