@@ -11,7 +11,7 @@
 
 BUILD = ../../../../build
 SUBDIRS =
-RULESET =
+RULESET = CLANG
 
 # Makefile rules pre processing
 include $(BUILD)/Makefile.pre
