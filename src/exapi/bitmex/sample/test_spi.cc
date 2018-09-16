@@ -18,6 +18,19 @@
 #include <cstring>
 #include <iostream>
 
+#include <regex>
+#if __cplusplus >= 201103L &&                             \
+    (!defined(__GLIBCXX__) || (__cplusplus >= 201402L) || \
+        (defined(_GLIBCXX_REGEX_DFS_QUANTIFIERS_LIMIT) || \
+         defined(_GLIBCXX_REGEX_STATE_LIMIT)           || \
+             (defined(_GLIBCXX_RELEASE)                && \
+             _GLIBCXX_RELEASE > 4)))
+# define HAVE_WORKING_REGEX 1
+#else
+# define HAVE_WORKING_REGEX 0
+# warning "No working regex! please upgrade to gcc-4.9+"
+#endif
+
 /** 
  * Read command line options
  */
@@ -51,6 +64,8 @@ void test_bitmex_quote_spi()
     api->ConnServer(slist, &spi);
     api->Init();
 
+    api->GetAnnouncement();
+    
     api->Join();
     api->Dispose();
 }
@@ -71,6 +86,8 @@ int main(int argc, char *argv[])
         );
         return -1;
     }
+
+    printf("GCC is %d.%d", __GNUC__, __GNUC_MINOR__);
 
     // test async mode
     test_bitmex_quote_spi();

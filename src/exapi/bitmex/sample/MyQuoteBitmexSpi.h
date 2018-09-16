@@ -43,4 +43,40 @@ public:
         cout << "** OnSymbolUnsubscribed" << endl;
     }
 
+    //-------------------------- Extra Data ------------------------------
+
+    virtual void OnAnnouncement(const void *data) {
+        cout << "** OnAnnouncement\n" 
+             << (const char *)data << endl;
+    }
+
+    virtual void OnAnnouncementUrgent(const void *data) {
+        cout << "** OnAnnouncementUrgent\n"
+             << (const char *)data << endl;
+    }
+
+    virtual void OnSchema(const void *schema) {
+        cout << "** OnSchema\n"
+             << (const char *)schema << endl;
+    }
+
+    virtual void OnSchemaWebsocket(const void *schema) {
+        cout << "** OnSchemaWebsocket\n"
+             << (const char *)schema << endl;
+    }
+
+    virtual void OnStats(const void *stats) {
+        cout << "** OnStats\n"
+             << (const char *)stats << endl;
+    }
+
+    virtual void OnStatsHistory(const void *stats) {
+        cout << "** OnStatsHistory\n"
+             << (const char *)stats << endl;
+    }
+
+    virtual void OnStatsHistoryUsd(const void *stats) {
+        cout << "** OnStatsHistoryUsd\n"
+             << (const char *)stats << endl;
+    }
 };

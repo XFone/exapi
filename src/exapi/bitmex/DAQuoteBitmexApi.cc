@@ -239,25 +239,95 @@ int DAQuoteBitmexApi::GetAnnouncementUrgent()
 
 int DAQuoteBitmexApi::GetSchema(const char *model)
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/schema"
+    );
+
+    request->Init();
+    if (nullptr != model) {
+        request->AddParam("model", model);
+    }
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        const char *data = json.c_str();
+        impl->m_spi->OnSchema(data);
+    });
 }
 
 int DAQuoteBitmexApi::GetSchemaWebsocket()
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/websocketHelp"
+    );
+
+    request->Init();
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        const char *data = json.c_str();
+        impl->m_spi->OnSchemaWebsocket(data);
+    });
 }
 
 int DAQuoteBitmexApi::GetStats()
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/stats"
+    );
+
+    request->Init();
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnStats(json.c_str());
+    });
 }
 
 int DAQuoteBitmexApi::GetStatsHistory()
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/stats/history"
+    );
+
+    request->Init();
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnStatsHistory(json.c_str());
+    });
 }
 
 int DAQuoteBitmexApi::GetStatsHistoryUsd()
 {
-    return 0; //TODO
+    GET_IMPL(this, impl);
+
+    auto request = RestRequest::CreateBuilder(
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/stats/historyUSD"
+    );
+
+    request->Init();
+
+    return RestRequest::SendAsync(request, 
+      [impl](const request_t req, const response_t rsp) {
+        std::string json;
+        RestRequest::ParseReponse(rsp, json);
+        impl->m_spi->OnStatsHistoryUsd(json.c_str());
+    });
 }

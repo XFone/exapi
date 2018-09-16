@@ -97,6 +97,10 @@ namespace exapi {
 
         virtual void OnAnnouncementUrgent(const void *data) {}
 
+        virtual void OnSchema(const void *schema) {}
+
+        virtual void OnSchemaWebsocket(const void *schema) {}
+
         virtual void OnStats(const void *stats) {}
 
         virtual void OnStatsHistory(const void *statsHist) {}
