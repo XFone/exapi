@@ -54,13 +54,32 @@ public:
             return *this;
         }
 
+        /**
+         * Json item type: 0: invalid
+         */
+        unsigned type() const;
+
         Json & at(const char *name) throw(std::runtime_error);
 
+        /**
+         * Get value
+         * support typename: bool, double, std::string
+         */
         template<typename T> T get() throw(std::runtime_error);
-        // bool        get() throw(std::runtime_error);
-        // double      get() throw(std::runtime_error);
-        // std::string get() throw(std::runtime_error);
 
+        /**
+         * Get value
+         * support typename: all base type, and C struct defined in json2c
+         * @return 0 for success, elsewise return -errno
+         */
+        template<typename T> int get(T &v);
+
+        /**
+         * Get datetime value
+         * support typename: time_t timestamp_t
+         * @return 0 for success, elsewise return -errno
+         */
+        template<typename T> int get_datetime(T &v);
     }; // Json
 
 public:

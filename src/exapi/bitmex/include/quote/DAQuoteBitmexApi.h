@@ -24,9 +24,11 @@
 #endif
 
 #include "quote/IQuoteApi.h"
-#include "quote/DAQuoteBitmexDef.h"
 
 namespace exapi {
+
+    /* C header without namespace */
+    #include "quote/DAQuoteBitmexDef.h"
 
     /**
      * DAQuoteBitmexSpi

@@ -24,10 +24,12 @@
 #endif
 
 #include "trade/ITraderApi.h"
-#include "trade/DATraderBitmexDef.h"
-#include "quote/DAQuoteBitmexDef.h"
 
 namespace exapi {
+
+    /* C header without namespace */
+    #include "quote/DAQuoteBitmexDef.h"
+    #include "trade/DATraderBitmexDef.h"
 
     /**
      * DATraderBitmexSpi

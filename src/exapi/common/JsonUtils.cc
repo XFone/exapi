@@ -13,6 +13,7 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <cerrno>
 #include <memory>
 #include <sstream>
 #include <chrono>
@@ -58,6 +59,11 @@ JsonUtils::Json::~Json()
     if (nullptr != m_ctx_root) {
         cJSON_Delete(m_ctx_root);
     }
+}
+
+unsigned JsonUtils::Json::type() const
+{
+    return (m_pointer != nullptr) ? m_pointer->type : cJSON_Invalid;
 }
 
 JsonUtils::Json &JsonUtils::Json::at(const char *name) throw(std::runtime_error)
@@ -109,6 +115,175 @@ std::string JsonUtils::Json::get() throw(std::runtime_error)
     throw std::runtime_error(
         std::string("json item") + m_pointer->string + "is not string"
     );
+}
+
+template<>
+int JsonUtils::Json::get(const char * &v)
+{
+    if (m_pointer->type == cJSON_String) {
+        v = m_pointer->valuestring;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(const char ** &v)  // array of string [ "", ... ]
+{
+    if (m_pointer->type == cJSON_Array) {
+        cJSON *child = m_pointer->child;
+        while (child != NULL) {
+            if (child->type != cJSON_String || child->type != cJSON_Raw) {
+                // TODO: show warning
+            }
+            *v++  = child->valuestring;
+            child = child->next;
+        }
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(const void * &v)
+{
+    if (m_pointer->type == cJSON_String || m_pointer->type == cJSON_Raw) {
+        v = m_pointer->valuestring;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(bool &v)
+{
+    if (m_pointer->type == cJSON_False) {
+        v = false;
+        return 0;
+    } else if (m_pointer->type == cJSON_True) {
+        v = true;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(double &v)
+{
+    if (m_pointer->type == cJSON_Number) {
+        v = m_pointer->valuedouble;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(double * &v)  // array of double [ 1.0, ... ]
+{
+    if (m_pointer->type == cJSON_Array) {
+        cJSON *child = m_pointer->child;
+        while (child != NULL) {
+            if (child->type != cJSON_Number) {
+                // TODO: show warning
+            }
+            *v++  = child->valuedouble;
+            child = child->next;
+        }
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(long &v)
+{
+    if (m_pointer->type == cJSON_Number) {
+        v = (long)m_pointer->valuedouble;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(long * &v)  // array of long [ 1, ... ]
+{
+    if (m_pointer->type == cJSON_Array) {
+        cJSON *child = m_pointer->child;
+        while (child != NULL) {
+            if (child->type != cJSON_Number) {
+                // TODO: show warning
+            }
+            *v++  = (long)child->valuedouble;
+            child = child->next;
+        }
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(unsigned long &v)
+{
+    if (m_pointer->type == cJSON_Number) {
+        v = (unsigned long)m_pointer->valuedouble;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(unsigned long * &v)  // array of unsigned long [ 1, ... ]
+{
+    if (m_pointer->type == cJSON_Array) {
+        cJSON *child = m_pointer->child;
+        while (child != NULL) {
+            if (child->type != cJSON_Number) {
+                // TODO: show warning
+            }
+            *v++  = (unsigned long)child->valuedouble;
+            child = child->next;
+        }
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(int &v)
+{
+    if (m_pointer->type == cJSON_Number) {
+        v = (int32_t)m_pointer->valuedouble;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(long long &v)
+{
+    if (m_pointer->type == cJSON_Number) {
+        v = (int64_t)m_pointer->valuedouble;
+        return 0;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get_datetime(long &time)
+{
+    if (m_pointer->type == cJSON_String) {
+        return time = m_pointer->valuedouble;
+    }
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get_datetime(long long &timestamp)
+{
+    if (m_pointer->type == cJSON_String) {
+        return timestamp = m_pointer->valuedouble;
+    }
+    return -EBADMSG;
 }
 
 //---------------------------- JsonUtils ----------------------------------
