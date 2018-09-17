@@ -56,9 +56,9 @@ $(RESTBED_SRC)/dependency/catch/include: catch-dependency
 	@cp -a catch-dependency/include $(RESTBED_SRC)/dependency/catch
 
 # restbed source
-$(RESTBED_SRC):
+$(RESTBED_SRC): $(RESTBED_VER).patch
 	@echo "⬇️  Downloading $(SRC_URL)..."
-	@wget -c $(SRC_URL) -O $(RESTBED_VER).tgz
+	-@wget -c $(SRC_URL) -O $(RESTBED_VER).tgz
 	@tar zxf $(RESTBED_VER).tgz
 	@cd $(RESTBED_SRC) ; patch -p1 < ../$(RESTBED_VER).patch
 

@@ -16,28 +16,38 @@ SUBDIRS = build
 include $(BUILD)/Makefile.pre
 
 # Depended Modules (libraries)
-MODULES += CJSON RESTBED
+L1_MODULES = CJSON RESTBED
+MODULES   += $(L1_MODULES)
 
 # All
 all::
 	@set -e
 	@echo "---------------------------------------------------------------"
-	@echo "               Building Third-party Libraries                  "
+	@echo "               Building Third-Party Libraries                  "
 	@echo "---------------------------------------------------------------"
 	-@TARGET_ARCH=$(TARGET_ARCH) $(MAKE) --no-print-directory modules
 
 list:
-	@echo "List of Third-party Libraries:"
-	-@for i in $(LIBNAMES) ; do ( echo "  " $$i ); done
+	@echo "----------------------------------"
+	@echo "List of Third-Party Libraries:  "
+	-@for i in $(LIBNAMES) ; do ( echo " " $$i ); done
+	@echo "----------------------------------"
+	@echo "Libraries in Current Directory: "
+	-@for i in $(LIBROOTS) ; do ( echo " " $$i ); done
+
+clean:
+	-@for i in $(LIBROOTS) ; do ( echo "cleaning $$i" && rm -rf $$i ); done
 
 # Makefile rules post processing
 # include $(BUILD)/Makefile.post
+
 include $(BUILD)/modules.mk
-MDEPENDS += $(foreach module, $(MODULES), $($(module)_DEPENDS))
-LIBDIRS  += $(foreach module, $(MODULES), $(abspath $($(module)_LIBDIRS)))
+MDEPENDS += $(foreach module, $(L1_MODULES), $($(module)_DEPENDS))
+LIBROOTS += $(foreach module, $(L1_MODULES), $(abspath $($(module)_ROOT)))
 LIBNAMES += $(foreach module, $(MODULES), $($(module)_LIBNAME))
 
 DEPEND_LIBS += $(strip $(MDEPENDS))
 
 modules: $(DEPEND_LIBS)
 	@echo "[---]	😎 done."
+
