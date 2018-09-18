@@ -18,6 +18,7 @@
 #include "RestRequest.h"
 #include "BitmexApi.h"
 #include "JsonUtils.h"
+#include "BitmexApiDef.h"
 #include "quote/DAQuoteBitmexApi.h"
 
 using namespace exapi;
@@ -33,7 +34,7 @@ private:
     const char          *m_domain;
     std::string          m_api_key;
     std::string          m_secret_key;
-    DAQuoteBitmexSpi   *m_spi;
+    DAQuoteBitmexSpi    *m_spi;
 
     _DAQuoteBitmexApiImpl(const char *api_key, const char *secret_key) 
       : m_domain(BITMEX_REST_URL), 
@@ -264,7 +265,7 @@ int DAQuoteBitmexApi::GetSchemaWebsocket()
     GET_IMPL(this, impl);
 
     auto request = RestRequest::CreateBuilder(
-        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/websocketHelp"
+        impl->m_domain, HTTP_PROTOCOL_HTTPS, METHOD_GET, "/api/v1/schema/websocketHelp"
     );
 
     request->Init();

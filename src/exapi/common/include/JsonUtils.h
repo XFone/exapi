@@ -18,6 +18,15 @@
 #include <stdexcept>
 
 /**
+ * Json string
+ */
+struct _json_t {
+    char string[];
+};
+
+typedef _json_t *json_t;
+
+/**
  * JsonUtils has methods for processing json string
  */
 class JsonUtils {
@@ -72,14 +81,14 @@ public:
          * support typename: all base type, and C struct defined in json2c
          * @return 0 for success, elsewise return -errno
          */
-        template<typename T> int get(T &v);
+        template<typename T> int get(const char *name, T &v);
 
         /**
          * Get datetime value
          * support typename: time_t timestamp_t
          * @return 0 for success, elsewise return -errno
          */
-        template<typename T> int get_datetime(T &v);
+        template<typename T> int get_datetime(const char *name, T &v);
     }; // Json
 
 public:
@@ -140,3 +149,17 @@ public:
     template <typename T>
     static std::string to_json(std::vector< T > values);
 };
+
+#if defined(_JSON_DECODER_)
+
+#include <unordered_map>
+using std::unordered_map;
+using std::string;
+
+typedef void (* JsonDecoderRt)(JsonUtils::JsonImpl *jnode, void *object);
+
+typedef unordered_map<string, JsonDecoderRt> decoder_map_t;
+
+void decode_json_tree(const decoder_map_t &jmap, JsonUtils::JsonImpl *root, void *object);
+
+#endif /* _JSON_DECODER_ */

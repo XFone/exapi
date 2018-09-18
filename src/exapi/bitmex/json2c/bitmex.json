@@ -10,34 +10,23 @@
     "version": "1.0"
   },
   "definitions": {
-    "QueryFilterParams": {
+    "Announcement": {
       "description": "",
       "properties": {
-        "symbol": {
-          "type": "string"
-        },
-        "filter": {
-          "type": "string"
-        },
-        "columns": {
-          "type": "string"
-        },
-        "count": {
+        "id": {
           "type": "integer",
           "format": "int32"
         },
-        "start": {
-          "type": "integer",
-          "format": "int32"
+        "link": {
+          "type": "string"
         },
-        "reverse": {
-          "type": "boolean"
+        "title": {
+          "type": "string"
         },
-        "startTime": {
-          "type": "string",
-          "format": "date-time"
+        "content": {
+          "type": "string"
         },
-        "endTime": {
+        "date": {
           "type": "string",
           "format": "date-time"
         },
@@ -47,12 +36,928 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, QueryFilterParams &v)",
-        "encoder": "std::string to_json(const QueryFilterParams &v)"
+        "decoder": "int from_json(JsonUtils::Json &json, Announcement &v)",
+        "encoder": "std::string to_json(const Announcement &v)"
     },
-    "OrderParams": {
+    "Error": {
       "description": "",
       "properties": {
+        "error": {
+          "type": "string"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Error &v)",
+        "encoder": "std::string to_json(const Error &v)"
+    },
+    "APIKey": {
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nonce": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cidr": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "userId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, APIKey &v)",
+        "encoder": "std::string to_json(const APIKey &v)"
+    },
+    "Chat": {
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "user": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "fromBot": {
+          "type": "boolean"
+        },
+        "channelID": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Chat &v)",
+        "encoder": "std::string to_json(const Chat &v)"
+    },
+    "ChatChannel": {
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "type": "string"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, ChatChannel &v)",
+        "encoder": "std::string to_json(const ChatChannel &v)"
+    },
+    "ConnectedUsers": {
+      "description": "",
+      "properties": {
+        "users": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bots": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, ConnectedUsers &v)",
+        "encoder": "std::string to_json(const ConnectedUsers &v)"
+    },
+    "Execution": {
+      "description": "",
+      "properties": {
+        "execID": {
+          "type": "string"
+        },
+        "orderID": {
+          "type": "string"
+        },
+        "clOrdID": {
+          "type": "string"
+        },
+        "clOrdLinkID": {
+          "type": "string"
+        },
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "side": {
+          "type": "string"
+        },
+        "lastQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastPx": {
+          "type": "number",
+          "format": "double"
+        },
+        "underlyingLastPx": {
+          "type": "number",
+          "format": "double"
+        },
+        "lastMkt": {
+          "type": "string"
+        },
+        "lastLiquidityInd": {
+          "type": "string"
+        },
+        "simpleOrderQty": {
+          "type": "number",
+          "format": "double"
+        },
+        "orderQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "displayQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "stopPx": {
+          "type": "number",
+          "format": "double"
+        },
+        "pegOffsetValue": {
+          "type": "number",
+          "format": "double"
+        },
+        "pegPriceType": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "settlCurrency": {
+          "type": "string"
+        },
+        "execType": {
+          "type": "string"
+        },
+        "ordType": {
+          "type": "string"
+        },
+        "timeInForce": {
+          "type": "string"
+        },
+        "execInst": {
+          "type": "string"
+        },
+        "contingencyType": {
+          "type": "string"
+        },
+        "exDestination": {
+          "type": "string"
+        },
+        "ordStatus": {
+          "type": "string"
+        },
+        "triggered": {
+          "type": "string"
+        },
+        "workingIndicator": {
+          "type": "boolean"
+        },
+        "ordRejReason": {
+          "type": "string"
+        },
+        "simpleLeavesQty": {
+          "type": "number",
+          "format": "double"
+        },
+        "leavesQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "simpleCumQty": {
+          "type": "number",
+          "format": "double"
+        },
+        "cumQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "avgPx": {
+          "type": "number",
+          "format": "double"
+        },
+        "commission": {
+          "type": "number",
+          "format": "double"
+        },
+        "tradePublishIndicator": {
+          "type": "string"
+        },
+        "multiLegReportingType": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "trdMatchID": {
+          "type": "string"
+        },
+        "execCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "homeNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "foreignNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "transactTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Execution &v)",
+        "encoder": "std::string to_json(const Execution &v)"
+    },
+    "Funding": {
+      "description": "",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "fundingInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fundingRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "fundingRateDaily": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Funding &v)",
+        "encoder": "std::string to_json(const Funding &v)"
+    },
+    "Instrument": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "rootSymbol": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "typ": {
+          "type": "string"
+        },
+        "listing": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "front": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiry": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "settle": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "relistInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "inverseLeg": {
+          "type": "string"
+        },
+        "sellLeg": {
+          "type": "string"
+        },
+        "buyLeg": {
+          "type": "string"
+        },
+        "optionStrikePcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "optionStrikeRound": {
+          "type": "number",
+          "format": "double"
+        },
+        "optionStrikePrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "optionMultiplier": {
+          "type": "number",
+          "format": "double"
+        },
+        "positionCurrency": {
+          "type": "string"
+        },
+        "underlying": {
+          "type": "string"
+        },
+        "quoteCurrency": {
+          "type": "string"
+        },
+        "underlyingSymbol": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "referenceSymbol": {
+          "type": "string"
+        },
+        "calcInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "publishInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "publishTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "maxOrderQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "lotSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tickSize": {
+          "type": "number",
+          "format": "double"
+        },
+        "multiplier": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "settlCurrency": {
+          "type": "string"
+        },
+        "underlyingToPositionMultiplier": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "underlyingToSettleMultiplier": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "quoteToSettleMultiplier": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "isQuanto": {
+          "type": "boolean"
+        },
+        "isInverse": {
+          "type": "boolean"
+        },
+        "initMargin": {
+          "type": "number",
+          "format": "double"
+        },
+        "maintMargin": {
+          "type": "number",
+          "format": "double"
+        },
+        "riskLimit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "riskStep": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "number",
+          "format": "double"
+        },
+        "capped": {
+          "type": "boolean"
+        },
+        "taxed": {
+          "type": "boolean"
+        },
+        "deleverage": {
+          "type": "boolean"
+        },
+        "makerFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "takerFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "settlementFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "insuranceFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "fundingBaseSymbol": {
+          "type": "string"
+        },
+        "fundingQuoteSymbol": {
+          "type": "string"
+        },
+        "fundingPremiumSymbol": {
+          "type": "string"
+        },
+        "fundingTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fundingInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fundingRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "indicativeFundingRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "rebalanceTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rebalanceInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "openingTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "closingTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sessionInterval": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "prevClosePrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "limitDownPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "limitUpPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "bankruptLimitDownPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "bankruptLimitUpPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "prevTotalVolume": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalVolume": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "volume": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "volume24h": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevTotalTurnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalTurnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover24h": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevPrice24h": {
+          "type": "number",
+          "format": "double"
+        },
+        "vwap": {
+          "type": "number",
+          "format": "double"
+        },
+        "highPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "lowPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "lastPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "lastPriceProtected": {
+          "type": "number",
+          "format": "double"
+        },
+        "lastTickDirection": {
+          "type": "string"
+        },
+        "lastChangePcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "bidPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "midPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "askPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "impactBidPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "impactMidPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "impactAskPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "hasLiquidity": {
+          "type": "boolean"
+        },
+        "openInterest": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fairMethod": {
+          "type": "string"
+        },
+        "fairBasisRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "fairBasis": {
+          "type": "number",
+          "format": "double"
+        },
+        "fairPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "markMethod": {
+          "type": "string"
+        },
+        "markPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "indicativeTaxRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "indicativeSettlePrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "optionUnderlyingPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "settledPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Instrument &v)",
+        "encoder": "std::string to_json(const Instrument &v)"
+    },
+    "InstrumentInterval": {
+      "description": "",
+      "properties": {
+        "intervals": {
+          "type": "string"
+        },
+        "symbols": {
+          "type": "string"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, InstrumentInterval &v)",
+        "encoder": "std::string to_json(const InstrumentInterval &v)"
+    },
+    "IndexComposite": {
+      "description": "",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "indexSymbol": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "lastPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "weight": {
+          "type": "number",
+          "format": "double"
+        },
+        "logged": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, IndexComposite &v)",
+        "encoder": "std::string to_json(const IndexComposite &v)"
+    },
+    "Insurance": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "walletBalance": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Insurance &v)",
+        "encoder": "std::string to_json(const Insurance &v)"
+    },
+    "Leaderboard": {
+      "description": "",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "isRealName": {
+          "type": "boolean"
+        },
+        "profit": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Leaderboard &v)",
+        "encoder": "std::string to_json(const Leaderboard &v)"
+    },
+    "Liquidation": {
+      "description": "",
+      "properties": {
+        "orderID": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "side": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "leavesQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Liquidation &v)",
+        "encoder": "std::string to_json(const Liquidation &v)"
+    },
+    "Notification": {
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "ttl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string"
+        },
+        "closable": {
+          "type": "boolean"
+        },
+        "persist": {
+          "type": "boolean"
+        },
+        "waitForVisibility": {
+          "type": "boolean"
+        },
+        "sound": {
+          "type": "string"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Notification &v)",
+        "encoder": "std::string to_json(const Notification &v)"
+    },
+    "Order": {
+      "description": "",
+      "properties": {
+        "orderID": {
+          "type": "string"
+        },
+        "clOrdID": {
+          "type": "string"
+        },
+        "clOrdLinkID": {
+          "type": "string"
+        },
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
         "symbol": {
           "type": "string"
         },
@@ -79,17 +984,17 @@
           "type": "number",
           "format": "double"
         },
-        "clOrdID": {
-          "type": "string"
-        },
-        "clOrdLinkID": {
-          "type": "string"
-        },
         "pegOffsetValue": {
           "type": "number",
           "format": "double"
         },
         "pegPriceType": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "settlCurrency": {
           "type": "string"
         },
         "ordType": {
@@ -104,37 +1009,20 @@
         "contingencyType": {
           "type": "string"
         },
-        "text": {
+        "exDestination": {
           "type": "string"
         },
-        "_bufsiz": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "required": [],
-        "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderParams &v)",
-        "encoder": "std::string to_json(const OrderParams &v)"
-    },
-    "OrderAmendParams": {
-      "description": "",
-      "properties": {
-        "orderId": {
+        "ordStatus": {
           "type": "string"
         },
-        "origClOrdID": {
+        "triggered": {
           "type": "string"
         },
-        "clOrdID": {
+        "workingIndicator": {
+          "type": "boolean"
+        },
+        "ordRejReason": {
           "type": "string"
-        },
-        "simpleOrderQty": {
-          "type": "number",
-          "format": "double"
-        },
-        "orderQty": {
-          "type": "integer",
-          "format": "int32"
         },
         "simpleLeavesQty": {
           "type": "number",
@@ -144,19 +1032,827 @@
           "type": "integer",
           "format": "int32"
         },
+        "simpleCumQty": {
+          "type": "number",
+          "format": "double"
+        },
+        "cumQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "avgPx": {
+          "type": "number",
+          "format": "double"
+        },
+        "multiLegReportingType": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "transactTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Order &v)",
+        "encoder": "std::string to_json(const Order &v)"
+    },
+    "OrderBookL2": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "side": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
         "price": {
           "type": "number",
           "format": "double"
         },
-        "stopPx": {
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderBookL2 &v)",
+        "encoder": "std::string to_json(const OrderBookL2 &v)"
+    },
+    "Position": {
+      "description": "",
+      "properties": {
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "underlying": {
+          "type": "string"
+        },
+        "quoteCurrency": {
+          "type": "string"
+        },
+        "commission": {
           "type": "number",
           "format": "double"
         },
-        "pegOffsetValue": {
+        "initMarginReq": {
           "type": "number",
           "format": "double"
         },
-        "text": {
+        "maintMarginReq": {
+          "type": "number",
+          "format": "double"
+        },
+        "riskLimit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "leverage": {
+          "type": "number",
+          "format": "double"
+        },
+        "crossMargin": {
+          "type": "boolean"
+        },
+        "deleveragePercentile": {
+          "type": "number",
+          "format": "double"
+        },
+        "rebalancedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevRealisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevUnrealisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevClosePrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "openingTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "openingQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openingCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openingComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openOrderBuyQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openOrderBuyCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openOrderBuyPremium": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openOrderSellQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openOrderSellCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openOrderSellPremium": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execBuyQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execBuyCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execSellQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execSellCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currentTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "currentQty": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currentCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currentComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "realisedCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossOpenCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossOpenPremium": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossExecCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "isOpen": {
+          "type": "boolean"
+        },
+        "markPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "markValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "riskValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "homeNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "foreignNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "posState": {
+          "type": "string"
+        },
+        "posCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posCost2": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posCross": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posInit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posLoss": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posMaint": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "posAllowance": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "taxableMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "initMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maintMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sessionMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "targetExcessMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "varMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "realisedGrossPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "realisedTax": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "realisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedGrossPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "longBankrupt": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "shortBankrupt": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "taxBase": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "indicativeTaxRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "indicativeTax": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedTax": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedPnlPcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "unrealisedRoePcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "simpleQty": {
+          "type": "number",
+          "format": "double"
+        },
+        "simpleCost": {
+          "type": "number",
+          "format": "double"
+        },
+        "simpleValue": {
+          "type": "number",
+          "format": "double"
+        },
+        "simplePnl": {
+          "type": "number",
+          "format": "double"
+        },
+        "simplePnlPcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "avgCostPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "avgEntryPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "breakEvenPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "marginCallPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "liquidationPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "bankruptPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "lastValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Position &v)",
+        "encoder": "std::string to_json(const Position &v)"
+    },
+    "Quote": {
+      "description": "",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "bidSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bidPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "askPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "askSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Quote &v)",
+        "encoder": "std::string to_json(const Quote &v)"
+    },
+    "Settlement": {
+      "description": "",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "settlementType": {
+          "type": "string"
+        },
+        "settledPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "optionStrikePrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "optionUnderlyingPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "bankrupt": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "taxBase": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "taxRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Settlement &v)",
+        "encoder": "std::string to_json(const Settlement &v)"
+    },
+    "Stats": {
+      "description": "",
+      "properties": {
+        "rootSymbol": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "volume24h": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover24h": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openInterest": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "openValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Stats &v)",
+        "encoder": "std::string to_json(const Stats &v)"
+    },
+    "StatsHistory": {
+      "description": "",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rootSymbol": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "volume": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, StatsHistory &v)",
+        "encoder": "std::string to_json(const StatsHistory &v)"
+    },
+    "StatsUSD": {
+      "description": "",
+      "properties": {
+        "rootSymbol": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "turnover24h": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover30d": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover365d": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, StatsUSD &v)",
+        "encoder": "std::string to_json(const StatsUSD &v)"
+    },
+    "Trade": {
+      "description": "",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "side": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "tickDirection": {
+          "type": "string"
+        },
+        "trdMatchID": {
+          "type": "string"
+        },
+        "grossValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "homeNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "foreignNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Trade &v)",
+        "encoder": "std::string to_json(const Trade &v)"
+    },
+    "TradeBin": {
+      "description": "",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "open": {
+          "type": "number",
+          "format": "double"
+        },
+        "high": {
+          "type": "number",
+          "format": "double"
+        },
+        "low": {
+          "type": "number",
+          "format": "double"
+        },
+        "close": {
+          "type": "number",
+          "format": "double"
+        },
+        "trades": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "volume": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vwap": {
+          "type": "number",
+          "format": "double"
+        },
+        "lastSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "turnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "homeNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "foreignNotional": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, TradeBin &v)",
+        "encoder": "std::string to_json(const TradeBin &v)"
+    },
+    "Wallet": {
+      "description": "",
+      "properties": {
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "prevDeposited": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevWithdrawn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevTransferIn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevTransferOut": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevAmount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deltaDeposited": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deltaWithdrawn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deltaTransferIn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deltaTransferOut": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deltaAmount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deposited": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "withdrawn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transferIn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transferOut": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pendingCredit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pendingDebit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "confirmedDebit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "addr": {
+          "type": "string"
+        },
+        "script": {
+          "type": "string"
+        },
+        "withdrawalLock": {
           "type": "string"
         },
         "_bufsiz": {
@@ -165,17 +1861,1001 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderAmendParams &v)",
-        "encoder": "std::string to_json(const OrderAmendParams &v)"
+        "decoder": "int from_json(JsonUtils::Json &json, Wallet &v)",
+        "encoder": "std::string to_json(const Wallet &v)"
     },
-    "QueryPositionParams": {
+    "Transaction": {
+      "description": "",
+      "properties": {
+        "transactID": {
+          "type": "string"
+        },
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "transactType": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fee": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transactStatus": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "tx": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "transactTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Transaction &v)",
+        "encoder": "std::string to_json(const Transaction &v)"
+    },
+    "AccessToken": {
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "ttl": {
+          "type": "number",
+          "format": "double"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, AccessToken &v)",
+        "encoder": "std::string to_json(const AccessToken &v)"
+    },
+    "Affiliate": {
+      "description": "",
+      "properties": {
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "prevPayout": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevTurnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "execTurnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "execComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalReferrals": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalTurnover": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "payoutPcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "pendingPayout": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "referrerAccount": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Affiliate &v)",
+        "encoder": "std::string to_json(const Affiliate &v)"
+    },
+    "User": {
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ownerId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "preferences": {
+          "type": "string"
+        },
+        "TFAEnabled": {
+          "type": "string"
+        },
+        "affiliateID": {
+          "type": "string"
+        },
+        "pgpPubKey": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "geoipCountry": {
+          "type": "string"
+        },
+        "geoipRegion": {
+          "type": "string"
+        },
+        "typ": {
+          "type": "string"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, User &v)",
+        "encoder": "std::string to_json(const User &v)"
+    },
+    "UserCommission": {
+      "description": "",
+      "properties": {
+        "makerFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "takerFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "settlementFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "maxFee": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserCommission &v)",
+        "encoder": "std::string to_json(const UserCommission &v)"
+    },
+    "Margin": {
+      "description": "",
+      "properties": {
+        "account": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "riskLimit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevState": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pendingCredit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pendingDebit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "confirmedDebit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevRealisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "prevUnrealisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossComm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossOpenCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossOpenPremium": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossExecCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grossMarkValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "riskValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "taxableMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "initMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maintMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sessionMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "targetExcessMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "varMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "realisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedPnl": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "indicativeTax": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unrealisedProfit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "syntheticMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "walletBalance": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "marginBalance": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "marginBalancePcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "marginLeverage": {
+          "type": "number",
+          "format": "double"
+        },
+        "marginUsedPcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "excessMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "excessMarginPcnt": {
+          "type": "number",
+          "format": "double"
+        },
+        "availableMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "withdrawableMargin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "grossLastValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "commission": {
+          "type": "number",
+          "format": "double"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, Margin &v)",
+        "encoder": "std::string to_json(const Margin &v)"
+    },
+    "UserPreferences": {
+      "description": "",
+      "properties": {
+        "alertOnLiquidations": {
+          "type": "boolean"
+        },
+        "animationsEnabled": {
+          "type": "boolean"
+        },
+        "announcementsLastSeen": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "chatChannelID": {
+          "type": "number",
+          "format": "double"
+        },
+        "colorTheme": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "debug": {
+          "type": "boolean"
+        },
+        "disableEmails": {
+          "type": "string"
+        },
+        "hideConfirmDialogs": {
+          "type": "string"
+        },
+        "hideConnectionModal": {
+          "type": "boolean"
+        },
+        "hideFromLeaderboard": {
+          "type": "boolean"
+        },
+        "hideNameFromLeaderboard": {
+          "type": "boolean"
+        },
+        "hideNotifications": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "msgsSeen": {
+          "type": "string"
+        },
+        "orderBookBinning": {
+          "type": "string"
+        },
+        "orderBookType": {
+          "type": "string"
+        },
+        "orderClearImmediate": {
+          "type": "boolean"
+        },
+        "orderControlsPlusMinus": {
+          "type": "boolean"
+        },
+        "showLocaleNumbers": {
+          "type": "boolean"
+        },
+        "sounds": {
+          "type": "string"
+        },
+        "strictIPCheck": {
+          "type": "boolean"
+        },
+        "strictTimeout": {
+          "type": "boolean"
+        },
+        "tickerGroup": {
+          "type": "string"
+        },
+        "tickerPinned": {
+          "type": "boolean"
+        },
+        "tradeLayout": {
+          "type": "string"
+        },
+        "_bufsiz": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserPreferences &v)",
+        "encoder": "std::string to_json(const UserPreferences &v)"
+    },
+    "AnnouncementGetParams": {
+      "description": "",
+      "properties": {
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, AnnouncementGetParams &v)",
+        "encoder": "std::string to_json(const AnnouncementGetParams &v)"
+    },
+    "APIKeyNewParams": {
+      "description": "",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "cidr": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, APIKeyNewParams &v)",
+        "encoder": "std::string to_json(const APIKeyNewParams &v)"
+    },
+    "APIKeyDisableParams": {
+      "description": "",
+      "properties": {
+        "apiKeyID": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, APIKeyDisableParams &v)",
+        "encoder": "std::string to_json(const APIKeyDisableParams &v)"
+    },
+    "APIKeyEnableParams": {
+      "description": "",
+      "properties": {
+        "apiKeyID": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, APIKeyEnableParams &v)",
+        "encoder": "std::string to_json(const APIKeyEnableParams &v)"
+    },
+    "ChatGetParams": {
+      "description": "",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "channelID": {
+          "type": "number",
+          "format": "double"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, ChatGetParams &v)",
+        "encoder": "std::string to_json(const ChatGetParams &v)"
+    },
+    "ExecutionGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, ExecutionGetParams &v)",
+        "encoder": "std::string to_json(const ExecutionGetParams &v)"
+    },
+    "ExecutionGetTradeHistoryParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, ExecutionGetTradeHistoryParams &v)",
+        "encoder": "std::string to_json(const ExecutionGetTradeHistoryParams &v)"
+    },
+    "FundingGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, FundingGetParams &v)",
+        "encoder": "std::string to_json(const FundingGetParams &v)"
+    },
+    "InstrumentGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, InstrumentGetParams &v)",
+        "encoder": "std::string to_json(const InstrumentGetParams &v)"
+    },
+    "InstrumentGetCompositeIndexParams": {
+      "description": "",
+      "properties": {
+        "account": {
+          "type": "number",
+          "format": "double"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, InstrumentGetCompositeIndexParams &v)",
+        "encoder": "std::string to_json(const InstrumentGetCompositeIndexParams &v)"
+    },
+    "InsuranceGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, InsuranceGetParams &v)",
+        "encoder": "std::string to_json(const InsuranceGetParams &v)"
+    },
+    "LeaderboardGetParams": {
+      "description": "",
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, LeaderboardGetParams &v)",
+        "encoder": "std::string to_json(const LeaderboardGetParams &v)"
+    },
+    "LiquidationGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, LiquidationGetParams &v)",
+        "encoder": "std::string to_json(const LiquidationGetParams &v)"
+    },
+    "OrderGetOrdersParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderGetOrdersParams &v)",
+        "encoder": "std::string to_json(const OrderGetOrdersParams &v)"
+    },
+    "OrderNewBulkParams": {
+      "description": "",
+      "properties": {
+        "orders": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderNewBulkParams &v)",
+        "encoder": "std::string to_json(const OrderNewBulkParams &v)"
+    },
+    "OrderClosePositionParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderClosePositionParams &v)",
+        "encoder": "std::string to_json(const OrderClosePositionParams &v)"
+    },
+    "OrderCancelAllParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "text": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderCancelAllParams &v)",
+        "encoder": "std::string to_json(const OrderCancelAllParams &v)"
+    },
+    "OrderCancelAllAfterParams": {
+      "description": "",
+      "properties": {
+        "timeout": {
+          "type": "number",
+          "format": "double"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderCancelAllAfterParams &v)",
+        "encoder": "std::string to_json(const OrderCancelAllAfterParams &v)"
+    },
+    "OrderBookGetL2Params": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "depth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, OrderBookGetL2Params &v)",
+        "encoder": "std::string to_json(const OrderBookGetL2Params &v)"
+    },
+    "PositionGetParams": {
       "description": "",
       "properties": {
         "filter": {
-          "type": "string"
+          "type": "string",
+          "format": "JSON"
         },
         "columns": {
-          "type": "string"
+          "type": "string",
+          "format": "JSON"
         },
         "count": {
           "type": "integer",
@@ -183,8 +2863,469 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, QueryPositionParams &v)",
-        "encoder": "std::string to_json(const QueryPositionParams &v)"
+        "decoder": "int from_json(JsonUtils::Json &json, PositionGetParams &v)",
+        "encoder": "std::string to_json(const PositionGetParams &v)"
+    },
+    "PositionIsolateMarginParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, PositionIsolateMarginParams &v)",
+        "encoder": "std::string to_json(const PositionIsolateMarginParams &v)"
+    },
+    "PositionUpdateRiskLimitParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "riskLimit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, PositionUpdateRiskLimitParams &v)",
+        "encoder": "std::string to_json(const PositionUpdateRiskLimitParams &v)"
+    },
+    "PositionTransferIsolatedMarginParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, PositionTransferIsolatedMarginParams &v)",
+        "encoder": "std::string to_json(const PositionTransferIsolatedMarginParams &v)"
+    },
+    "PositionUpdateLeverageParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "leverage": {
+          "type": "number",
+          "format": "double"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, PositionUpdateLeverageParams &v)",
+        "encoder": "std::string to_json(const PositionUpdateLeverageParams &v)"
+    },
+    "QuoteGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, QuoteGetParams &v)",
+        "encoder": "std::string to_json(const QuoteGetParams &v)"
+    },
+    "QuoteGetBucketedParams": {
+      "description": "",
+      "properties": {
+        "binSize": {
+          "type": "string"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, QuoteGetBucketedParams &v)",
+        "encoder": "std::string to_json(const QuoteGetBucketedParams &v)"
+    },
+    "SchemaGetParams": {
+      "description": "",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, SchemaGetParams &v)",
+        "encoder": "std::string to_json(const SchemaGetParams &v)"
+    },
+    "SettlementGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, SettlementGetParams &v)",
+        "encoder": "std::string to_json(const SettlementGetParams &v)"
+    },
+    "TradeGetParams": {
+      "description": "",
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, TradeGetParams &v)",
+        "encoder": "std::string to_json(const TradeGetParams &v)"
+    },
+    "TradeGetBucketedParams": {
+      "description": "",
+      "properties": {
+        "binSize": {
+          "type": "string"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "columns": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reverse": {
+          "type": "boolean"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, TradeGetBucketedParams &v)",
+        "encoder": "std::string to_json(const TradeGetBucketedParams &v)"
+    },
+    "UserGetDepositAddressParams": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserGetDepositAddressParams &v)",
+        "encoder": "std::string to_json(const UserGetDepositAddressParams &v)"
+    },
+    "UserGetWalletParams": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserGetWalletParams &v)",
+        "encoder": "std::string to_json(const UserGetWalletParams &v)"
+    },
+    "UserGetWalletHistoryParams": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserGetWalletHistoryParams &v)",
+        "encoder": "std::string to_json(const UserGetWalletHistoryParams &v)"
+    },
+    "UserGetWalletSummaryParams": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserGetWalletSummaryParams &v)",
+        "encoder": "std::string to_json(const UserGetWalletSummaryParams &v)"
+    },
+    "UserMinWithdrawalFeeParams": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserMinWithdrawalFeeParams &v)",
+        "encoder": "std::string to_json(const UserMinWithdrawalFeeParams &v)"
+    },
+    "UserRequestWithdrawalParams": {
+      "description": "",
+      "properties": {
+        "otpToken": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "address": {
+          "type": "string"
+        },
+        "fee": {
+          "type": "number",
+          "format": "double"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserRequestWithdrawalParams &v)",
+        "encoder": "std::string to_json(const UserRequestWithdrawalParams &v)"
+    },
+    "UserCancelWithdrawalParams": {
+      "description": "",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserCancelWithdrawalParams &v)",
+        "encoder": "std::string to_json(const UserCancelWithdrawalParams &v)"
+    },
+    "UserConfirmWithdrawalParams": {
+      "description": "",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserConfirmWithdrawalParams &v)",
+        "encoder": "std::string to_json(const UserConfirmWithdrawalParams &v)"
+    },
+    "UserRequestEnableTFAParams": {
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserRequestEnableTFAParams &v)",
+        "encoder": "std::string to_json(const UserRequestEnableTFAParams &v)"
+    },
+    "UserConfirmEnableTFAParams": {
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserConfirmEnableTFAParams &v)",
+        "encoder": "std::string to_json(const UserConfirmEnableTFAParams &v)"
+    },
+    "UserDisableTFAParams": {
+      "description": "",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserDisableTFAParams &v)",
+        "encoder": "std::string to_json(const UserDisableTFAParams &v)"
+    },
+    "UserConfirmParams": {
+      "description": "",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserConfirmParams &v)",
+        "encoder": "std::string to_json(const UserConfirmParams &v)"
+    },
+    "UserCheckReferralCodeParams": {
+      "description": "",
+      "properties": {
+        "referralCode": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserCheckReferralCodeParams &v)",
+        "encoder": "std::string to_json(const UserCheckReferralCodeParams &v)"
+    },
+    "UserSavePreferencesParams": {
+      "description": "",
+      "properties": {
+        "prefs": {
+          "type": "string",
+          "format": "JSON"
+        },
+        "overwrite": {
+          "type": "boolean"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserSavePreferencesParams &v)",
+        "encoder": "std::string to_json(const UserSavePreferencesParams &v)"
+    },
+    "UserGetMarginParams": {
+      "description": "",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "required": [],
+        "type": "object",
+        "decoder": "int from_json(JsonUtils::Json &json, UserGetMarginParams &v)",
+        "encoder": "std::string to_json(const UserGetMarginParams &v)"
     }
   },
   "securityDefinitions": {},

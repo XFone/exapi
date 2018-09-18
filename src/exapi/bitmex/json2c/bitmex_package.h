@@ -30,14 +30,11 @@ typedef int64_t volume_t;
 typedef int64_t timestamp_t;            /**< timestamp in millisecond(ms) */
 #endif // USE_ZPROTO
 
-#include "quote/DAQuoteBitmexDef.h"
-#include "trade/DATraderBitmexDef.h"
+#include "BitmexApiDef.h"
 
 /* Trace package entry */
 union CODE_MAIN {
-    QueryFilterParams  queryFilterParams;
-    OrderParams        qrderParams;
-    OrderAmendParams   drderAmendParams;
+    const char *       schama_version;
     /* More modificator here */
 };
 

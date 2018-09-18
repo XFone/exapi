@@ -33,6 +33,7 @@ namespace exapi {
     typedef double  d_amount_t;
     typedef int64_t volume_t;
     typedef int64_t timestamp_t;            /**< timestamp in millisecond(ms) */
+    typedef struct _json_t *json_t;         /**< pointer json string or binary */
 #endif // DEF_TRADE_TYPES
 
     /**

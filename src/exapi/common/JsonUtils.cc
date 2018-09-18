@@ -8,9 +8,6 @@
  *
  */
 
-#include "JsonUtils.h"
-#include "cJSON.h"
-
 #include <cstdlib>
 #include <cassert>
 #include <cerrno>
@@ -18,6 +15,10 @@
 #include <sstream>
 #include <chrono>
 #include <iomanip>
+
+#define  _JSON_DECODER_
+#include "JsonUtils.h"
+#include "cJSON.h"
 
 //------------------------ JsonUtils::JsonImpl ----------------------------
 
@@ -118,22 +119,40 @@ std::string JsonUtils::Json::get() throw(std::runtime_error)
 }
 
 template<>
-int JsonUtils::Json::get(const char * &v)
+int JsonUtils::Json::get(const char *name, const char * &v)
 {
-    if (m_pointer->type == cJSON_String) {
-        v = m_pointer->valuestring;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsString(impl)) {
+        v = impl->valuestring;
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(const char ** &v)  // array of string [ "", ... ]
+int JsonUtils::Json::get(const char *name, char * &v)
 {
-    if (m_pointer->type == cJSON_Array) {
-        cJSON *child = m_pointer->child;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsString(impl)) {
+        v = impl->valuestring;
+        return 0;
+    }
+
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get(const char *name, const char ** &v)  // array of string [ "", ... ]
+{
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsArray(impl)) {
+        cJSON *child = impl->child;
         while (child != NULL) {
-            if (child->type != cJSON_String || child->type != cJSON_Raw) {
+            if (!cJSON_IsString(child)) {
                 // TODO: show warning
             }
             *v++  = child->valuestring;
@@ -145,45 +164,50 @@ int JsonUtils::Json::get(const char ** &v)  // array of string [ "", ... ]
 }
 
 template<>
-int JsonUtils::Json::get(const void * &v)
+int JsonUtils::Json::get(const char *name, void * &v)
 {
-    if (m_pointer->type == cJSON_String || m_pointer->type == cJSON_Raw) {
-        v = m_pointer->valuestring;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsRaw(impl)) {
+        v = impl->valuestring;
         return 0;
     }
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(bool &v)
+int JsonUtils::Json::get(const char *name, bool &v)
 {
-    if (m_pointer->type == cJSON_False) {
-        v = false;
-        return 0;
-    } else if (m_pointer->type == cJSON_True) {
-        v = true;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsBool(impl)) {
+        v = (impl->type == cJSON_True);
         return 0;
     }
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(double &v)
+int JsonUtils::Json::get(const char *name, double &v)
 {
-    if (m_pointer->type == cJSON_Number) {
-        v = m_pointer->valuedouble;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        v = impl->valuedouble;
         return 0;
     }
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(double * &v)  // array of double [ 1.0, ... ]
+int JsonUtils::Json::get(const char *name, double * &v)  // array of double [ 1.0, ... ]
 {
-    if (m_pointer->type == cJSON_Array) {
-        cJSON *child = m_pointer->child;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsArray(impl)) {
+        cJSON *child = impl->child;
         while (child != NULL) {
-            if (child->type != cJSON_Number) {
+            if (!cJSON_IsNumber(child)) {
                 // TODO: show warning
             }
             *v++  = child->valuedouble;
@@ -191,26 +215,32 @@ int JsonUtils::Json::get(double * &v)  // array of double [ 1.0, ... ]
         }
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(long &v)
+int JsonUtils::Json::get(const char *name, long &v)
 {
-    if (m_pointer->type == cJSON_Number) {
-        v = (long)m_pointer->valuedouble;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        v = (long)impl->valuedouble;
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(long * &v)  // array of long [ 1, ... ]
+int JsonUtils::Json::get(const char *name, long * &v)  // array of long [ 1, ... ]
 {
-    if (m_pointer->type == cJSON_Array) {
-        cJSON *child = m_pointer->child;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsArray(impl)) {
+        cJSON *child = impl->child;
         while (child != NULL) {
-            if (child->type != cJSON_Number) {
+            if (!cJSON_IsNumber(child)) {
                 // TODO: show warning
             }
             *v++  = (long)child->valuedouble;
@@ -218,26 +248,32 @@ int JsonUtils::Json::get(long * &v)  // array of long [ 1, ... ]
         }
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(unsigned long &v)
+int JsonUtils::Json::get(const char *name, unsigned long &v)
 {
-    if (m_pointer->type == cJSON_Number) {
-        v = (unsigned long)m_pointer->valuedouble;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        v = (unsigned long)impl->valuedouble;
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(unsigned long * &v)  // array of unsigned long [ 1, ... ]
+int JsonUtils::Json::get(const char *name, unsigned long * &v)  // array of unsigned long [ 1, ... ]
 {
-    if (m_pointer->type == cJSON_Array) {
-        cJSON *child = m_pointer->child;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsArray(impl)) {
+        cJSON *child = impl->child;
         while (child != NULL) {
-            if (child->type != cJSON_Number) {
+            if (!cJSON_IsNumber(child)) {
                 // TODO: show warning
             }
             *v++  = (unsigned long)child->valuedouble;
@@ -245,44 +281,66 @@ int JsonUtils::Json::get(unsigned long * &v)  // array of unsigned long [ 1, ...
         }
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(int &v)
+int JsonUtils::Json::get(const char *name, int &v)
 {
-    if (m_pointer->type == cJSON_Number) {
-        v = (int32_t)m_pointer->valuedouble;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        v = (int)impl->valuedouble;
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get(long long &v)
+int JsonUtils::Json::get(const char *name, long long &v)
 {
-    if (m_pointer->type == cJSON_Number) {
-        v = (int64_t)m_pointer->valuedouble;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        v = (long long)impl->valuedouble;
         return 0;
     }
+
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get_datetime(long &time)
+int JsonUtils::Json::get(const char *name, json_t &v)
 {
-    if (m_pointer->type == cJSON_String) {
-        return time = m_pointer->valuedouble;
-    }
+    // TODO
     return -EBADMSG;
 }
 
 template<>
-int JsonUtils::Json::get_datetime(long long &timestamp)
+int JsonUtils::Json::get_datetime(const char *name, long &time)
 {
-    if (m_pointer->type == cJSON_String) {
-        return timestamp = m_pointer->valuedouble;
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        time = (long)impl->valuedouble; // time_t
+        return 0;
     }
+
+    return -EBADMSG;
+}
+
+template<>
+int JsonUtils::Json::get_datetime(const char *name, long long &timestamp)
+{
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsNumber(impl)) {
+        timestamp = (long long)impl->valuedouble; // time_t
+        return 0;
+    }
+
     return -EBADMSG;
 }
 
@@ -367,6 +425,20 @@ std::string JsonUtils::to_datetime_ms(int64_t ms)
 }
 
 template <>
+std::string JsonUtils::to_json(const cJSON *json)
+{
+    std::string str(cJSON_Print(json));
+    return str;
+}
+
+template <>
+std::string JsonUtils::to_json(const json_t json)
+{
+    std::string str(json->string);
+    return str;
+}
+
+template <>
 std::string JsonUtils::to_json(const char *values[])
 {
     std::ostringstream ss;
@@ -404,4 +476,22 @@ std::string JsonUtils::to_json(std::vector<std::string> &values)
     ss.put(']');
 
     return ss.str();
+}
+
+//------------------------ for json_decoder ----------------------------------
+
+void decode_json_tree(const decoder_map_t &jmap, JsonUtils::JsonImpl *root, void *object)
+{
+    cJSON *p = reinterpret_cast<cJSON *>(root)->child;
+    const char *pch;
+
+    while (p != NULL) {
+        if ((pch = p->string) != NULL) {
+            auto it = jmap.find(pch);
+            if (it != jmap.end()) {
+                (*it->second)((JsonUtils::JsonImpl *)p, object);
+            }
+        }
+        p = p->next;
+    }
 }

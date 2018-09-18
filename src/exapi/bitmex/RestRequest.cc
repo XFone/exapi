@@ -177,7 +177,7 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
         restbed::Http::fetch( "\r\n", rsp);
         // TRACE(8, "  fetching delimiter");
     } else {
-        auto length = rsp->get_header("Content-Length", 0);
+        int length = rsp->get_header("Content-Length", 0);
         restbed::Http::fetch(length, rsp);
         // TRACE(8, "  fetching length %d", length);
     }
@@ -191,6 +191,17 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
         _trace_impl(8, "   Body | Length: %d", body.size());
         dump_frame("", " |", body.c_str(), body.size());
     });
+
+    // REST API: 300 requests every 5 minutes
+    // "x-ratelimit-limit": 300
+    // "x-ratelimit-remaining": 297
+    // "x-ratelimit-reset": 1489791662
+    if (rsp->has_header("x-ratelimit-remaining")) {
+        int ratelimit = rsp->get_header("x-ratelimit-remaining", 0);
+        if (ratelimit <= 1) {
+            LOGFILE(LOG_WARN, "rate limit is exhausted, remaining %d", ratelimit);
+        }
+    }
 
     return body;
 }
