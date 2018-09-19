@@ -117,6 +117,18 @@ public:
 
     static std::string GetItemString(const std::string &jsonstr, const char *name);
 
+    /**
+     * @param dtstr string in ISO 8601 format (e.g. '2012-04-23T18:25:43Z')
+     * @return time_t seconds since epoch ('1970-01-01T00:00:00Z')
+     */
+    static time_t from_datetime(const std::string &dtstr);
+
+    /**
+     * @param tsstr string in ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z') 
+     * @return timestamp_t milli-seconds 
+     */
+    static int64_t from_timestamp(const std::string &tsstr);
+
     //-------------------------- Json Encode ------------------------------
 
     /**

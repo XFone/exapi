@@ -315,6 +315,13 @@ template<>
 int JsonUtils::Json::get(const char *name, json_t &v)
 {
     // TODO
+    JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
+
+    if (cJSON_IsString(impl)) {
+        // v->string = impl->valuestring; // const char *
+        return 0;
+    }
+
     return -EBADMSG;
 }
 
@@ -323,8 +330,8 @@ int JsonUtils::Json::get_datetime(const char *name, long &time)
 {
     JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
 
-    if (cJSON_IsNumber(impl)) {
-        time = (long)impl->valuedouble; // time_t
+    if (cJSON_IsString(impl)) { // "2000-01-23T04:56:07Z"
+        time = from_datetime(impl->valuestring); // time_t
         return 0;
     }
 
@@ -336,8 +343,8 @@ int JsonUtils::Json::get_datetime(const char *name, long long &timestamp)
 {
     JsonImpl *impl = (JsonImpl *)(cJSON_GetObjectItem(m_pointer, name));
 
-    if (cJSON_IsNumber(impl)) {
-        timestamp = (long long)impl->valuedouble; // time_t
+    if (cJSON_IsString(impl)) { // "2000-01-23T04:56:07.126Z"
+        timestamp = from_timestamp(impl->valuestring); // timestamp_t
         return 0;
     }
 
@@ -378,6 +385,26 @@ JsonUtils::GetItemString(const std::string &jsonstr, const char *name) {
     return result;
 }
 
+time_t
+JsonUtils::from_datetime(const std::string &dtstr)
+{
+    struct std::tm tm;
+#if __GNUC__ < 5
+    strptime(dtstr.c_str(), "%FT%T%Z", &tm);
+#else
+    std::istringstream ss(dtstr);
+    ss >> std::get_time(&tm, "%FT%T%Z");
+#endif
+    return mktime(&tm);
+}
+
+int64_t
+JsonUtils::from_timestamp(const std::string &tsstr)
+{
+    // NOT implemented
+    return 0L;
+}
+
 int 
 JsonUtils::to_hexstring(char *out, const char *buf, size_t size)
 {
@@ -398,14 +425,14 @@ JsonUtils::to_hexstring(char *out, const char *buf, size_t size)
 
 std::string JsonUtils::to_datetime(time_t datetime)
 {
-    // ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z')
+    // ISO 8601 format (e.g. '2012-04-23T18:25:43Z')
     std::ostringstream ss;
 #if __GNUC__ < 5
     char buf[sizeof "2012-04-23T18:25:43Z"];
-    strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&datetime));
+    strftime(buf, sizeof(buf), "%FT%T%Z", gmtime(&datetime));
     ss << buf;
 #else
-    ss << std::put_time(gmtime(&datetime), "%FT%TZ");
+    ss << std::put_time(gmtime(&datetime), "%FT%T%Z");
 #endif
     return ss.str();
 }
@@ -418,7 +445,7 @@ std::string JsonUtils::to_datetime_ms(int64_t ms)
     struct tm * ptm, stm = { 0 };
     time_t secs = ms / 1000L;
     ptm = localtime_r(&secs, &stm);
-    snprintf(buf, sizeof(buf), "%02d%02d%02d.%03d", ptm->tm_hour, ptm->tm_min, 
+    snprintf(buf, sizeof(buf), "%02d%02d%02d.%03dZ", ptm->tm_hour, ptm->tm_min, 
              ptm->tm_sec, (int)(ms % 1000L));
 
     return std::string(buf);

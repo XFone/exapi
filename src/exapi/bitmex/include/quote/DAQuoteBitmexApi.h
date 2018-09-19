@@ -73,7 +73,20 @@ namespace exapi {
 
         //-------------------------- Quote Data ------------------------------
         
+        /**
+         * @param l2data array of \ref OrderBookL2
+         */
         virtual void OnOrderBook(const void *l2data) {}
+
+        /**
+         * @param quotes array of \ref Quote
+         */
+        virtual void OnQuotes(const void *quotes) {}
+
+        /**
+         * @param quotes array of \ref Quote
+         */
+        virtual void OnQuotesBucketed(const void *quotes) {}
 
         //------------------------- Funding callbacks ------------------------
 
@@ -160,7 +173,7 @@ namespace exapi {
          * @param symbol Instrument symbol. Send a series (e.g. XBT) to get data for the nearest contract in that series.
          * @param depth Orderbook depth per side. Send 0 for full depth. default: 25
          */
-        int QueryOrderBookLevel2(const char *symbol, size_t depth);
+        int QueryOrderBookLevel2(const char *symbol, size_t depth = 25);
 
         /**
          * Get Quotes
@@ -198,13 +211,13 @@ namespace exapi {
 
         /**
          * Get Trades.
-         * \ref OnQueryTrades
+         * \ref OnTrades
          */
         int QueryTrades(const QueryFilterParams &params);
 
         /**
          * Get previous trades in time buckets.
-         * \ref OnQueryTradesBucketd
+         * \ref OnTradesBucketd
          */
         int QueryTradesBucketed(const char *binSize, bool partial,
                                 const QueryFilterParams &params);

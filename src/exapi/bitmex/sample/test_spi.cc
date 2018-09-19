@@ -18,17 +18,21 @@
 #include <cstring>
 #include <iostream>
 
-#include <regex>
-#if __cplusplus >= 201103L &&                             \
+#include "JsonUtils.h"
+
+#ifdef CHECK_REGEX_VERSION
+# include <regex>
+# if __cplusplus >= 201103L &&                            \
     (!defined(__GLIBCXX__) || (__cplusplus >= 201402L) || \
         (defined(_GLIBCXX_REGEX_DFS_QUANTIFIERS_LIMIT) || \
          defined(_GLIBCXX_REGEX_STATE_LIMIT)           || \
              (defined(_GLIBCXX_RELEASE)                && \
              _GLIBCXX_RELEASE > 4)))
-# define HAVE_WORKING_REGEX 1
-#else
-# define HAVE_WORKING_REGEX 0
-# warning "No working regex! please upgrade to gcc-4.9+"
+#  define HAVE_WORKING_REGEX 1
+# else
+#  define HAVE_WORKING_REGEX 0
+#  warning "No working std::regex! please upgrade to gcc-4.9+ or use boost::regex"
+# endif
 #endif
 
 /** 
@@ -58,13 +62,45 @@ int checkopt(int opt, char *parg)
 void test_bitmex_quote_spi()
 {
     DAQuoteBitmexApi *api = DAQuoteBitmexApi::CreateApi("", "");
-    DAQuoteBitmexSpi spi;
+    MyDAQuoteBitmexSpi spi;
 
     const char *slist[] = { "https://www.bitmex.com", "\0" };
     api->ConnServer(slist, &spi);
     api->Init();
 
-    api->GetAnnouncement();
+    //------ Quote Data ------
+    //api->QueryOrderBookLevel2("XBT");
+
+    QueryFilterParams params = {
+        .symbol     = "", //"ETCBTC",
+        .filter     = nullptr,
+        .columns    = nullptr, 
+        .count      = 100,
+        .start      = 0,
+        .reverse    = false,
+        .startTime  = JsonUtils::from_datetime("2018-08-01T12:00:00Z"), // BUG in gcc, strptime not handle %Z
+        .endTime    = JsonUtils::from_datetime("2018-08-01T12:30:00Z")  // BUG in gcc, strptime not handle %Z
+    };
+
+    //api->QueryQuotes(params);                      // got 403 Forbidden
+    //api->QueryQuotesBucketed("1m", false, params); // got 403 Forbidden
+
+    //------- Funding --------
+    //api->QueryFundingHistory(params);
+    //api->QueryInsuranceHistory(params);
+
+    //------- Trades Data ----
+    //api->QueryTrades(params);
+    //api->QueryTradesBucketed("1m", false, params);
+
+    //------ Extra Data ------
+    //api->GetAnnouncement();
+    api->GetAnnouncementUrgent();
+    //api->GetSchema();
+    //api->GetSchemaWebsocket();
+    //api->GetStats();
+    //api->GetStatsHistory();
+    //api->GetStatsHistoryUsd();
     
     api->Join();
     api->Dispose();
@@ -87,7 +123,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("GCC is %d.%d", __GNUC__, __GNUC_MINOR__);
+    printf("GCC is %d.%d\n", __GNUC__, __GNUC_MINOR__);
 
     // test async mode
     test_bitmex_quote_spi();

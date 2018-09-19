@@ -43,6 +43,47 @@ public:
         cout << "** OnSymbolUnsubscribed" << endl;
     }
 
+    //-------------------------- Quote Data ------------------------------
+
+    virtual void OnOrderBook(const void *l2data) {
+        cout << "** OnOrderBook\n" 
+             << (const char *)l2data << endl;
+    }
+
+    virtual void OnQuotes(const void *quotes) {
+        cout << "** OnQuotes\n" 
+             << (const char *)quotes << endl;
+    }
+
+    virtual void OnQuotesBucketed(const void *quotes) {
+        cout << "** OnQuotesBucketed\n" 
+             << (const char *)quotes << endl;
+    }
+
+    //------------------------- Funding callbacks ------------------------
+
+    virtual void OnFundingHistory(const void *fundings) {
+        cout << "** OnFundingHistory\n" 
+             << (const char *)fundings << endl;
+    }
+
+    virtual void OnInsuranceHistory(const void *insurances) {
+        cout << "** OnInsuranceHistory\n" 
+             << (const char *)insurances << endl;
+    }
+
+    //-------------------------- Trades Data -----------------------------
+
+    virtual void OnTrades(const void *trades) {
+        cout << "** OnTrades\n" 
+             << (const char *)trades << endl;
+    }
+
+    virtual void OnTradesBucketd(const void *tradebin) {
+        cout << "** OnTradesBucketd\n" 
+             << (const char *)tradebin << endl;
+    }
+
     //-------------------------- Extra Data ------------------------------
 
     virtual void OnAnnouncement(const void *data) {
