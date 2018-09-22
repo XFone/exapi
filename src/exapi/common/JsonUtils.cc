@@ -390,12 +390,27 @@ JsonUtils::from_datetime(const std::string &dtstr)
 {
     struct std::tm tm;
 #if __GNUC__ < 5
-    strptime(dtstr.c_str(), "%FT%T%Z", &tm);
+    strptime(dtstr.c_str(), "%FT%T", &tm);  // localtime
 #else
     std::istringstream ss(dtstr);
-    ss >> std::get_time(&tm, "%FT%T%Z");
+    ss >> std::get_time(&tm, "%FT%T%Z");    // localtime + timezone
 #endif
     return mktime(&tm);
+}
+
+int64_t
+JsonUtils::from_datetime_ms(const std::string &tsstr)
+{
+    // ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z')
+    struct tm tm;
+    int ms;
+    sscanf(tsstr.c_str(), "%04d-%02d-%02dT%02d%02d%02d.%03dZ",
+           &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+           &tm.tm_hour, &tm.tm_min, &tm.tm_sec, &ms);
+    tm.tm_year -= 1900;
+    tm.tm_mon  -= 1;
+
+    return mktime(&tm) * 1000L + ms;
 }
 
 int64_t
@@ -429,10 +444,10 @@ std::string JsonUtils::to_datetime(time_t datetime)
     std::ostringstream ss;
 #if __GNUC__ < 5
     char buf[sizeof "2012-04-23T18:25:43Z"];
-    strftime(buf, sizeof(buf), "%FT%T%Z", gmtime(&datetime));
+    strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&datetime));
     ss << buf;
 #else
-    ss << std::put_time(gmtime(&datetime), "%FT%T%Z");
+    ss << std::put_time(gmtime(&datetime), "%FT%TZ");
 #endif
     return ss.str();
 }
@@ -440,13 +455,14 @@ std::string JsonUtils::to_datetime(time_t datetime)
 std::string JsonUtils::to_datetime_ms(int64_t ms)
 {
     // ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z')
-    char buf[sizeof "'2012-04-23T18:25:43.511Z'"];
+    char buf[sizeof "2012-04-23T18:25:43.511Z"];
 
-    struct tm * ptm, stm = { 0 };
+    struct tm * ptm;
     time_t secs = ms / 1000L;
-    ptm = localtime_r(&secs, &stm);
-    snprintf(buf, sizeof(buf), "%02d%02d%02d.%03dZ", ptm->tm_hour, ptm->tm_min, 
-             ptm->tm_sec, (int)(ms % 1000L));
+    ptm = gmtime(&secs);
+    snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d%02d%02d.%03dZ",
+             ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday,
+             ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)(ms % 1000L));
 
     return std::string(buf);
 }

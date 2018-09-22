@@ -20,7 +20,7 @@ include $(BUILD)/Makefile.pre
 -include config.mk
 
 # Build target (TARGET_LIB, TARGET_SHLIB or TARGET_PRG)
-TARGET_PRG = test-bitmex-spi
+TARGET_PRG = test-bitmex-quote test-bitmex-trade
 
 # Depended Modules (libraries)
 MODULES += PTHREAD IUTILS UUID CJSON OPENSSL RESTBED
@@ -36,8 +36,11 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 STDCCFLAGS += -DNO_FILE_LINE
 
 # Sources to build
-SOURCES = $(wildcard *.cc ../*.cc ../../common/*.cc)
+SOURCES = $(wildcard ../*.cc ../../common/*.cc)
 INCDIRS  += ../include ../../common/include
+
+SOURCES_test-bitmex-quote = test_spi.cxx
+SOURCES_test-bitmex-trade = test_trade.cxx
 
 # All
 all::
@@ -49,7 +52,11 @@ all::
 # Test
 test: all
 	@echo "🌞  Testing..."
-	@$(LD_PREFIX) $(BINDIR)/$(TARGET_PRG) -t 7 -v 7 2>&1
+	@$(LD_PREFIX) $(BINDIR)/test-bitmex-quote -t 7 -v 7 2>&1
+
+test-trade: all
+	@echo "🌞  Testing..."
+	@$(LD_PREFIX) $(BINDIR)/test-bitmex-trade -t 7 -v 7 2>&1
 
 # Makefile rules post processing
 include $(BUILD)/Makefile.post

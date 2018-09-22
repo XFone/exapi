@@ -125,8 +125,10 @@ public:
 
     /**
      * @param tsstr string in ISO 8601 format (e.g. '2012-04-23T18:25:43.511Z') 
-     * @return timestamp_t milli-seconds 
+     * @return timestamp_t milli-seconds since epoch ('1970-01-01T00:00:00Z')
      */
+    static int64_t from_datetime_ms(const std::string &tsstr);
+
     static int64_t from_timestamp(const std::string &tsstr);
 
     //-------------------------- Json Encode ------------------------------

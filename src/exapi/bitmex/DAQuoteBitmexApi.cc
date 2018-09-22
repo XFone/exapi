@@ -118,7 +118,7 @@ public:
 
 #define GET_IMPL(p, i) _DAQuoteBitmexApiImpl *i = static_cast<_DAQuoteBitmexApiImpl *>(p)
 
-static void AssignParams(RestRequest &request, const QueryFilterParams& params)
+void AssignParams(RestRequest &request, const QueryFilterParams& params)
 {
     request.AddParam("symbol", params.symbol)
         .AddParam("count", std::to_string(params.count))    // default 100

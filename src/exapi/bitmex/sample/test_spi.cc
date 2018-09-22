@@ -78,15 +78,15 @@ void test_bitmex_quote_spi()
         .count      = 100,
         .start      = 0,
         .reverse    = false,
-        .startTime  = JsonUtils::from_datetime("2018-08-01T12:00:00Z"), // BUG in gcc, strptime not handle %Z
-        .endTime    = JsonUtils::from_datetime("2018-08-01T12:30:00Z")  // BUG in gcc, strptime not handle %Z
+        .startTime  = JsonUtils::from_datetime("2018-08-01T12:00:00"), // BUG in gcc, strptime not handle %Z
+        .endTime    = JsonUtils::from_datetime("2018-08-01T12:30:00")  // BUG in gcc, strptime not handle %Z
     };
 
     //api->QueryQuotes(params);                      // got 403 Forbidden
     //api->QueryQuotesBucketed("1m", false, params); // got 403 Forbidden
 
     //------- Funding --------
-    //api->QueryFundingHistory(params);
+    api->QueryFundingHistory(params);
     //api->QueryInsuranceHistory(params);
 
     //------- Trades Data ----
@@ -95,7 +95,7 @@ void test_bitmex_quote_spi()
 
     //------ Extra Data ------
     //api->GetAnnouncement();
-    api->GetAnnouncementUrgent();
+    //api->GetAnnouncementUrgent();
     //api->GetSchema();
     //api->GetSchemaWebsocket();
     //api->GetStats();
