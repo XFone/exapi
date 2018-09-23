@@ -20,7 +20,7 @@ include $(BUILD)/Makefile.pre
 -include config.mk
 
 # Build target (TARGET_LIB, TARGET_SHLIB or TARGET_PRG)
-TARGET_PRG = test-bitmex-quote test-bitmex-trade
+TARGET_PRG = test-bitmex-quote test-bitmex-trade test-bitmex-wss
 
 # Depended Modules (libraries)
 MODULES += PTHREAD IUTILS UUID CJSON OPENSSL RESTBED
@@ -39,8 +39,9 @@ STDCCFLAGS += -DNO_FILE_LINE
 SOURCES = $(wildcard ../*.cc ../../common/*.cc)
 INCDIRS  += ../include ../../common/include
 
-SOURCES_test-bitmex-quote = test_spi.cxx
-SOURCES_test-bitmex-trade = test_trade.cxx
+SOURCES_test-bitmex-quote = test_spi.cc
+SOURCES_test-bitmex-trade = test_trade.cc
+SOURCES_test-bitmex-wss   = test_wss.cc
 
 # All
 all::
@@ -50,13 +51,20 @@ all::
 	@echo "---------------------------------------------------------------"
 
 # Test
-test: all
-	@echo "🌞  Testing..."
+test: test-quote test-trade test-wss
+	@echo "🌞  done."
+
+test-quote: all
+	@echo "🌞  Testing quote api..."
 	@$(LD_PREFIX) $(BINDIR)/test-bitmex-quote -t 7 -v 7 2>&1
 
 test-trade: all
-	@echo "🌞  Testing..."
+	@echo "🌞  Testing trader api..."
 	@$(LD_PREFIX) $(BINDIR)/test-bitmex-trade -t 7 -v 7 2>&1
+
+test-wss: all
+	@echo "🌞  Testing websocket api..."
+	@$(LD_PREFIX) $(BINDIR)/test-bitmex-wss -t 7 -v 7 2>&1
 
 # Makefile rules post processing
 include $(BUILD)/Makefile.post

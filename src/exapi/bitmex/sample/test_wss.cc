@@ -1,7 +1,7 @@
 /*
  * $Id: $
  *
- * Main entry for trader test
+ * Main entry for websocket test
  *
  * Copyright (c) 2014-2018 Zerone.IO. All rights reserved.
  *
@@ -21,7 +21,7 @@
 #include "JsonUtils.h"
 
 
-/** 
+/**
  * Read command line options
  */
 int checkopt(int opt, char *parg)
@@ -41,24 +41,31 @@ int checkopt(int opt, char *parg)
     return result;
 }
 
-/*---------------------------- async mode -----------------------------------*/
+/*---------------------------- Websocket -----------------------------------*/
 
-#include "MyTraderBitmexSpi.h"
+#include "BitmexWsApi.h"
+using namespace exapi;
 
-void test_bitmex_trader_spi()
+void test_bitmex_websocket()
 {
-    DATraderBitmexApi *api = DATraderBitmexApi::CreateApi("", "");
-    MyDATraderBitmexSpi spi;
+    BitmexWsApi api("", "");
 
-    const char *slist[] = { "https://www.bitmex.com", NULL };
-    api->ConnServer(slist, &spi);
-    api->Init();
+    api.start();                            // 启动连接服务器线程
 
-    //------ ApiKey ------
+    sleep(3);
 
-    
-    api->Join();
-    api->Dispose();
+    const char *topics[] = {
+        "orderBookL2_25",
+        "quoteBin1m",
+        "trade",
+        NULL
+    };
+
+    api.Subscribe(topics);                 // 订阅
+
+    sleep(30);
+
+    api.stop();
 }
 
 int main(int argc, char *argv[])
@@ -76,11 +83,8 @@ int main(int argc, char *argv[])
 
     printf("GCC is %d.%d\n", __GNUC__, __GNUC_MINOR__);
 
-    // test async mode
-    test_bitmex_trader_spi();
-
     // test websocket
-    // test_bitmex_websocket();
-    
+    test_bitmex_websocket();
+
     return 0;
 }

@@ -16,10 +16,6 @@
 
 #include <cstdio>
 
-#ifdef USE_OPENSSL
-#include <openssl/md5.h>
-#endif
-
 #include "LoggerImpl.h"
 #include "WebSockClient.h"
 using namespace exapi;
@@ -282,29 +278,31 @@ void WebSocketClient::stop()
     }
 }
 
-void WebSocketClient::emit(const std::string channel, std::string &parameter)
+void WebSocketClient::emit(const std::string op, std::string &params)
 {
     auto socket = m_client->m_socket;
 
-    std::string cmd("{'event':'addChannel','channel': '");
+    std::string cmd("{'op':'");
     
-    cmd += channel;
-    if (parameter.size() > 0) {
-        cmd += "','parameters':";
-        cmd += parameter;
+    cmd += op;
+    if (params.size() > 0) {
+        cmd += "','args':";
+        cmd += params;
     }
     cmd +=  "'}";
 
     LOGFILE(LOG_DEBUG, "ws[%s] emit command %s", socket->get_key().c_str(), cmd.c_str());
 
-    socket->send(cmd, [channel](const std::shared_ptr<restbed::WebSocket> &ws) {
-        LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' emitted", 
-                ws->get_key().data(), channel.c_str());
+    socket->send(cmd, [op](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "ws[%s] op '%s' emitted", 
+                ws->get_key().data(), op.c_str());
     });
 }
 
 void WebSocketClient::remove(std::string channel)
 {
+    /* NOT SUPPORT
+
     auto socket = m_client->m_socket;
 
     std::string cmd("{'event':'removeChannel','channel':'");
@@ -317,56 +315,5 @@ void WebSocketClient::remove(std::string channel)
         LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' removed", 
                 ws->get_key().data(), channel.c_str());
     });
-}
-
-/*--------------------------- ParameterBuilder -----------------------------*/
-
-std::string ParameterBuilder::build() {
-    std::string result("{");
-    int n = 0;
-    for (auto param : m_params) {
-        result += ((n++ != 0) ? ",'" : "'");
-        result += param.first;
-        result += "':'";
-        result += param.second;
-        result += "'";
-    }
-    result += "}";
-    return result;
-}
-
-std::string ParameterBuilder::buildSign(const std::string &secret) {
-    std::string params;    // for generating md5 in HTTP request format
-    unsigned char md[MD5_DIGEST_LENGTH];
-    char strMd5[2 * MD5_DIGEST_LENGTH + 1];
-
-    std::string result("{");
-    int n = 0;
-    for (auto param : m_params) {
-        result += ((n++ != 0) ? ",'" : "'");
-        result += param.first;
-        result += "':'";
-        result += param.second;
-        result += "'";
-
-        // query params for signing
-        params += param.first;
-        params += "=";
-        params += param.second;
-        params += "&";
-    }
-    
-    params += "secret_key=";
-    params += secret;
-    
-    (void)MD5((const unsigned char *)params.c_str(), params.size() - 1, md);
-    for (int n = 0; n < MD5_DIGEST_LENGTH; n++) {
-        sprintf(&strMd5[n << 1], "%02X", md[n]);    // output in upper case
-    }
-
-    // append signature
-    result += "'sign':'";
-    result += strMd5;
-    result += "'}";
-    return result;
+    */
 }

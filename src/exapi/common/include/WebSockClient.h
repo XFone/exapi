@@ -90,32 +90,4 @@ namespace exapi {
 
     };
 
-    /**
-     * OKex websocket emit parameter builder
-     */
-    class ParameterBuilder {
-    protected:
-        std::vector< std::pair<std::string, std::string> > m_params;
-
-    public:
-        ParameterBuilder() : m_params() {}
-
-        ParameterBuilder &AddParam(const char *name, const std::string &val) {
-            std::pair<std::string, std::string> param(name, val);
-            m_params.push_back(param);
-            return *this;
-        }
-
-        /**
-         * generate parameter in json format
-         */
-        std::string build();
-
-        /**
-         * generate parameter in json format, with signature field
-         * @param secret secret key
-         */
-        std::string buildSign(const std::string &secret);
-
-    };
 } // namespace exapi
