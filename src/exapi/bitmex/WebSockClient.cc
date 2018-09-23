@@ -119,7 +119,7 @@ namespace exapi {
 
             auto extensions = response->get_header("Sec-WebSocket-Extensions", restbed::String::lowercase);
             if (extensions.find("permessage-deflate") != std::string::npos) {
-                is_deflate = true;
+                is_deflate = true; // rfc7692 - client_no_context_takeover
                 LOGFILE(LOG_INFO, "Enable websocket permessage-deflate");
             }
 
@@ -133,13 +133,6 @@ namespace exapi {
             } else {
                 m_ws_mgnr->update(m_socket, m_request);
             }
-
-            // init socket and tls settings
-            // m_socket->get_socket()->
-            // set_socket_init_handler(bind(&type::on_socket_init,this,::_1));
-            // set_tls_init_handler(bind(&type::on_tls_init,this,::_1));
-            // set_open_handshake_timeout(3000);
-            // set_close_handshake_timeout(3000);
 
             return 0;
         }
@@ -173,12 +166,75 @@ namespace exapi {
     }; // WebSocketClientImpl
 }
 
-const char *deflate(const std::vector<unsigned char> &in, std::string &out) {
+// TODO: consider using boost/beast/websocket
+const char *encode(const std::string &in, std::vector<unsigned char> &out) {
     unsigned char buf[1024];
     size_t osize = sizeof(buf);
-    uncompress(buf, &osize, in.data(), in.size());
+    
+    z_stream defstream = {
+        .data_type  = Z_BINARY,
+        .zalloc     = Z_NULL,
+        .zfree      = Z_NULL,
+        .opaque     = Z_NULL,
+        .avail_in   = (uInt)in.size(),
+        .next_in    = (Bytef *)in.data(),
+        .avail_out  = (uInt)osize,
+        .next_out   = buf
+    };
+
+    deflateInit2(&defstream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15, 8, Z_DEFAULT_STRATEGY);
+    int ret = deflate(&defstream, Z_SYNC_FLUSH);
+    deflateEnd(&defstream);
+    osize = defstream.total_out;
+
+    //out.assign(&buf[0], &buf[osize]);
+    out.assign(&buf[2], &buf[osize - 4]);
+
+    TRACE(7, "deflate returns %d, in=%d out=%d:", ret, in.size(), out.size());
+    TRACE_IF(8, {
+        dump_frame("enc", "", (char *)out.data(), out.size());
+    });
+
+    return (const char *)out.data();
+}
+
+const char *decode(std::vector<unsigned char> &in, std::string &out) {
+    unsigned char buf[1024];
+    size_t osize = sizeof(buf);
+
+    TRACE_IF(8, {
+        dump_frame("in ", "", (char *)in.data(), in.size());
+    });
+
+    unsigned char head[] = { 0x78, 0x9C };
+    in.insert(in.begin(), head, &head[2]);
+    unsigned char tail[] = { 0x00, 0x00, 0xFF, 0xFF };
+    in.insert(in.end(), tail, &tail[4]);
+
+    z_stream defstream = {
+        .data_type  = Z_BINARY,
+        .zalloc     = Z_NULL,
+        .zfree      = Z_NULL,
+        .opaque     = Z_NULL,
+        .avail_in   = (uInt)in.size(),
+        .next_in    = (Bytef *)in.data(),
+        .avail_out  = (uInt)osize,
+        .next_out   = buf
+    };
+
+    inflateInit(&defstream);
+    int ret = inflate(&defstream, Z_SYNC_FLUSH);
+    inflateEnd(&defstream);
+    osize = defstream.total_out;
+
     out.assign((char *)buf, osize);
-    return out.c_str();
+
+    TRACE(7, "inflate returns %d, in=%d out=%d:", ret, in.size(), out.size());
+    TRACE_IF(8, {
+        dump_frame("dev", "", (char *)out.data(), out.size());
+    });
+
+    return out.data();
 }
 
 /*---------------------------- WebSocketClient -----------------------------*/
@@ -291,7 +347,15 @@ void WebSocketClient::start()
             auto msgdata = msg->get_data();
             std::string text;
             if (this->m_client->is_deflate) {
-                deflate(msgdata, text);
+              #if 0
+                // test encode/decode
+                std::string test("Hello");
+                std::vector<unsigned char> buf;
+                encode(test, buf);
+                decode(buf, text);
+              #else
+                decode(msgdata, text);
+              #endif
             } else {
                 text = restbed::String::to_string(msgdata);
                 TRACE(7, ">>>\n%s\n>>>", text.c_str());
@@ -326,9 +390,17 @@ void WebSocketClient::send(const std::string &cmd)
     auto socket = m_client->m_socket;
     LOGFILE(LOG_DEBUG, "ws[%s] emit command %s", socket->get_key().c_str(), cmd.c_str());
 
-    socket->send(cmd, [](const std::shared_ptr<restbed::WebSocket> &ws) {
+    auto callback = [](const std::shared_ptr<restbed::WebSocket> &ws) {
         LOGFILE(LOG_DEBUG, "ws[%s] command emitted", ws->get_key().data());
-    });
+    };
+
+    if (m_client->is_deflate) {
+        std::vector<unsigned char> out;
+        encode(cmd, out);
+        socket->send(out, callback);
+    } else {
+        socket->send(cmd, callback);
+    }
 }
 
 void WebSocketClient::subscribe(const std::string channel, std::string &parameter)

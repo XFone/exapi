@@ -68,6 +68,8 @@ void test_bitmex_websocket()
         sleep(3);
 
         const char *topics[] = {
+            "announcement",
+            "publicNotifications",
             "orderBookL2_25",
             "quoteBin1m",
             "trade",
