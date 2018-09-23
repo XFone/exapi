@@ -106,10 +106,6 @@ void test_bitmex_quote_spi()
     api->Dispose();
 }
 
-/*----------------------------- Websocket -----------------------------------*/
-
-// TODO
-
 int main(int argc, char *argv[])
 {
     int res;

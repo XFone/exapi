@@ -132,7 +132,7 @@ void OKCoinWebSocketApi::Close()
 void OKCoinWebSocketApi::Emit(const char *channel, string &parameter)
 {
     if (pWebsocket != nullptr) {
-        pWebsocket->emit(channel, parameter);
+        pWebsocket->subscribe(channel, parameter);
     }
 }
 
@@ -145,14 +145,14 @@ void OKCoinWebSocketApi::Emit(const char *channel)
 void OKCoinWebSocketApi::Emit(string &channel)
 {
     if (pWebsocket != nullptr) {
-        pWebsocket->emit(channel);
+        pWebsocket->subscribe(channel);
     }
 }
 
 void OKCoinWebSocketApi::Remove(string channel)
 {
     if (pWebsocket != nullptr) {
-        pWebsocket->remove(channel);
+        pWebsocket->unsubscribe(channel);
     }
 }
 

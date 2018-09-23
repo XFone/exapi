@@ -74,13 +74,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("GCC is %d.%d\n", __GNUC__, __GNUC_MINOR__);
-
     // test async mode
     test_bitmex_trader_spi();
 
-    // test websocket
-    // test_bitmex_websocket();
-    
     return 0;
 }

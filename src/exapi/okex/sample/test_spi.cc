@@ -102,10 +102,10 @@ int main(int argc, char *argv[])
     }
 
     // test sync mode
-    test_okex_quote_sync();
+    // test_okex_quote_sync();
 
     // test async mode
-    test_okex_quote_spi();
+    // test_okex_quote_spi();
 
     // test websocket
     test_okex_websocket();

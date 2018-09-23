@@ -15,6 +15,7 @@
 #include "DumpFunc.h"
 
 #include <cstdio>
+#include <system_error>
 
 #include "LoggerImpl.h"
 #include "WebSockClient.h"
@@ -93,9 +94,15 @@ namespace exapi {
             TRACE(7, ">>>\n%s\n>>>", 
                   restbed::String::to_string(restbed::Http::to_bytes(response)).c_str());
 
-            if (response->get_status_code() != restbed::SWITCHING_PROTOCOLS ||
-                response->get_header("upgrade", restbed::String::lowercase ) != "websocket") {
-                LOGFILE(LOG_ERROR, "Invalid response status in websocket");
+            if (response->get_status_code() != (int)restbed::SWITCHING_PROTOCOLS) {
+                LOGFILE(LOG_ERROR, "Invalid response status in websocket - %d", 
+                        response->get_status_code());
+                return -EPROTO;
+            }
+
+            auto upgrade = response->get_header("upgrade", restbed::String::lowercase);
+            if (upgrade.compare(0, sizeof("websocket") - 1, "websocket")) {
+                LOGFILE(LOG_ERROR, "Invalid http header 'upgrade' - '%s'", upgrade.c_str());
                 return -EPROTO;
             }
 
@@ -164,10 +171,14 @@ WebSocketClient::~WebSocketClient() {
 
 void WebSocketClient::start()
 {
+    int ret;
+
     LOGFILE(LOG_DEBUG, "server '%s'...", m_url.c_str());
 
-    if (m_client->connect(m_url) != 0) 
-        return;
+    if ((ret = m_client->connect(m_url)) != 0) {
+        m_client->stop();
+        throw std::system_error(-ret, std::generic_category());
+    }
 
     auto socket = m_client->m_socket;
 
@@ -278,28 +289,33 @@ void WebSocketClient::stop()
     }
 }
 
-void WebSocketClient::emit(const std::string channel, std::string &parameter)
+void WebSocketClient::send(const std::string &cmd)
+{
+    auto socket = m_client->m_socket;
+    LOGFILE(LOG_DEBUG, "ws[%s] emit command %s", socket->get_key().c_str(), cmd.c_str());
+
+    socket->send(cmd, [](const std::shared_ptr<restbed::WebSocket> &ws) {
+        LOGFILE(LOG_DEBUG, "ws[%s] command emitted", ws->get_key().data());
+    });
+}
+
+void WebSocketClient::subscribe(const std::string channel, std::string &params)
 {
     auto socket = m_client->m_socket;
 
     std::string cmd("{'event':'addChannel','channel': '");
     
     cmd += channel;
-    if (parameter.size() > 0) {
+    if (params.size() > 0) {
         cmd += "','parameters':";
-        cmd += parameter;
+        cmd += params;
     }
     cmd +=  "'}";
-
-    LOGFILE(LOG_DEBUG, "ws[%s] emit command %s", socket->get_key().c_str(), cmd.c_str());
-
-    socket->send(cmd, [channel](const std::shared_ptr<restbed::WebSocket> &ws) {
-        LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' emitted", 
-                ws->get_key().data(), channel.c_str());
-    });
+	
+	send(cmd);
 }
 
-void WebSocketClient::remove(std::string channel)
+void WebSocketClient::unsubscribe(std::string channel)
 {
     auto socket = m_client->m_socket;
 
@@ -307,10 +323,5 @@ void WebSocketClient::remove(std::string channel)
     cmd += channel;
     cmd += "'}";
 
-    LOGFILE(LOG_DEBUG, "ws[%s] remove command %s", socket->get_key().c_str(), cmd.c_str());
-
-    socket->send(cmd, [channel](const std::shared_ptr<restbed::WebSocket> &ws) {
-        LOGFILE(LOG_DEBUG, "ws[%s] channel '%s' removed", 
-                ws->get_key().data(), channel.c_str());
-    });
+	send(cmd);
 }

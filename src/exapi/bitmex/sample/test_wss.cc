@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <system_error>
 
 #include "JsonUtils.h"
 
@@ -45,27 +46,43 @@ int checkopt(int opt, char *parg)
 
 #include "BitmexWsApi.h"
 using namespace exapi;
+using namespace std;
+
+void on_message(const char *msg) {
+    cout << "[websockect]: " << msg << endl;
+}
 
 void test_bitmex_websocket()
 {
     BitmexWsApi api("", "");
 
-    api.start();                            // 启动连接服务器线程
+    try {
+        // BITMEX_WSS_URL, BITMEX_WSS_TESTNET
+        // BITMEX_WSS_PATH, BITMEX_WSS_MUX_PATH
+        api.SetUrl(BITMEX_WSS_TESTNET BITMEX_WSS_PATH); // using testnet
 
-    sleep(3);
+        api.set_message_callback(on_message);
 
-    const char *topics[] = {
-        "orderBookL2_25",
-        "quoteBin1m",
-        "trade",
-        NULL
-    };
+        api.start();                            // start work thread
 
-    api.Subscribe(topics);                 // 订阅
+        sleep(3);
 
-    sleep(30);
+        const char *topics[] = {
+            "orderBookL2_25",
+            "quoteBin1m",
+            "trade",
+            NULL
+        };
 
-    api.stop();
+        api.Subscribe(topics);                 // subscribe to subjects/topics
+
+        sleep(30);
+
+        api.stop();
+
+    } catch (exception &ex) {
+        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", typeid(ex).name(), ex.what()); 
+    }
 }
 
 int main(int argc, char *argv[])
@@ -81,9 +98,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("GCC is %d.%d\n", __GNUC__, __GNUC_MINOR__);
-
-    // test websocket
+   // test websocket
     test_bitmex_websocket();
 
     return 0;

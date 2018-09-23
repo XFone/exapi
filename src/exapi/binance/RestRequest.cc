@@ -173,7 +173,7 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
         restbed::Http::fetch( "\r\n", rsp);
         // TRACE(8, "  fetching delimiter");
     } else {
-        auto length = rsp->get_header("Content-Length", 0);
+        int length = rsp->get_header("Content-Length", 0);
         restbed::Http::fetch(length, rsp);
         // TRACE(8, "  fetching length %d", length);
     }

@@ -67,12 +67,17 @@ namespace exapi {
         }
 
         /**
+         * Send raw command according to server
+         */
+        void send(const std::string &command);
+
+        /**
          * subscribe to emit/event channel
          * @param channel name of channel
          */
-        void emit(const std::string channel) {
+        void subscribe(const std::string channel) {
             std::string parameter;
-            emit(channel, parameter);
+            subscribe(channel, parameter);
         }
 
         /**
@@ -80,13 +85,13 @@ namespace exapi {
          * @param channel name of channel
          * @param parameter parameters in json
          */
-        void emit(const std::string channel, std::string &parameter);
+        void subscribe(const std::string channel, std::string &parameter);
 
         /**
          * Unsubscribe to emit/event channel
          * @param channel name of channel
          */
-        void remove(const std::string channel);
+        void unsubscribe(const std::string channel);
 
     };
 

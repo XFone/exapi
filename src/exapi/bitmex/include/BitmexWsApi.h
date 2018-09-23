@@ -46,6 +46,7 @@ namespace exapi {
     
         /**
          * Subscribe to topics 
+         * see https://www.bitmex.com/app/wsAPI#Subscriptions
          * @param subjects array of subjects (topics)
          *        authenticationRequired: "privateNotifications", "account", 
          *          "wallet", "affiliate", "margin", "position", "transact", 
@@ -60,6 +61,43 @@ namespace exapi {
             Emit("subscribe", subjects);
         }
 
+        /**
+         * Unsubscribe to topics
+         * see https://www.bitmex.com/app/wsAPI#Subscriptions
+         */
+        void Unsubscribe(const char *subjects[]) {
+            Emit("unsubscribe", subjects);
+        }
+
+        /**
+         * For user-locked streams, you must authenticate first.
+         */
+        void Authentication();
+
+        /**
+         * Automatically cancel all your orders after a specified timeout
+         * see [Dead Man’s Switch (Auto Cancel)](https://www.bitmex.com/app/wsAPI#Dead-Mans-Switch-Auto-Cancel)
+         * see also (REST at /order/cancelAllAfter) 
+         * \ref DATraderBitmexApi::CancelOrdersAfter
+         * 
+         * Advanced users of BitMEX should use this operation. A common use 
+         * pattern is to set a timeout of 60000, and call it every 15 seconds. 
+         * This gives you sufficient wiggle room to keep your orders open in 
+         * case of a network hiccup, while still offering significant protection 
+         * in case of a larger outage. Of course, the parameters are up to you.
+         * 
+         * @param timeout millisecond timeout, To cancel this operation and keep 
+         *        your orders open, pass a timeout of 0
+         */
+        void CancelAllAfter(int64_t timeout = 60000L);
+
+        //------------------------ Multiplexing -----------------------------
+
+        void Emit(const char *channel, const char *topic, const char *payload);
+
+        void Subscribe(const char *channel, const char *subjects[]);
+
+        void Unsubscribe(const char *channel, const char *subjects[]);
     };
 
 } // namespace exapi

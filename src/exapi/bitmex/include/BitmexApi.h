@@ -15,7 +15,8 @@
 #define BITMEX_REST_URL            "https://www.bitmex.com"
 #define BITMEX_WSS_URL             "wss://www.bitmex.com"
 
-#define BITMEX_TEST_NET            "https://testnet.bitmex.com/"
+#define BITMEX_REST_TESTNET        "https://testnet.bitmex.com"
+#define BITMEX_WSS_TESTNET         "wss://testnet.bitmex.com"
 
 #define SATOSHI                    0.00000001
 
@@ -139,10 +140,15 @@ enum BitmexApiType {
 
 /**
  * Web Socket Streams for Bitmex
- * ref [WebSocket API]("https://testnet.bitmex.com/app/wsAPI")
+ * see [WebSocket API]("https://www.bitmex.com/app/wsAPI")
  */
-#define BITMEX_WSS_PATH         "/app/wsAPI"
+#define BITMEX_WSS_PATH         "/realtime"
 
-#define BITMEX_WSS_TESTPATH     "/realtime"
+/**
+ * Web Socket Streams Multiplexing
+ * see [Multiplexing](https://www.bitmex.com/app/wsAPI#Multiplexing)
+ * Packet Format: [<type>,<id>,<topic>,<payload>]
+ */
+#define BITMEX_WSS_MUX_PATH     "/realtimemd"
 
 #endif /* __BITMEX_API_H__ */
