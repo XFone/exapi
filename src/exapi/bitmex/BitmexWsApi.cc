@@ -83,7 +83,9 @@ std::string bitmex_signature(std::string &api_key, std::string &secret_key,
 
 void BitmexWsApi::Authentication()
 {
-    std::string expires = std::to_string(3600L);
+    struct tm tm;
+    time_t utc_time = timegm(&tm);
+    std::string expires = std::to_string(utc_time + 5); // # 5s grace period in case of clock skew
     std::string cmd("{\"op\":\"authKeyExpires\",\"args\":[\"");
     cmd += m_api_key;
     cmd += "\",";

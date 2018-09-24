@@ -83,20 +83,28 @@ void test_bitmex_websocket()
 
         sleep(1);
 
-        api.Authentication();
-
-        sleep(3);
-
-        const char *topics[] = {
-            "position",
-            //"publicNotifications",
-            //"orderBookL2_25",
-            //"quoteBin1m",
-            //"trade",
+        const char *public_topics[] = {
+            "publicNotifications",
+            "orderBookL2_25",
+            "quoteBin1m",
+            "trade",
             NULL
         };
 
-        api.Subscribe(topics);                 // subscribe to subjects/topics
+        api.Subscribe(public_topics);           // subscribe to subjects/topics
+
+        sleep(10);
+    #if 0
+        api.Authentication();
+        sleep(3);
+
+        const char *private_topics[] = {
+            "position"
+            // ...
+        };
+
+        api.Subscribe(private_topics); 
+    #endif 
 
         sleep(30);
 

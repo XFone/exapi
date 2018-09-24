@@ -92,7 +92,7 @@ namespace exapi {
             m_ws->handshake_ex(m_host, m_path,
                 [this](websocket::request_type &m) {
                     // m.insert(http::field::sec_websocket_protocol, "xmpp;ws-chat");
-                    m.insert(http::field::sec_websocket_key, m_wss_key);
+                    // m.insert(http::field::sec_websocket_key, m_wss_key);
                 }, hh_ec
             );
 
