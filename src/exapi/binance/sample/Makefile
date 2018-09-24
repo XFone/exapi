@@ -31,6 +31,7 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 
 # Additional LDFLAGS
 # LDFLAGS += -Wl,-t
+LIBNAMES  += z                     # zlib deflate/inflate
 
 # for UNIT_TEST and LOGFILE: dont print filename and lineno
 STDCCFLAGS += -DNO_FILE_LINE

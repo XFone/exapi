@@ -11,7 +11,7 @@
 
 BUILD = ../../../../build
 SUBDIRS =
-RULESET = CLANG
+RULESET =
 
 # Makefile rules pre processing
 include $(BUILD)/Makefile.pre
@@ -31,7 +31,7 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 
 # Additional LDFLAGS
 # LDFLAGS += -Wl,-t
-LIBNAMES += z                      # zlib for deflate
+# LIBNAMES += z                    # zlib for deflate
 
 # for UNIT_TEST and LOGFILE: dont print filename and lineno
 STDCCFLAGS += -DNO_FILE_LINE
@@ -52,20 +52,22 @@ all::
 	@echo "---------------------------------------------------------------"
 
 # Test
+CONFIG_FILE = bitmex.conf
+
 test: test-quote test-trade test-wss
 	@echo "🌞  done."
 
 test-quote: all
 	@echo "🌞  Testing quote api..."
-	@$(LD_PREFIX) $(BINDIR)/test-bitmex-quote -t 7 -v 7 2>&1
+	@$(LD_PREFIX) $(BINDIR)/test-bitmex-quote -t 7 -v 7 -c $(CONFIG_FILE) 2>&1
 
 test-trade: all
 	@echo "🌞  Testing trader api..."
-	@$(LD_PREFIX) $(BINDIR)/test-bitmex-trade -t 7 -v 7 2>&1
+	@$(LD_PREFIX) $(BINDIR)/test-bitmex-trade -t 7 -v 7 -c $(CONFIG_FILE) 2>&1
 
 test-wss: all
 	@echo "🌞  Testing websocket api..."
-	@$(LD_PREFIX) $(BINDIR)/test-bitmex-wss -t 7 -v 7 2>&1
+	@$(LD_PREFIX) $(BINDIR)/test-bitmex-wss -t 7 -v 7 -c $(CONFIG_FILE) 2>&1
 
 # Makefile rules post processing
 include $(BUILD)/Makefile.post

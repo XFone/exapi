@@ -161,6 +161,10 @@ void OKCoinWebSocketApi::Run()
     if (pWebsocket == nullptr) {
         pWebsocket = std::make_shared<WebSocketClient>(m_uri);
     }
+
+    extern void on_websocket_message(const char *msg); // WebSockClient.cc
+
+    pWebsocket->set_message_callback(on_websocket_message);
     pWebsocket->start();
 }
 

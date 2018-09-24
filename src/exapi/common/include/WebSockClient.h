@@ -32,6 +32,7 @@ namespace exapi {
      */
     class WebSocketClient {
     protected:
+        friend WebSocketClientImpl;
         std::string          m_url;
         ws_callback_open     cb_open;
         ws_callback_close    cb_close;

@@ -75,17 +75,21 @@ void test_okex_quote_spi()
 
 void test_okex_websocket()
 {
-    OKCoinWebSocketApiCom api("", "");      //国际站
+    try {
+        OKCoinWebSocketApiCom api("", "");      //国际站
 
-    api.Run();                              // 启动连接服务器线程
+        api.Run();                              // 启动连接服务器线程
 
-    sleep(3);
+        sleep(3);
 
-    api.ok_spotusd_btc_ticker();            // 订阅行情
+        api.ok_spotusd_btc_ticker();            // 订阅行情
 
-    sleep(20);
+        sleep(20);
 
-    api.remove_ok_spotusd_btc_ticker();     // 取消订阅
+        api.remove_ok_spotusd_btc_ticker();     // 取消订阅
+    } catch (exception &ex) {
+        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", typeid(ex).name(), ex.what()); 
+    }
 }
 
 int main(int argc, char *argv[])
@@ -102,10 +106,10 @@ int main(int argc, char *argv[])
     }
 
     // test sync mode
-    // test_okex_quote_sync();
+    test_okex_quote_sync();
 
     // test async mode
-    // test_okex_quote_spi();
+    test_okex_quote_spi();
 
     // test websocket
     test_okex_websocket();

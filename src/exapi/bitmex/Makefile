@@ -33,7 +33,6 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 
 # Additional arguments for linker
 #LDFLAGS += -Wl,-t
-LIBNAMES += z                      # zlib for deflate
 
 # Sources to build
 SOURCES = $(wildcard *.cc *.cxx ../common/*.cc ./json2c/*.cc)

@@ -20,7 +20,13 @@
 #include <system_error>
 
 #include "JsonUtils.h"
+#include "BitmexWsApi.h"
 
+using namespace exapi;
+using namespace std;
+
+string my_apikey("");
+string my_secret("");
 
 /**
  * Read command line options
@@ -31,7 +37,18 @@ int checkopt(int opt, char *parg)
     switch (opt) {
     case 'c':
         LOGFILE(LOG_INFO, "loadling config file '%s'", parg);
-        // read_config_file(parg, on_read_keyval);
+        read_config_file(parg, [](const char *key, const char *vals[]) {
+            if (!strcmp(key, "ApiKey")) {
+                my_apikey = vals[0];
+                cout << "Read ApiKey " << my_apikey << endl;
+                return;
+            } 
+            if (!strcmp(key, "Secret")) {
+                my_secret = vals[0];
+                cout << "Read Secret " << my_secret.substr(0, 2) << "..." << endl;
+                return;
+            }
+        });
         break;
 
     default:
@@ -44,17 +61,16 @@ int checkopt(int opt, char *parg)
 
 /*---------------------------- Websocket -----------------------------------*/
 
-#include "BitmexWsApi.h"
-using namespace exapi;
-using namespace std;
-
 void on_message(const char *msg) {
     cout << "[websockect]: " << msg << endl;
 }
 
 void test_bitmex_websocket()
 {
-    BitmexWsApi api("", "");
+    string real_secret = my_secret;
+    // prompt for password
+    
+    BitmexWsApi api(my_apikey, real_secret);
 
     try {
         // BITMEX_WSS_URL, BITMEX_WSS_TESTNET
@@ -65,14 +81,18 @@ void test_bitmex_websocket()
 
         api.start();                            // start work thread
 
+        sleep(1);
+
+        api.Authentication();
+
         sleep(3);
 
         const char *topics[] = {
-            "announcement",
-            "publicNotifications",
-            "orderBookL2_25",
-            "quoteBin1m",
-            "trade",
+            "position",
+            //"publicNotifications",
+            //"orderBookL2_25",
+            //"quoteBin1m",
+            //"trade",
             NULL
         };
 
