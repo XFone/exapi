@@ -16,6 +16,7 @@
 
 #include "JsonUtils.h"
 #include "RestRequest.h"
+#include "BitmexWsApi.h"
 using namespace exapi;
 
 #ifdef USE_OPENSSL
@@ -208,30 +209,21 @@ RestRequest::ParseReponse(const std::shared_ptr<restbed::Response> &rsp, std::st
 
 RestRequest &RestRequest::ApiKey(const std::string &api_key)
 {
-    AddHeader("X-MBX-APIKEY", api_key);
+    AddHeader("api-key", api_key);
     return *this;
 }
 
 RestRequest &RestRequest::Sign(const std::string &secret_key)
 {
-    std::string params;
+    time_t utc_time     = time(NULL); // generate_nonce()
+    std::string expires = std::to_string(utc_time + 5); // # 5s grace period in case of clock skew
+    
+    std::string signature = BitmexSignature(secret_key,
+        get_method().c_str(), get_path().c_str(), expires.c_str(),
+        (const char *)get_body().data());
 
-    for (const auto qp : this->get_query_parameters()) {
-         params += restbed::Uri::encode_parameter(qp.first) + "=" + 
-                   restbed::Uri::encode_parameter(qp.second) + "&";
-    }
-
-    unsigned char digest[32];
-    unsigned int  digest_size;
-    (void)HMAC(EVP_sha256(), 
-               secret_key.c_str(), secret_key.size(),
-               (const unsigned char *)params.c_str(), params.size() - 1,
-               digest, &digest_size);
-
-    char signature[HMAC_MAX_MD_CBLOCK];
-    JsonUtils::to_hexstring(signature, (char *)digest, digest_size);
-
-    AddParam("signature", signature);
+    AddParam("api-expires", expires);        // or 'api-nonce' for old version
+    AddParam("api-signature", signature);
 
     return *this;
 }

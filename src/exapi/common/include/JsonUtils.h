@@ -138,9 +138,10 @@ public:
      * @out output character buffer
      * @buf input binary buffer
      * @size size if input buffer
+     * @upper_case default is to output uppercase
      * @return sizeof of output buffer in chars
      */
-    static int to_hexstring(char *out, const char *buf, size_t size);
+    static int to_hexstring(char *out, const char *buf, size_t size, bool upper_case = true);
 
     /**
      * @param time seconds 

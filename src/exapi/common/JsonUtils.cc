@@ -421,7 +421,7 @@ JsonUtils::from_timestamp(const std::string &tsstr)
 }
 
 int 
-JsonUtils::to_hexstring(char *out, const char *buf, size_t size)
+JsonUtils::to_hexstring(char *out, const char *buf, size_t size, bool upper_case)
 {
     /* register */ int i;
     unsigned char val;
@@ -429,13 +429,25 @@ JsonUtils::to_hexstring(char *out, const char *buf, size_t size)
     /* register */ const char *p_buf;
     const char *buf_end = buf + size;
     
-    for (i = 0, p_buf = buf; p_buf < buf_end; i++, p_buf++) {
-        val = 0x0F & (*p_buf >> 4);
-        *p++ = (val >= 0x0A) ? (val + 'A' - 0x0A) : ('0' + val);
-        val = 0x0F & *p_buf;
-        *p++ = (val >= 0x0A) ? (val + 'A' - 0x0A) : ('0' + val);
+    if (upper_case) {
+        for (i = 0, p_buf = buf; p_buf < buf_end; i++, p_buf++) {
+            val = 0x0F & (*p_buf >> 4);
+            *p++ = (val >= 0x0A) ? (val + 'A' - 0x0A) : ('0' + val);
+            val = 0x0F & *p_buf;
+            *p++ = (val >= 0x0A) ? (val + 'A' - 0x0A) : ('0' + val);
+        }
+    } else {
+        for (i = 0, p_buf = buf; p_buf < buf_end; i++, p_buf++) {
+            val = 0x0F & (*p_buf >> 4);
+            *p++ = (val >= 0x0A) ? (val + 'a' - 0x0A) : ('0' + val);
+            val = 0x0F & *p_buf;
+            *p++ = (val >= 0x0A) ? (val + 'a' - 0x0A) : ('0' + val);
+        }
     }
-    return (p - out);
+
+    int res = (p - out);
+    out[res] = '\0';
+    return res;
 }
 
 std::string JsonUtils::to_datetime(time_t datetime)

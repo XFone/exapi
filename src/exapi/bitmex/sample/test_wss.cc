@@ -13,10 +13,12 @@
 #include "Log.h"
 #include "ConConf.h"
 #include "Trace.h"
+#include "osdeps/osutil.h"
 
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <fstream>
 #include <system_error>
 
 #include "JsonUtils.h"
@@ -44,8 +46,20 @@ int checkopt(int opt, char *parg)
                 return;
             } 
             if (!strcmp(key, "Secret")) {
-                my_secret = vals[0];
-                cout << "Read Secret " << my_secret.substr(0, 2) << "..." << endl;
+                string secret(vals[0]);
+                if (secret.rfind(".key") != string::npos) { // load from keyfile
+                    ifstream is;
+                    is.open(secret, ios_base::in);
+                    if (is.is_open()) {
+                        is >> my_secret;   // read from keyfile
+                        is.close();
+                        cout << "Read Secret ('" << secret
+                             << "') " << my_secret.substr(0, 2) << "..." << endl;
+                    }
+                } else {
+                    my_secret = secret;
+                    cout << "Read Secret " << my_secret.substr(0, 2) << "..." << endl;
+                }
                 return;
             }
         });
@@ -57,6 +71,24 @@ int checkopt(int opt, char *parg)
     }
 
     return result;
+}
+
+/*---------------------------- Signature -----------------------------------*/
+
+void test_bitmex_signature()
+{
+    string API_KEY    = "CfwQ4SZ6gM_t6dIy1bCLJylX";
+    string API_SECRET = "f9XOPLacPCZJ1dvPzN8B6Et7nMEaPGeomMSHk8Cr2zD4NfCY";
+    const char *nonce = "1537896765";
+
+    string signature = BitmexSignature(API_SECRET, "GET", "/realtime", nonce);
+
+    string sig_valid("53c81d62ab81dda46f1b6cfae5464d85126aab66dbf57c275274bae1b8466f45");
+
+    cout << "Signature: " << signature 
+         << ((signature.compare(sig_valid) == 0) ? " matched" : " unmatched")
+         << endl;
+
 }
 
 /*---------------------------- Websocket -----------------------------------*/
@@ -83,6 +115,7 @@ void test_bitmex_websocket()
 
         sleep(1);
 
+    #if 0
         const char *public_topics[] = {
             "publicNotifications",
             "orderBookL2_25",
@@ -92,9 +125,7 @@ void test_bitmex_websocket()
         };
 
         api.Subscribe(public_topics);           // subscribe to subjects/topics
-
-        sleep(10);
-    #if 0
+    #else
         api.Authentication();
         sleep(3);
 
@@ -111,7 +142,7 @@ void test_bitmex_websocket()
         api.stop();
 
     } catch (exception &ex) {
-        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", typeid(ex).name(), ex.what()); 
+        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", type_name(ex).data(), ex.what()); 
     }
 }
 
@@ -128,7 +159,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-   // test websocket
+    // test websocket signaure
+    // test_bitmex_signature();
+
+    // test websocket
     test_bitmex_websocket();
 
     return 0;

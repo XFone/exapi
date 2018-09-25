@@ -100,4 +100,14 @@ namespace exapi {
         void Unsubscribe(const char *channel, const char *subjects[]);
     };
 
+    /**
+     * Generates an API signature.
+     * A signature is HMAC_SHA256(secret, verb + path + nonce + data), hex encoded.
+     * Verb must be uppercased, url is relative, nonce must be an increasing 64-bit integer
+     * and the data, if present, must be JSON without whitespace between keys.
+     */
+    std::string BitmexSignature(const std::string &secret_key,
+                                const char *verb, const char *path, 
+                                const char *nonce, const char *data = nullptr);
+
 } // namespace exapi
