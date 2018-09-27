@@ -10,68 +10,16 @@
  */
 
 #include "Base.h"
-#include "Log.h"
-#include "ConConf.h"
-#include "Trace.h"
 #include "osdeps/osutil.h"
 
 #include <cstdio>
-#include <cstring>
-#include <iostream>
-#include <fstream>
 #include <system_error>
 
-#include "JsonUtils.h"
+#include "ReadConf.ipp"             // read apiKey from config file
 #include "BitmexWsApi.h"
 
 using namespace exapi;
 using namespace std;
-
-string my_apikey("");
-string my_secret("");
-
-/**
- * Read command line options
- */
-int checkopt(int opt, char *parg)
-{
-    int result = 0;
-    switch (opt) {
-    case 'c':
-        LOGFILE(LOG_INFO, "loadling config file '%s'", parg);
-        read_config_file(parg, [](const char *key, const char *vals[]) {
-            if (!strcmp(key, "ApiKey")) {
-                my_apikey = vals[0];
-                cout << "Read ApiKey " << my_apikey << endl;
-                return;
-            } 
-            if (!strcmp(key, "Secret")) {
-                string secret(vals[0]);
-                if (secret.rfind(".key") != string::npos) { // load from keyfile
-                    ifstream is;
-                    is.open(secret, ios_base::in);
-                    if (is.is_open()) {
-                        is >> my_secret;   // read from keyfile
-                        is.close();
-                        cout << "Read Secret ('" << secret
-                             << "') " << my_secret.substr(0, 2) << "..." << endl;
-                    }
-                } else {
-                    my_secret = secret;
-                    cout << "Read Secret " << my_secret.substr(0, 2) << "..." << endl;
-                }
-                return;
-            }
-        });
-        break;
-
-    default:
-        result = -1;
-        break;
-    }
-
-    return result;
-}
 
 /*---------------------------- Signature -----------------------------------*/
 
@@ -97,7 +45,7 @@ void on_message(const char *msg) {
     cout << "[websockect]: " << msg << endl;
 }
 
-void test_bitmex_websocket()
+void test_bitmex_websocket_public()
 {
     string real_secret = my_secret;
     // prompt for password
@@ -105,9 +53,8 @@ void test_bitmex_websocket()
     BitmexWsApi api(my_apikey, real_secret);
 
     try {
-        // BITMEX_WSS_URL, BITMEX_WSS_TESTNET
-        // BITMEX_WSS_PATH, BITMEX_WSS_MUX_PATH
-        api.SetUrl(BITMEX_WSS_TESTNET BITMEX_WSS_PATH); // using testnet
+        // using testnet
+        api.SetUrl(BITMEX_WSS_TESTNET BITMEX_WSS_PATH);
 
         api.set_message_callback(on_message);
 
@@ -115,27 +62,66 @@ void test_bitmex_websocket()
 
         sleep(1);
 
-    #if 0
         const char *public_topics[] = {
+            "announcement",
             "publicNotifications",
             "orderBookL2_25",
             "quoteBin1m",
-            "trade",
+            "tradeBin1m",
+            // "connected", "chat", "instrument", "settlement",
+            // "funding", "insurance", "liquidation", 
+            // "orderBookL2", "orderBookL2_25", "orderBook10", 
+            // "quote", "trade", 
+            // "quoteBin1m", "quoteBin5m", "quoteBin1h", "quoteBin1d", 
+            // "tradeBin1m", "tradeBin5m", "tradeBin1h", "tradeBin1d"
             NULL
         };
 
         api.Subscribe(public_topics);           // subscribe to subjects/topics
-    #else
+
+        sleep(30);
+
+        api.stop();
+
+    } catch (exception &ex) {
+        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", type_name(ex).data(), ex.what()); 
+    }
+}
+
+void test_bitmex_websocket_private()
+{
+    string real_secret = my_secret;
+    // prompt for password
+    
+    BitmexWsApi api(my_apikey, real_secret);
+
+    try {
+        // using testnet
+        api.SetUrl(BITMEX_WSS_TESTNET BITMEX_WSS_PATH);
+
+        api.set_message_callback(on_message);
+
+        api.start();                            // start work thread
+
+        sleep(1);
+
         api.Authentication();
         sleep(3);
 
         const char *private_topics[] = {
-            "position"
-            // ...
+            "privateNotifications", 
+            "account", 
+            "wallet", 
+            "affiliate", 
+            "margin", 
+            "position", 
+            "transact", 
+            "order", 
+            "execution",
+            NULL
         };
 
         api.Subscribe(private_topics); 
-    #endif 
 
         sleep(30);
 
@@ -163,7 +149,8 @@ int main(int argc, char *argv[])
     // test_bitmex_signature();
 
     // test websocket
-    test_bitmex_websocket();
+    test_bitmex_websocket_public();
+    //test_bitmex_websocket_private();
 
     return 0;
 }

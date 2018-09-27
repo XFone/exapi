@@ -9,62 +9,20 @@
  *
  */
 
-#include "Base.h"
-#include "Log.h"
-#include "ConConf.h"
-#include "Trace.h"
+#include "JsonUtils.h"              // for JsonUtils::from_datetime
+#include "ReadConf.ipp"             // read apiKey from config file
 
-#include <cstdio>
-#include <cstring>
-#include <iostream>
-
-#include "JsonUtils.h"
-
-#ifdef CHECK_REGEX_VERSION
-# include <regex>
-# if __cplusplus >= 201103L &&                            \
-    (!defined(__GLIBCXX__) || (__cplusplus >= 201402L) || \
-        (defined(_GLIBCXX_REGEX_DFS_QUANTIFIERS_LIMIT) || \
-         defined(_GLIBCXX_REGEX_STATE_LIMIT)           || \
-             (defined(_GLIBCXX_RELEASE)                && \
-             _GLIBCXX_RELEASE > 4)))
-#  define HAVE_WORKING_REGEX 1
-# else
-#  define HAVE_WORKING_REGEX 0
-#  warning "No working std::regex! please upgrade to gcc-4.9+ or use boost::regex"
-# endif
-#endif
-
-/** 
- * Read command line options
- */
-int checkopt(int opt, char *parg)
-{
-    int result = 0;
-    switch (opt) {
-    case 'c':
-        LOGFILE(LOG_INFO, "loadling config file '%s'", parg);
-        // read_config_file(parg, on_read_keyval);
-        break;
-
-    default:
-        result = -1;
-        break;
-    }
-
-    return result;
-}
+#include "BitmexApi.h"              // for BITMEX_REST_TESTNET
+#include "MyQuoteBitmexSpi.h"
 
 /*---------------------------- async mode -----------------------------------*/
 
-#include "MyQuoteBitmexSpi.h"
-
 void test_bitmex_quote_spi()
 {
-    DAQuoteBitmexApi *api = DAQuoteBitmexApi::CreateApi("", "");
+    DAQuoteBitmexApi *api = DAQuoteBitmexApi::CreateApi(my_apikey.c_str(), my_secret.c_str());
     MyDAQuoteBitmexSpi spi;
 
-    const char *slist[] = { "https://www.bitmex.com", "\0" };
+    const char *slist[] = { BITMEX_REST_TESTNET, "\0" };
     api->ConnServer(slist, &spi);
     api->Init();
 

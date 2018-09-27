@@ -13,8 +13,11 @@
 /** @file RestRequest.h Wrap class of restbed::Request.
  */
 
-#include <restbed>
 #include <chrono>
+#include <cmath>
+#include <string>
+
+#include <restbed>
 
 namespace exapi {
 
@@ -133,20 +136,48 @@ namespace exapi {
             return *this;
         }
 
-        RestRequest &AddParam(const std::string&name, const std::string&value) {
+        RestRequest &AddParam(const std::string&name, const std::string &value) {
             set_query_parameter(name, value);
             return *this;
         }
 
-        /**
-         * Add form parameter if only value is NOT null
-         */
         RestRequest &AddParam(const std::string&name, const char *value) {
+            set_query_parameter(name, value == nullptr ? "" : value);
+            return *this;
+        }
+
+        /**
+         * Add form optional parameter if only value is NOT null
+         */
+        RestRequest &AddParamIf(const std::string&name, const char *value) {
             if (nullptr != value)
                 set_query_parameter(name, value);
             return *this;
         }
-        
+
+        /**
+         * Add form optional parameter if only value is NOT zero value (int32 or int64)
+         */
+        template <typename T>
+        RestRequest &AddParamIf(const std::string&name, T val) {
+            if (val != 0)
+                set_query_parameter(name, std::to_string(val));
+            return *this;
+        }
+
+        /**
+         * Add form optional parameter if only value is NOT zero value (double)
+         */
+        RestRequest &AddParamIf(const std::string&name, double val) {
+            if (!std::isnan(val) && std::abs(val) > /* SATOSHI/10 */  0.000000001)
+                set_query_parameter(name, std::to_string(val));
+            return *this;
+        }
+
+        /**
+         * Add parameters in map
+         * @param values parameters in multimap
+         */
         RestRequest &AddParams(const std::multimap<std::string, std::string> &values) {
             set_query_parameters(values);
             return *this;

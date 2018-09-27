@@ -1,12 +1,10 @@
 # Sample codes
 
-## Using DAQuoteBitmexSpi + MyDAQuoteBitmexApi in async mode
+## 1. Using DAQuoteBitmexSpi in async mode
 
 1. Define an class (MyDAQuoteBitmexSpi) inherited from DAQuoteBitmexSpi:
 
-    ```C++
-    // see MyDAQuoteBitmexSpi.h
-    ```
+    see [MyDAQuoteBitmexSpi.h](./MyQuoteBitmexSpi.h)
 
 2. Initialize an API with **DAQuoteBitmexApi::CreateApi** and assign with an instance of above class:
 
@@ -25,3 +23,6 @@
         api->Dispose();
     }
     ```
+
+## 2. Using DATraderBitmexSpi in async mode
+

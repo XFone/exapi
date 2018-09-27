@@ -9,48 +9,21 @@
  *
  */
 
-#include "Base.h"
-#include "Log.h"
-#include "ConConf.h"
-#include "Trace.h"
+#include "ReadConf.ipp"             // read apiKey from config file
 
-#include <cstdio>
-#include <cstring>
-#include <iostream>
+#include "BitmexApi.h"              // for BITMEX_REST_TESTNET
+#include "MyTraderBitmexSpi.h"
 
-#include "JsonUtils.h"
-
-
-/** 
- * Read command line options
- */
-int checkopt(int opt, char *parg)
-{
-    int result = 0;
-    switch (opt) {
-    case 'c':
-        LOGFILE(LOG_INFO, "loadling config file '%s'", parg);
-        // read_config_file(parg, on_read_keyval);
-        break;
-
-    default:
-        result = -1;
-        break;
-    }
-
-    return result;
-}
+using namespace exapi;
 
 /*---------------------------- async mode -----------------------------------*/
 
-#include "MyTraderBitmexSpi.h"
-
 void test_bitmex_trader_spi()
 {
-    DATraderBitmexApi *api = DATraderBitmexApi::CreateApi("", "");
+    DATraderBitmexApi *api = DATraderBitmexApi::CreateApi(my_apikey.c_str(), my_secret.c_str());
     MyDATraderBitmexSpi spi;
 
-    const char *slist[] = { "https://www.bitmex.com", NULL };
+    const char *slist[] = { BITMEX_REST_TESTNET, NULL };
     api->ConnServer(slist, &spi);
     api->Init();
 
