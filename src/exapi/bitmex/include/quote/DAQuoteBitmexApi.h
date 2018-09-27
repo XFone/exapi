@@ -90,34 +90,64 @@ namespace exapi {
 
         //------------------------- Funding callbacks ------------------------
 
+        /**
+         * @param fundings array of \ref Fundings
+         */
         virtual void OnFundingHistory(const void *fundings) {}
 
+        /**
+         * @param insurances array of \ref Insurance
+         */
         virtual void OnInsuranceHistory(const void *insurances) {}
 
         //-------------------------- Trades Data -----------------------------
 
+        /**
+         * @param trades array of \ref Trade
+         */
         virtual void OnTrades(const void *trades) {}
 
+        /**
+         * @param tradebin \ref TradeBin
+         */
         virtual void OnTradesBucketd(const void *tradebin) {}
 
         //-------------------------- Extra Data ------------------------------
 
         /**
          * Received site announcements
-         * @data array of announcements
+         * @data array of \ref Announcement
          */
         virtual void OnAnnouncement(const void *data) {}
 
+        /**
+         * @param data \ref AnnouncementUrgent
+         */
         virtual void OnAnnouncementUrgent(const void *data) {}
 
+        /**
+         * @param schema \ref Schema
+         */
         virtual void OnSchema(const void *schema) {}
 
+        /**
+         * @param schema \ref Schema
+         */
         virtual void OnSchemaWebsocket(const void *schema) {}
 
+        /**
+         * @param stats \ref Stats
+         */
         virtual void OnStats(const void *stats) {}
 
+        /**
+         * @param statsHist \ref StatsHistory
+         */
         virtual void OnStatsHistory(const void *statsHist) {}
 
+        /**
+         * @param statsUsd \ref StatsUSD
+         */
         virtual void OnStatsHistoryUsd(const void *statsUsd) {}
 
     };

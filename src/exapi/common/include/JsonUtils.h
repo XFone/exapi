@@ -54,6 +54,10 @@ public:
 
         Json() : m_ctx_root(nullptr), m_pointer(nullptr) {}
 
+        Json(const std::string &jsonstr) : Json() {
+            parse(jsonstr);
+        }
+
         ~Json();
 
         Json & parse(const std::string &jsonstr);
@@ -75,6 +79,13 @@ public:
          * support typename: bool, double, std::string
          */
         template<typename T> T get() throw(std::runtime_error);
+
+        /**
+         * Get value
+         * support typename: all base type, and C struct defined in json2c
+         * @return 0 for success, elsewise return -errno
+         */
+        template<typename T> int get(T &v);
 
         /**
          * Get value
@@ -131,6 +142,15 @@ public:
 
     static int64_t from_timestamp(const std::string &tsstr);
 
+    /**
+     * De-serialize data from json string
+     */
+    template <typename T>
+    static int from_json(const std::string &jsonstr, T &v) {
+        Json json;
+        return json.parse(jsonstr).get<T>(v);
+    }
+
     //-------------------------- Json Encode ------------------------------
 
     /**
@@ -164,6 +184,8 @@ public:
     template <typename T>
     static std::string to_json(std::vector< T > values);
 };
+
+/*--------------------------- _JSON_DECODER_ -------------------------------*/
 
 #if defined(_JSON_DECODER_)
 

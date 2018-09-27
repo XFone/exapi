@@ -37,8 +37,8 @@ CXXFLAGS += -UDEBUG                # conficts with corvusoft/restbed/logger.hpp
 STDCCFLAGS += -DNO_FILE_LINE
 
 # Sources to build
-SOURCES = $(wildcard ../*.cc ../../common/*.cc)
-INCDIRS  += ../include ../../common/include
+SOURCES = $(wildcard ../*.cc ../json2c/*.cc ../../common/*.cc)
+INCDIRS  += ../include ../json2c ../../common/include
 
 SOURCES_test-bitmex-quote = test_spi.cc
 SOURCES_test-bitmex-trade = test_trade.cc

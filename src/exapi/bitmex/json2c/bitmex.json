@@ -36,7 +36,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Announcement &v)",
+        "decoder": "int JsonUtils::Json::get(Announcement &v)",
         "encoder": "std::string to_json(const Announcement &v)"
     },
     "Error": {
@@ -51,7 +51,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Error &v)",
+        "decoder": "int JsonUtils::Json::get(Error &v)",
         "encoder": "std::string to_json(const Error &v)"
     },
     "APIKey": {
@@ -94,7 +94,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, APIKey &v)",
+        "decoder": "int JsonUtils::Json::get(APIKey &v)",
         "encoder": "std::string to_json(const APIKey &v)"
     },
     "Chat": {
@@ -130,7 +130,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Chat &v)",
+        "decoder": "int JsonUtils::Json::get(Chat &v)",
         "encoder": "std::string to_json(const Chat &v)"
     },
     "ChatChannel": {
@@ -149,7 +149,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, ChatChannel &v)",
+        "decoder": "int JsonUtils::Json::get(ChatChannel &v)",
         "encoder": "std::string to_json(const ChatChannel &v)"
     },
     "ConnectedUsers": {
@@ -169,7 +169,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, ConnectedUsers &v)",
+        "decoder": "int JsonUtils::Json::get(ConnectedUsers &v)",
         "encoder": "std::string to_json(const ConnectedUsers &v)"
     },
     "Execution": {
@@ -344,7 +344,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Execution &v)",
+        "decoder": "int JsonUtils::Json::get(Execution &v)",
         "encoder": "std::string to_json(const Execution &v)"
     },
     "Funding": {
@@ -375,7 +375,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Funding &v)",
+        "decoder": "int JsonUtils::Json::get(Funding &v)",
         "encoder": "std::string to_json(const Funding &v)"
     },
     "Instrument": {
@@ -765,7 +765,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Instrument &v)",
+        "decoder": "int JsonUtils::Json::get(Instrument &v)",
         "encoder": "std::string to_json(const Instrument &v)"
     },
     "InstrumentInterval": {
@@ -783,7 +783,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, InstrumentInterval &v)",
+        "decoder": "int JsonUtils::Json::get(InstrumentInterval &v)",
         "encoder": "std::string to_json(const InstrumentInterval &v)"
     },
     "IndexComposite": {
@@ -820,7 +820,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, IndexComposite &v)",
+        "decoder": "int JsonUtils::Json::get(IndexComposite &v)",
         "encoder": "std::string to_json(const IndexComposite &v)"
     },
     "Insurance": {
@@ -843,7 +843,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Insurance &v)",
+        "decoder": "int JsonUtils::Json::get(Insurance &v)",
         "encoder": "std::string to_json(const Insurance &v)"
     },
     "Leaderboard": {
@@ -865,7 +865,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Leaderboard &v)",
+        "decoder": "int JsonUtils::Json::get(Leaderboard &v)",
         "encoder": "std::string to_json(const Leaderboard &v)"
     },
     "Liquidation": {
@@ -894,7 +894,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Liquidation &v)",
+        "decoder": "int JsonUtils::Json::get(Liquidation &v)",
         "encoder": "std::string to_json(const Liquidation &v)"
     },
     "Notification": {
@@ -939,7 +939,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Notification &v)",
+        "decoder": "int JsonUtils::Json::get(Notification &v)",
         "encoder": "std::string to_json(const Notification &v)"
     },
     "Order": {
@@ -1064,7 +1064,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Order &v)",
+        "decoder": "int JsonUtils::Json::get(Order &v)",
         "encoder": "std::string to_json(const Order &v)"
     },
     "OrderBookL2": {
@@ -1094,7 +1094,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderBookL2 &v)",
+        "decoder": "int JsonUtils::Json::get(OrderBookL2 &v)",
         "encoder": "std::string to_json(const OrderBookL2 &v)"
     },
     "Position": {
@@ -1463,7 +1463,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Position &v)",
+        "decoder": "int JsonUtils::Json::get(Position &v)",
         "encoder": "std::string to_json(const Position &v)"
     },
     "Quote": {
@@ -1498,7 +1498,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Quote &v)",
+        "decoder": "int JsonUtils::Json::get(Quote &v)",
         "encoder": "std::string to_json(const Quote &v)"
     },
     "Settlement": {
@@ -1544,7 +1544,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Settlement &v)",
+        "decoder": "int JsonUtils::Json::get(Settlement &v)",
         "encoder": "std::string to_json(const Settlement &v)"
     },
     "Stats": {
@@ -1578,7 +1578,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Stats &v)",
+        "decoder": "int JsonUtils::Json::get(Stats &v)",
         "encoder": "std::string to_json(const Stats &v)"
     },
     "StatsHistory": {
@@ -1608,7 +1608,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, StatsHistory &v)",
+        "decoder": "int JsonUtils::Json::get(StatsHistory &v)",
         "encoder": "std::string to_json(const StatsHistory &v)"
     },
     "StatsUSD": {
@@ -1642,7 +1642,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, StatsUSD &v)",
+        "decoder": "int JsonUtils::Json::get(StatsUSD &v)",
         "encoder": "std::string to_json(const StatsUSD &v)"
     },
     "Trade": {
@@ -1690,7 +1690,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Trade &v)",
+        "decoder": "int JsonUtils::Json::get(Trade &v)",
         "encoder": "std::string to_json(const Trade &v)"
     },
     "TradeBin": {
@@ -1753,7 +1753,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, TradeBin &v)",
+        "decoder": "int JsonUtils::Json::get(TradeBin &v)",
         "encoder": "std::string to_json(const TradeBin &v)"
     },
     "Wallet": {
@@ -1861,7 +1861,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Wallet &v)",
+        "decoder": "int JsonUtils::Json::get(Wallet &v)",
         "encoder": "std::string to_json(const Wallet &v)"
     },
     "Transaction": {
@@ -1914,7 +1914,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Transaction &v)",
+        "decoder": "int JsonUtils::Json::get(Transaction &v)",
         "encoder": "std::string to_json(const Transaction &v)"
     },
     "AccessToken": {
@@ -1941,7 +1941,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, AccessToken &v)",
+        "decoder": "int JsonUtils::Json::get(AccessToken &v)",
         "encoder": "std::string to_json(const AccessToken &v)"
     },
     "Affiliate": {
@@ -2012,7 +2012,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Affiliate &v)",
+        "decoder": "int JsonUtils::Json::get(Affiliate &v)",
         "encoder": "std::string to_json(const Affiliate &v)"
     },
     "User": {
@@ -2079,7 +2079,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, User &v)",
+        "decoder": "int JsonUtils::Json::get(User &v)",
         "encoder": "std::string to_json(const User &v)"
     },
     "UserCommission": {
@@ -2107,7 +2107,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserCommission &v)",
+        "decoder": "int JsonUtils::Json::get(UserCommission &v)",
         "encoder": "std::string to_json(const UserCommission &v)"
     },
     "Margin": {
@@ -2279,7 +2279,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, Margin &v)",
+        "decoder": "int JsonUtils::Json::get(Margin &v)",
         "encoder": "std::string to_json(const Margin &v)"
     },
     "UserPreferences": {
@@ -2371,7 +2371,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserPreferences &v)",
+        "decoder": "int JsonUtils::Json::get(UserPreferences &v)",
         "encoder": "std::string to_json(const UserPreferences &v)"
     },
     "AnnouncementGetParams": {
@@ -2383,7 +2383,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, AnnouncementGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(AnnouncementGetParams &v)",
         "encoder": "std::string to_json(const AnnouncementGetParams &v)"
     },
     "APIKeyNewParams": {
@@ -2407,7 +2407,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, APIKeyNewParams &v)",
+        "decoder": "int JsonUtils::Json::get(APIKeyNewParams &v)",
         "encoder": "std::string to_json(const APIKeyNewParams &v)"
     },
     "APIKeyDisableParams": {
@@ -2418,7 +2418,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, APIKeyDisableParams &v)",
+        "decoder": "int JsonUtils::Json::get(APIKeyDisableParams &v)",
         "encoder": "std::string to_json(const APIKeyDisableParams &v)"
     },
     "APIKeyEnableParams": {
@@ -2429,7 +2429,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, APIKeyEnableParams &v)",
+        "decoder": "int JsonUtils::Json::get(APIKeyEnableParams &v)",
         "encoder": "std::string to_json(const APIKeyEnableParams &v)"
     },
     "ChatGetParams": {
@@ -2452,7 +2452,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, ChatGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(ChatGetParams &v)",
         "encoder": "std::string to_json(const ChatGetParams &v)"
     },
     "ExecutionGetParams": {
@@ -2490,7 +2490,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, ExecutionGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(ExecutionGetParams &v)",
         "encoder": "std::string to_json(const ExecutionGetParams &v)"
     },
     "ExecutionGetTradeHistoryParams": {
@@ -2528,7 +2528,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, ExecutionGetTradeHistoryParams &v)",
+        "decoder": "int JsonUtils::Json::get(ExecutionGetTradeHistoryParams &v)",
         "encoder": "std::string to_json(const ExecutionGetTradeHistoryParams &v)"
     },
     "FundingGetParams": {
@@ -2566,7 +2566,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, FundingGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(FundingGetParams &v)",
         "encoder": "std::string to_json(const FundingGetParams &v)"
     },
     "InstrumentGetParams": {
@@ -2604,7 +2604,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, InstrumentGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(InstrumentGetParams &v)",
         "encoder": "std::string to_json(const InstrumentGetParams &v)"
     },
     "InstrumentGetCompositeIndexParams": {
@@ -2646,7 +2646,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, InstrumentGetCompositeIndexParams &v)",
+        "decoder": "int JsonUtils::Json::get(InstrumentGetCompositeIndexParams &v)",
         "encoder": "std::string to_json(const InstrumentGetCompositeIndexParams &v)"
     },
     "InsuranceGetParams": {
@@ -2684,7 +2684,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, InsuranceGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(InsuranceGetParams &v)",
         "encoder": "std::string to_json(const InsuranceGetParams &v)"
     },
     "LeaderboardGetParams": {
@@ -2695,7 +2695,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, LeaderboardGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(LeaderboardGetParams &v)",
         "encoder": "std::string to_json(const LeaderboardGetParams &v)"
     },
     "LiquidationGetParams": {
@@ -2733,7 +2733,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, LiquidationGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(LiquidationGetParams &v)",
         "encoder": "std::string to_json(const LiquidationGetParams &v)"
     },
     "OrderGetOrdersParams": {
@@ -2771,7 +2771,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderGetOrdersParams &v)",
+        "decoder": "int JsonUtils::Json::get(OrderGetOrdersParams &v)",
         "encoder": "std::string to_json(const OrderGetOrdersParams &v)"
     },
     "OrderNewBulkParams": {
@@ -2783,7 +2783,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderNewBulkParams &v)",
+        "decoder": "int JsonUtils::Json::get(OrderNewBulkParams &v)",
         "encoder": "std::string to_json(const OrderNewBulkParams &v)"
     },
     "OrderClosePositionParams": {
@@ -2798,7 +2798,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderClosePositionParams &v)",
+        "decoder": "int JsonUtils::Json::get(OrderClosePositionParams &v)",
         "encoder": "std::string to_json(const OrderClosePositionParams &v)"
     },
     "OrderCancelAllParams": {
@@ -2816,7 +2816,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderCancelAllParams &v)",
+        "decoder": "int JsonUtils::Json::get(OrderCancelAllParams &v)",
         "encoder": "std::string to_json(const OrderCancelAllParams &v)"
     },
     "OrderCancelAllAfterParams": {
@@ -2828,7 +2828,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderCancelAllAfterParams &v)",
+        "decoder": "int JsonUtils::Json::get(OrderCancelAllAfterParams &v)",
         "encoder": "std::string to_json(const OrderCancelAllAfterParams &v)"
     },
     "OrderBookGetL2Params": {
@@ -2843,7 +2843,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, OrderBookGetL2Params &v)",
+        "decoder": "int JsonUtils::Json::get(OrderBookGetL2Params &v)",
         "encoder": "std::string to_json(const OrderBookGetL2Params &v)"
     },
     "PositionGetParams": {
@@ -2863,7 +2863,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, PositionGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(PositionGetParams &v)",
         "encoder": "std::string to_json(const PositionGetParams &v)"
     },
     "PositionIsolateMarginParams": {
@@ -2877,7 +2877,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, PositionIsolateMarginParams &v)",
+        "decoder": "int JsonUtils::Json::get(PositionIsolateMarginParams &v)",
         "encoder": "std::string to_json(const PositionIsolateMarginParams &v)"
     },
     "PositionUpdateRiskLimitParams": {
@@ -2892,7 +2892,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, PositionUpdateRiskLimitParams &v)",
+        "decoder": "int JsonUtils::Json::get(PositionUpdateRiskLimitParams &v)",
         "encoder": "std::string to_json(const PositionUpdateRiskLimitParams &v)"
     },
     "PositionTransferIsolatedMarginParams": {
@@ -2907,7 +2907,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, PositionTransferIsolatedMarginParams &v)",
+        "decoder": "int JsonUtils::Json::get(PositionTransferIsolatedMarginParams &v)",
         "encoder": "std::string to_json(const PositionTransferIsolatedMarginParams &v)"
     },
     "PositionUpdateLeverageParams": {
@@ -2922,7 +2922,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, PositionUpdateLeverageParams &v)",
+        "decoder": "int JsonUtils::Json::get(PositionUpdateLeverageParams &v)",
         "encoder": "std::string to_json(const PositionUpdateLeverageParams &v)"
     },
     "QuoteGetParams": {
@@ -2960,7 +2960,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, QuoteGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(QuoteGetParams &v)",
         "encoder": "std::string to_json(const QuoteGetParams &v)"
     },
     "QuoteGetBucketedParams": {
@@ -3004,7 +3004,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, QuoteGetBucketedParams &v)",
+        "decoder": "int JsonUtils::Json::get(QuoteGetBucketedParams &v)",
         "encoder": "std::string to_json(const QuoteGetBucketedParams &v)"
     },
     "SchemaGetParams": {
@@ -3015,7 +3015,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, SchemaGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(SchemaGetParams &v)",
         "encoder": "std::string to_json(const SchemaGetParams &v)"
     },
     "SettlementGetParams": {
@@ -3053,7 +3053,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, SettlementGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(SettlementGetParams &v)",
         "encoder": "std::string to_json(const SettlementGetParams &v)"
     },
     "TradeGetParams": {
@@ -3091,7 +3091,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, TradeGetParams &v)",
+        "decoder": "int JsonUtils::Json::get(TradeGetParams &v)",
         "encoder": "std::string to_json(const TradeGetParams &v)"
     },
     "TradeGetBucketedParams": {
@@ -3135,7 +3135,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, TradeGetBucketedParams &v)",
+        "decoder": "int JsonUtils::Json::get(TradeGetBucketedParams &v)",
         "encoder": "std::string to_json(const TradeGetBucketedParams &v)"
     },
     "UserGetDepositAddressParams": {
@@ -3146,7 +3146,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserGetDepositAddressParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserGetDepositAddressParams &v)",
         "encoder": "std::string to_json(const UserGetDepositAddressParams &v)"
     },
     "UserGetWalletParams": {
@@ -3157,7 +3157,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserGetWalletParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserGetWalletParams &v)",
         "encoder": "std::string to_json(const UserGetWalletParams &v)"
     },
     "UserGetWalletHistoryParams": {
@@ -3168,7 +3168,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserGetWalletHistoryParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserGetWalletHistoryParams &v)",
         "encoder": "std::string to_json(const UserGetWalletHistoryParams &v)"
     },
     "UserGetWalletSummaryParams": {
@@ -3179,7 +3179,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserGetWalletSummaryParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserGetWalletSummaryParams &v)",
         "encoder": "std::string to_json(const UserGetWalletSummaryParams &v)"
     },
     "UserMinWithdrawalFeeParams": {
@@ -3190,7 +3190,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserMinWithdrawalFeeParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserMinWithdrawalFeeParams &v)",
         "encoder": "std::string to_json(const UserMinWithdrawalFeeParams &v)"
     },
     "UserRequestWithdrawalParams": {
@@ -3215,7 +3215,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserRequestWithdrawalParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserRequestWithdrawalParams &v)",
         "encoder": "std::string to_json(const UserRequestWithdrawalParams &v)"
     },
     "UserCancelWithdrawalParams": {
@@ -3226,7 +3226,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserCancelWithdrawalParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserCancelWithdrawalParams &v)",
         "encoder": "std::string to_json(const UserCancelWithdrawalParams &v)"
     },
     "UserConfirmWithdrawalParams": {
@@ -3237,7 +3237,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserConfirmWithdrawalParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserConfirmWithdrawalParams &v)",
         "encoder": "std::string to_json(const UserConfirmWithdrawalParams &v)"
     },
     "UserRequestEnableTFAParams": {
@@ -3248,7 +3248,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserRequestEnableTFAParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserRequestEnableTFAParams &v)",
         "encoder": "std::string to_json(const UserRequestEnableTFAParams &v)"
     },
     "UserConfirmEnableTFAParams": {
@@ -3262,7 +3262,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserConfirmEnableTFAParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserConfirmEnableTFAParams &v)",
         "encoder": "std::string to_json(const UserConfirmEnableTFAParams &v)"
     },
     "UserDisableTFAParams": {
@@ -3276,7 +3276,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserDisableTFAParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserDisableTFAParams &v)",
         "encoder": "std::string to_json(const UserDisableTFAParams &v)"
     },
     "UserConfirmParams": {
@@ -3287,7 +3287,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserConfirmParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserConfirmParams &v)",
         "encoder": "std::string to_json(const UserConfirmParams &v)"
     },
     "UserCheckReferralCodeParams": {
@@ -3298,7 +3298,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserCheckReferralCodeParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserCheckReferralCodeParams &v)",
         "encoder": "std::string to_json(const UserCheckReferralCodeParams &v)"
     },
     "UserSavePreferencesParams": {
@@ -3313,7 +3313,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserSavePreferencesParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserSavePreferencesParams &v)",
         "encoder": "std::string to_json(const UserSavePreferencesParams &v)"
     },
     "UserGetMarginParams": {
@@ -3324,7 +3324,7 @@
         },
         "required": [],
         "type": "object",
-        "decoder": "int from_json(JsonUtils::Json &json, UserGetMarginParams &v)",
+        "decoder": "int JsonUtils::Json::get(UserGetMarginParams &v)",
         "encoder": "std::string to_json(const UserGetMarginParams &v)"
     }
   },

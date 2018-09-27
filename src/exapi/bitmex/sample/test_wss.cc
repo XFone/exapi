@@ -65,9 +65,9 @@ void test_bitmex_websocket_public()
         const char *public_topics[] = {
             "announcement",
             "publicNotifications",
-            "orderBookL2_25",
-            "quoteBin1m",
-            "tradeBin1m",
+            "orderBook10",
+            "quote",
+            "trade",
             // "connected", "chat", "instrument", "settlement",
             // "funding", "insurance", "liquidation", 
             // "orderBookL2", "orderBookL2_25", "orderBook10", 
