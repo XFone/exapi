@@ -14,7 +14,7 @@
  */
 
 #include <string>
-#include "RestRequest.h"
+#include "HttpRestClient.h"
 
 namespace exapi {
 

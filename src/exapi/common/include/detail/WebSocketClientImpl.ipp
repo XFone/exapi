@@ -8,6 +8,10 @@
  * $Log: $
  *
  */
+#pragma once
+
+/** @file WebSocketClientImpl.ipp implements WebSocketClient with Boost.Beast
+ */
 
 #include "Base.h"
 #include "Log.h"
@@ -17,6 +21,7 @@
 #include <cstdio>
 #include <thread>
 #include <system_error>
+#include <uuid/uuid.h>
 
 #include <boost/regex.hpp>
 #include <boost/beast/core.hpp>
@@ -43,30 +48,34 @@ namespace exapi {
     class WebSocketClientImpl {
     protected:
         friend  WebSocketClient;
-        typedef websocket::stream< ssl::stream<tcp::socket> >  websocket_stream;
-        WebSocketClient                                       *m_intf;
-        boost::asio::io_context                                m_ioc;
-        std::shared_ptr<websocket_stream>                      m_ws;
-        std::shared_ptr<std::thread>                           m_worker;
-        bool                                                   is_start;
-        std::string                                            m_host;
-        std::string                                            m_port;
-        std::string                                            m_path;
-        std::string                                            m_wss_key;
+        typedef websocket::stream< ssl::stream<tcp::socket> >   websocket_stream;
+        WebSocketClient                                        *m_intf;
+        boost::asio::io_context                                 m_ioc;
+        std::shared_ptr<websocket_stream>                       m_ws;
+        std::shared_ptr<std::thread>                            m_worker;
+        bool                                                    is_start;
+        std::string                                             m_host;
+        std::string                                             m_port;
+        std::string                                             m_path;
+        std::string                                             m_wss_key;
 
-        beast::multi_buffer                                    m_rdbuf;
+        beast::multi_buffer                                     m_rdbuf;
 
         static std::string generate_key() {
-        #if 0
-            unsigned char raw_key[16];
-
-            for (int i = 0; i < 4; i++) {
-                conv.i = m_rng();
-                std::copy(conv.c, conv.c + 4, &raw_key[i * 4]);
+            char buf[40];
+            char *p0 = &buf[0], *p;
+            uuid_t uuid;
+            uuid_generate_random(uuid);
+            uuid_unparse_lower(uuid, buf);
+            // remove char '-' from string s
+            for (p = p0; *p != '\0'; p++) {
+                char ch = *p;
+                if ((int)ch != '-') {
+                    *p0++ = ch;
+                }
             }
-            return base64_encode(raw_key, size_of(raw_key));
-        #endif
-            return std::string("KbwSTU0TCg");
+            *p0 = '\0';
+            return std::string(buf);
         }
 
         void on_connect(error_code ec) {
@@ -292,15 +301,15 @@ namespace exapi {
 
 /*---------------------------- WebSocketClient -----------------------------*/
 
-/*------------- Sample code ----------------
-#include "detail/WebSocketClientImpl.ipp"
+#ifdef DEF_WEBSOCKET_CLIENT
 
 using namespace exapi;
 
-WebSocketClient::WebSocketClient(const std::string url)
+WebSocketClient::WebSocketClient(const std::string &url)
   : m_url(url), cb_open(nullptr), cb_close(nullptr), cb_message(nullptr),
     m_client(new WebSocketClientImpl())
 {
+    // m_url = "ws://localhost:1984/chat"; // for testing
     m_client->m_intf = this;
 }
 
@@ -308,6 +317,12 @@ WebSocketClient::~WebSocketClient() {
     stop();
     // delete m_client;
 };
+
+#endif // DEF_WEBSOCKET_CLIENT
+
+/*------------- Sample code ----------------
+#define DEF_WEBSOCKET_CLIENT
+#include "detail/WebSocketClientImpl.ipp"
 
 void WebSocketClient::start()
 {

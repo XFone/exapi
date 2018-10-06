@@ -13,23 +13,10 @@
 #include "Log.h"
 #include "Trace.h"
 
+#define DEF_WEBSOCKET_CLIENT
 #include "detail/WebSocketClientImpl.ipp"
-using namespace exapi;
 
 /*---------------------------- WebSocketClient -----------------------------*/
-
-WebSocketClient::WebSocketClient(const std::string url)
-  : m_url(url), cb_open(nullptr), cb_close(nullptr), cb_message(nullptr),
-    m_client(new WebSocketClientImpl())
-{
-    // m_url = "ws://localhost:1984/chat"; // for testing
-    m_client->m_intf = this;
-}
-
-WebSocketClient::~WebSocketClient() {
-    stop();
-    // delete m_client;
-};
 
 void WebSocketClient::start()
 {

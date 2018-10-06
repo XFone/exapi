@@ -15,8 +15,9 @@
 #include "DumpFunc.h"
 
 #include "JsonUtils.h"
-#include "RestRequest.h"
+#include "HttpRestClient.h"
 #include "BitmexWsApi.h"
+#include "detail/RestClientImpl_restbed.ipp"
 using namespace exapi;
 
 #ifdef USE_OPENSSL
@@ -24,31 +25,6 @@ using namespace exapi;
 #endif
 
 static std::shared_ptr<restbed::Settings> _bitmex_settings;
-
-static const char *GetHttpMethod(HTTP_METHOD method)
-{
-    const char *str = "GET";
-
-    switch (method) {
-    case METHOD_GET:
-        break;
-    case METHOD_POST:
-        str = "POST";
-        break;
-    case METHOD_PUT:
-        str = "PUT";
-        break;
-    case METHOD_DELETE:
-        str = "DELETE";
-        break;
-    default:
-        LOGFILE(LOG_ALERT, "Unsupported HTTP_METHOD %d", method);
-        assert(0);
-        break;
-    }
-
-    return str;
-}
 
 std::shared_ptr<RestRequest> 
 RestRequest::CreateBuilder(const char *url, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path) {
@@ -61,7 +37,7 @@ RestRequest::CreateBuilder(const char *url, HTTP_PROTOCOL protocol, HTTP_METHOD 
     req->set_port((protocol == HTTP_PROTOCOL_HTTPS) ? 443 : 80);
     //req->set_version(1.1);
     req->set_path(path);
-    req->set_method(GetHttpMethod(method));
+    req->set_method(HttpRestClient::to_string(method));
 
     req->add_header("Host", req->get_host());
     //req->add_header("Accept", "text/html,application/json,application/xml,*/*");

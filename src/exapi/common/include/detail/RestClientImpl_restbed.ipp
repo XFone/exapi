@@ -1,8 +1,7 @@
 /*
  * $Id: $
  * 
- * RestRequest class declaration 
- * [depreciated] please use detail/RestClientImpl_restbed.ipp
+ * HttpRestClient and RestRequest implemented with restbed
  *  
  * Copyright (c) 2014-2018 Zerone.IO. All rights reserved.
  *
@@ -11,32 +10,18 @@
  */
 #pragma once
 
-/** @file RestRequest.h Wrap class of restbed::Request.
+/** @file RestClientImpl_restbed.ipp Wrap class of restbed::Request.
  */
 
-#include <chrono>
 #include <cmath>
 #include <string>
+#include <chrono>
 
 #include <restbed>
 
+#include "HttpRestClient.h"
+
 namespace exapi {
-
-    enum HTTP_PROTOCOL {
-        HTTP_PROTOCOL_HTTP,
-        HTTP_PROTOCOL_HTTPS
-    };
-
-    enum HTTP_METHOD {
-        METHOD_GET,
-        METHOD_POST,
-        METHOD_PUT,
-        METHOD_HEAD,
-        METHOD_DELETE,
-        METHOD_TRACE,
-        METHOD_OPTIONS,
-        METHOD_CONNECT
-    };
 
     typedef std::shared_ptr<restbed::Request>  request_t;
     typedef std::shared_ptr<restbed::Response> response_t;
@@ -55,9 +40,12 @@ namespace exapi {
      */
     class RestRequest : public restbed::Request {
     protected:
+        // friend WebSocketClient;
+        friend HttpRestClient;
+
         /** time_point for latency management */
         std::chrono::steady_clock::time_point m_sent_time;
-
+        
     public:
         RestRequest() : restbed::Request() {}
 
@@ -201,4 +189,11 @@ namespace exapi {
 
     };
 
+
+#ifdef DEF_HTTPRESTCLENT
+    // HttpRestClient methods
+
+#endif
+
 } // namespace exapi
+

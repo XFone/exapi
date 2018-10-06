@@ -14,13 +14,13 @@
 #include "Trace.h"
 
 #include <cerrno>
+#include <thread>
 
-#include "RestRequest.h"
 #include "BitmexApi.h"
 #include "JsonUtils.h"
 #include "BitmexApiDef.h"
 #include "quote/DAQuoteBitmexApi.h"
-
+#include "detail/RestClientImpl_restbed.ipp"
 using namespace exapi;
 
 #define _BITMEX_(api_type)         (int)(QuoteApiType::EX_TYPE_BITMEX + api_type)

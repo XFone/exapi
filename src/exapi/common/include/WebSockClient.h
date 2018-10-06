@@ -33,21 +33,21 @@ namespace exapi {
     class WebSocketClient {
     protected:
         friend WebSocketClientImpl;
-        std::string          m_url;
-        ws_callback_open     cb_open;
-        ws_callback_close    cb_close;
-        ws_callback_message  cb_message;
+        std::string                                 m_url;
+        ws_callback_open                            cb_open;
+        ws_callback_close                           cb_close;
+        ws_callback_message                         cb_message;
 
         /** pointer to implementation class */
-        std::unique_ptr<WebSocketClientImpl>  m_client;
+        std::unique_ptr<WebSocketClientImpl>        m_client;
   
         /** time_point for latency management */
-        std::chrono::steady_clock::time_point m_sent_time;
+        std::chrono::steady_clock::time_point       m_sent_time;
  
         // WebSocketClient() = delete;
  
     public:
-        WebSocketClient(const std::string url);
+        WebSocketClient(const std::string &url);
 
         virtual ~WebSocketClient();
 

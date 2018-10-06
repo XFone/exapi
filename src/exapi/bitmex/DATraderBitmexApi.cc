@@ -12,10 +12,10 @@
 #include "Base.h"
 #include "Log.h"
 
-#include "JsonUtils.h"
-#include "RestRequest.h"
 #include "BitmexApi.h"
+#include "JsonUtils.h"
 #include "trade/DATraderBitmexApi.h"
+#include "detail/RestClientImpl_restbed.ipp"
 using namespace exapi;
 
 /**

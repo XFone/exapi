@@ -14,8 +14,8 @@
 
 #include "curlprotocol.h"
 #include "urlhelp.h"
-#include "RestRequest.h"
 #include "trade/DATraderOkexApi.h"
+#include "detail/RestClientImpl_restbed.ipp"
 using namespace exapi;
 
 #define _OKEX_(api_type)         (int)(TraderApiType::EX_TYPE_OKEX + api_type)

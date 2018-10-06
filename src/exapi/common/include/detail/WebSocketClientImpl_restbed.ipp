@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <system_error>
 #include <zlib.h>
+#include <uuid/uuid.h>
 
 #include "LoggerImpl.h"
 #include "WebSockClient.h"
@@ -40,16 +41,20 @@ namespace exapi {
         std::string                                            m_sec_key;
 
         static std::string generate_key() {
-        #if 0
-            unsigned char raw_key[16];
-
-            for (int i = 0; i < 4; i++) {
-                conv.i = m_rng();
-                std::copy(conv.c, conv.c + 4, &raw_key[i * 4]);
+            char buf[40];
+            char *p0 = &buf[0], *p;
+            uuid_t uuid;
+            uuid_generate_random(uuid);
+            uuid_unparse_lower(uuid, buf);
+            // remove char '-' from string s
+            for (p = p0; *p != '\0'; p++) {
+                char ch = *p;
+                if ((int)ch != '-') {
+                    *p0++ = ch;
+                }
             }
-            return base64_encode(raw_key, size_of(raw_key));
-        #endif
-            return std::string("UxbkqrAEToZeKbwSTU0TCg==");
+            *p0 = '\0';
+            return std::string(buf);
         }
 
         void set_websocket_headers(const std::string &url, const std::shared_ptr<restbed::Request> &req) {
@@ -278,12 +283,11 @@ fail_end:
 
 /*---------------------------- WebSocketClient -----------------------------*/
 
-/*------------- Sample code ----------------
-#include "detail/WebSocketClientImpl_restbed.ipp"
+#ifdef DEF_WEBSOCKET_CLIENT
 
 using namespace exapi;
 
-WebSocketClient::WebSocketClient(const std::string url)
+WebSocketClient::WebSocketClient(const std::string &url)
   : m_url(url), cb_open(nullptr), cb_close(nullptr), cb_message(nullptr),
     m_client(new WebSocketClientImpl())
 {
@@ -294,6 +298,12 @@ WebSocketClient::~WebSocketClient() {
     stop();
     // delete m_client;
 };
+
+#endif // DEF_WEBSOCKET_CLIENT
+
+/*------------- Sample code ----------------
+#define DEF_WEBSOCKET_CLIENT
+#include "detail/WebSocketClientImpl_restbed.ipp"
 
 void WebSocketClient::start()
 {

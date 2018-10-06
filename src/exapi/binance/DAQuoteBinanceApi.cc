@@ -14,12 +14,11 @@
 #include "Trace.h"
 
 #include <cerrno>
-
-#include "RestRequest.h"
+#include <thread>
 #include "BinanceApi.h"
 #include "JsonUtils.h"
 #include "quote/DAQuoteBinanceApi.h"
-
+#include "detail/RestClientImpl.ipp"
 using namespace exapi;
 
 #define _BINANCE_(api_type)         (int)(QuoteApiType::EX_TYPE_BINANCE + api_type)
@@ -117,7 +116,7 @@ int DAQuoteBinanceApi::QueryDepth(const char *symbol, size_t limit)
         .AddParam("limit", std::to_string(limit));
 
     return RestRequest::SendAsync(request, 
-      [impl](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
+      [impl](const request_t req, const response_t rsp) {
         std::string json;
         RestRequest::ParseReponse(rsp, json);
         impl->m_spi->OnQuoteUpdated(_BINANCE_(BINANCE_TYPE_DEPTH), const_cast<char *>(json.c_str()));
@@ -173,7 +172,7 @@ int DAQuoteBinanceApi::StartUserDataStream()
     request->Init().ApiKey(impl->m_api_key);
 
     return RestRequest::SendAsync(request, 
-      [impl](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
+      [impl](const request_t req, const response_t rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
         std::string listenKey = JsonUtils::GetItem(jsonstr, "listenKey");
@@ -197,7 +196,7 @@ int DAQuoteBinanceApi::KeepAliveUserDataStream(const char *listenKey)
     std::string lkey = listenKey;
 
     return RestRequest::SendAsync(request, 
-      [impl, lkey](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
+      [impl, lkey](const request_t req, const response_t rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
         // re-use OnStartUserDataStream()
@@ -221,7 +220,7 @@ int DAQuoteBinanceApi::CloseUserDataStream(const char *listenKey)
     std::string lkey = listenKey;
 
     return RestRequest::SendAsync(request, 
-      [impl, lkey](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
+      [impl, lkey](const request_t req, const response_t rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
         impl->m_spi->OnCloseUserDataStream(lkey.c_str());
@@ -260,7 +259,7 @@ int DAQuoteBinanceApi::GetServerTime()
     request->Init();
 
     return RestRequest::SendAsync(request, 
-      [impl](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
+      [impl](const request_t req, const response_t rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
         time_t srvtime = JsonUtils::GetItemUint64(jsonstr, "serverTime");
@@ -280,7 +279,7 @@ int DAQuoteBinanceApi::GetExchangeInfo()
     request->Init();
 
     return RestRequest::SendAsync(request, 
-      [impl](const std::shared_ptr<restbed::Request>req, const std::shared_ptr<restbed::Response>rsp) {
+      [impl](const request_t req, const response_t rsp) {
         std::string jsonstr;
         RestRequest::ParseReponse(rsp, jsonstr);
         impl->m_spi->OnExchangeInfo(jsonstr.c_str());

@@ -12,9 +12,10 @@
 #include "Base.h"
 #include "Log.h"
 
-#include "RestRequest.h"
 #include "BinanceApi.h"
+#include "JsonUtils.h"
 #include "trade/DATraderBinanceApi.h"
+#include "detail/RestClientImpl.ipp"
 using namespace exapi;
 
 /**

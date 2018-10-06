@@ -15,7 +15,8 @@
 #include "DumpFunc.h"
 
 #include "JsonUtils.h"
-#include "RestRequest.h"
+#include "HttpRestClient.h"
+#include "detail/RestClientImpl_restbed.ipp"
 using namespace exapi;
 
 #ifdef USE_OPENSSL

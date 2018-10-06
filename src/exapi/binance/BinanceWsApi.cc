@@ -7,6 +7,7 @@
  */
 
 #include "BinanceWsApi.h"
+#include "JsonUtils.h"
 
 using namespace exapi;
 
