@@ -28,7 +28,7 @@ namespace exapi {
 
     /**
      * WebSocketClient
-     * Wrap class of restbed::WebSocket to handling wss messages:
+     * Websocket client to handling wss messages:
      */
     class WebSocketClient {
     protected:

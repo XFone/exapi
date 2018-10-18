@@ -32,14 +32,14 @@ void WebSocketClient::start()
     LOGFILE(LOG_DEBUG, "ws[%s] starting...", m_client->get_key().c_str());
     m_client->start();
 
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 50; i++) {
         if (!m_client->m_ws->is_open()) {
            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
  
     if (!m_client->m_ws->is_open()) {
-        LOGFILE(LOG_ERROR, "websocket is closed");
+        LOGFILE(LOG_ERROR, "websocket connect timeout");
         throw std::system_error(ECONNABORTED, std::generic_category());
     }
 

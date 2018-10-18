@@ -30,8 +30,10 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "WebSockClient.h"
+#include "Socks5.h"
 
 using error_code    = boost::system::error_code;
 using tcp           = boost::asio::ip::tcp;         // from <boost/asio/ip/tcp.hpp>
@@ -54,6 +56,7 @@ namespace exapi {
         std::shared_ptr<websocket_stream>                       m_ws;
         std::shared_ptr<std::thread>                            m_worker;
         bool                                                    is_start;
+        std::string                                             m_proxy;
         std::string                                             m_host;
         std::string                                             m_port;
         std::string                                             m_path;
@@ -85,6 +88,18 @@ namespace exapi {
             }
 
             LOGFILE(LOG_INFO, "ws[%s] opened connection", get_key().data());
+
+            // Preform socks4/socks5 proxy handshake
+            if (!m_proxy.empty()) {
+                tcp::socket &socket = m_ws->next_layer().next_layer();
+
+                Socks5::handshake(socket, m_host, m_port, ec);
+                if (ec) {
+                    LOGFILE(LOG_ERROR, "socks5 handshake - %s", ec.message().c_str());
+                    return;
+                }
+                TRACE(7, "socks5 handshaked");
+            }
 
             // Perform the ssl handshake
             m_ws->next_layer().handshake(ssl::stream_base::client, ec);
@@ -171,6 +186,7 @@ namespace exapi {
         WebSocketClientImpl() 
             : m_intf(NULL), m_ioc(), is_start(false) {
             m_wss_key = generate_key();
+            // m_proxy = "localhost:21080";
         }
         
         ~WebSocketClientImpl() {}
@@ -196,6 +212,11 @@ namespace exapi {
             } else {
                 assert(0);
             }
+        }
+
+        const std::string & set_proxy(const std::string &proxy) {
+            m_proxy = proxy;
+            return m_proxy;
         }
 
         /**
@@ -232,7 +253,15 @@ namespace exapi {
 
             // m_ws->control_callback(on_control);
 
-            auto result = resolver.resolve(m_host, m_port, ec);
+            tcp::resolver::results_type result;
+            if (m_proxy.empty()) {
+                result = resolver.resolve(m_host, m_port, ec);
+            } else {
+                std::vector<std::string> fields;
+                boost::split(fields, m_proxy, boost::is_any_of(":"));
+                LOGFILE(LOG_INFO, "via Socks5 proxy '%s:%s'", fields[0].c_str(), fields[1].c_str());
+                result = resolver.resolve(fields[0], fields[1], ec);
+            }
 
             if (ec) {
                 LOGFILE(LOG_ERROR, "tcp::resolver::resolve: %s", ec.message().c_str());
@@ -338,14 +367,14 @@ void WebSocketClient::start()
     LOGFILE(LOG_DEBUG, "ws[%s] starting...", m_client->get_key().c_str());
     m_client->start();
 
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 50; i++) {
         if (!m_client->m_ws->is_open()) {
            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
  
     if (!m_client->m_ws->is_open()) {
-        LOGFILE(LOG_ERROR, "websocket is closed");
+        LOGFILE(LOG_ERROR, "websocket connect timeout");
         throw std::system_error(ECONNABORTED, std::generic_category());
     }
 
