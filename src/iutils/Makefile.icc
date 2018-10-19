@@ -44,11 +44,12 @@ SOURCES = osdeps/osutil.c \
 	  Cli.c
 
 SOURCES_CXX   = xpp/Cli.cxx
-SOURCES_LINUX = osdeps/linux/ShellUtil.c \
-                osdeps/linux/PidFile.c   \
-                osdeps/linux/debug/Segfault.c
-SOURCES_WIN32 = osdeps/win32/FileCache.c \
-                osdeps/win32/getopt.c    \
+SOURCES_LINUX = osdeps/linux/ShellUtil.c      \
+                osdeps/linux/PidFile.c        \
+                osdeps/linux/debug/Segfault.c \
+                osdeps/linux/debug/SegDemangle.cc
+SOURCES_WIN32 = osdeps/win32/FileCache.c      \
+                osdeps/win32/getopt.c         \
                 osdeps/win32/getopt1.c
 
 SOURCES_DARWIN = $(SOURCES_LINUX)

@@ -73,6 +73,11 @@ std::string type_name(T &t) {
 }
 #endif //__GNUG__
 
+/**
+ * Catch sigfault and printout demangled c++ names
+ */
+void catch_segfault_cpp(void (*handler)(int, siginfo_t *, void *));
+
 #endif /* __cplusplus >= 201103L */
 
 /*-------------------------- C Functions -----------------------------*/
