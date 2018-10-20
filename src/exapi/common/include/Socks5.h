@@ -81,7 +81,7 @@ namespace exapi {
             }
 
             void send_1(tcp::socket &socket) {
-                size_t len = 7 + m_addrlen;
+                // size_t len = 7 + m_addrlen;
                 boost::array<boost::asio::const_buffer, 128> bufs = {
                     {
                         boost::asio::buffer(&m_version, 1),
@@ -177,7 +177,7 @@ namespace exapi {
             Socks5Response response;
             response.recv_0(socket);
 
-            TRACE(7, "socks5 handshake 1");
+            TRACE(8, "socks5 handshake 1");
 
             if (!response.is_success()) {
                 ec = boost::asio::error::address_family_not_supported;
@@ -190,7 +190,7 @@ namespace exapi {
             // Receive a response from the SOCKS server.
             response.recv_1(socket);
 
-            TRACE(7, "socks5 handshake 2");
+            TRACE(8, "socks5 handshake 2");
 
             if (!response.is_success()) {
                 ec = boost::asio::error::address_family_not_supported;

@@ -1,7 +1,7 @@
 /*
  * $Id: $
  * 
- * RestClientImpl and RestRequest class implemented with boost::asio
+ * RestClientImpl class implemented with boost::asio
  *  
  * Copyright (c) 2014-2018 Zerone.IO. All rights reserved.
  *
@@ -19,7 +19,6 @@
 #include "DumpFunc.h"
 
 #include <memory>
-#include <string>
 #include <vector>
 #include <chrono>
 #include <thread>
@@ -33,8 +32,11 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/error.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/algorithm/string.hpp>
 
+#include "RestRequestImpl.h"
 #include "HttpRestClient.h"
+#include "Socks5.h"
 
 using error_code    = boost::system::error_code;
 using tcp           = boost::asio::ip::tcp;         // from <boost/asio/ip/tcp.hpp>
@@ -44,228 +46,7 @@ namespace http      = boost::beast::http;           // from <boost/beast/http.hp
 
 namespace exapi {
 
-    typedef std::shared_ptr<http::request<http::string_body> >  request_t;
-    typedef std::shared_ptr<http::response<http::string_body> > response_t;
     typedef ssl::stream<tcp::socket>                            sslstream_t;
-    //typedef void (* rest_callback_t)(const request_t, const response_t);
-    typedef const std::function<void (const request_t, const response_t)> rest_callback_t;
-
-    /**
-     * RestRequest
-     * Wrap class of request_t to let setters in builder style:
-     * <pre>
-     * auto reqt = RestRequest::CreateBuilder(uri);
-     * reqt->Init().AddHeader("Host", host)
-     *             .SetPath("/v1/test")
-     *             .AddParam("p1", "1");
-     * // call rest method in sync mode
-     * auto resp = RestRequest::SendSync(reqt);
-     * </pre>
-     */
-    class RestRequest {
-    protected:
-        // friend WebSocketClient;
-        friend  HttpRestClient;
-        friend  RestClientImpl;
-
-        request_t                                               m_request;
-        response_t                                              m_response;
-
-        std::shared_ptr<sslstream_t>                            m_ssl;
-
-        /** time_point for latency management */
-        std::chrono::steady_clock::time_point                   m_sent_time;
-
-        rest_callback_t                                        *m_callback;
-        //beast::flat_buffer                                    m_rdbuf
-        beast::multi_buffer                                     m_rdbuf;
-
-        std::unordered_map<std::string, std::string>            m_params;
-
-    protected:
-
-        void on_read(error_code ec, size_t bytes_read) {
-            boost::ignore_unused(bytes_read);
-            if (ec) {
-                if (boost::system::errc::operation_canceled != ec) {
-                    LOGFILE(LOG_WARN, "on_read - %s", ec.message().c_str());
-                }
-                return;
-            }
-            TRACE(8, "on_read");
-
-            if (nullptr != m_callback) {
-                (*m_callback)(m_request, m_response);
-            }
-            // Clear the buffer
-            m_rdbuf.consume(m_rdbuf.size());
-        }
-
-        void on_write(error_code ec, size_t bytes_transferred) {
-            boost::ignore_unused(bytes_transferred);
-
-            if (ec) {
-                if (boost::system::errc::operation_canceled != ec) {
-                    LOGFILE(LOG_WARN, "on_write - %s", ec.message().c_str());
-                }
-                return;
-            }
-            TRACE(8, "on_write");
-
-            http::async_read(*m_ssl, m_rdbuf, *m_response,
-                std::bind(&RestRequest::on_read, this, 
-                          std::placeholders::_1, std::placeholders::_2)
-            );
-        }
-
-    public:
-        RestRequest() : m_callback(nullptr) {}
-
-        static std::shared_ptr<RestRequest>
-        CreateBuilder(const char *url_domain, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path);
-
-        RestRequest &Init();
-
-        void ReprarePayload();
-
-        /**
-         *  Send request and return respose in synchronise mode
-         * @param req rest request
-         * @return response body (json-string)
-         */
-        static std::string SendSync(std::shared_ptr<RestRequest> &req);
-
-        static int SendAsync(std::shared_ptr<RestRequest> &req, 
-            const std::function<void (const request_t, const response_t)> &callback);
-
-        static std::string& ParseReponse(const response_t &rsp, std::string &body);
-
-        //----------------------  Setters in builder style -------------------
-
-        RestRequest &SetBody(const std::string &value) {
-            //m_request->body() = std::move(value);
-            m_request->body() = value;
-            return *this;
-        }
-            
-        RestRequest &SetPort(const uint16_t value) {
-            // m_request->port(value);
-            return *this;
-        }
-        
-        RestRequest &SetVersion(const double value) {
-            m_request->version((int)(value * 10)); // 1.1 is (int)11
-            return *this;
-        }
-        
-        RestRequest &SetPath(const std::string &value) {
-            m_request->target(value);
-            return *this;
-        }
-        
-        RestRequest &SetHost(const std::string &value) {
-            m_request->set(http::field::host, value);
-            return *this;
-        }
-
-        RestRequest &SetMethod(const http::verb &method) {
-            m_request->method(method); // http::verb::get
-            return *this;
-        }
-
-        RestRequest &SetMethod(const std::string &method) {
-            m_request->method_string(method);
-            return *this;
-        }
-        
-        RestRequest &SetProtocol(const std::string &value) {
-            //set_protocol(value);
-            assert(0); // TODO
-            return *this;
-        }
-
-        RestRequest &AddHeader(const std::string &name, const std::string &value) {
-            m_request->set(http::string_to_field(name), value);
-            return *this;
-        }
-
-        RestRequest &SetHeader(const std::string &name, const std::string &value) {
-            m_request->set(http::string_to_field(name), value);
-            return *this;
-        }
-            
-        RestRequest &SetHeaders(const std::multimap<std::string, std::string> &values) {
-            for (auto v: values) {
-                SetHeader(v.first, v.second);
-            }
-            return *this;
-        }
-
-        RestRequest &AddParam(const std::string&name, const std::string &value) {
-            m_params[name] = value;
-            return *this;
-        }
-
-        RestRequest &AddParam(const std::string&name, const char *value) {
-            m_params[name] = std::string(value);
-            return *this;
-        }
-
-        /**
-         * Add form optional parameter if only value is NOT null
-         */
-        RestRequest &AddParamIf(const std::string&name, const char *value) {
-            if (nullptr != value)
-                AddParam(name, value);
-            return *this;
-        }
-
-        /**
-         * Add form optional parameter if only value is NOT zero value (int32 or int64)
-         */
-        template <typename T>
-        RestRequest &AddParamIf(const std::string&name, T val) {
-            if (val != 0)
-                AddParam(name, std::to_string(val));
-            return *this;
-        }
-
-        /**
-         * Add form optional parameter if only value is NOT zero value (double)
-         */
-        RestRequest &AddParamIf(const std::string&name, double val) {
-            if (!std::isnan(val) && std::abs(val) > /* SATOSHI/10 */  0.000000001)
-                AddParam(name, std::to_string(val));
-            return *this;
-        }
-
-        /**
-         * Add parameters in map
-         * @param values parameters in multimap
-         */
-        RestRequest &AddParams(const std::multimap<std::string, std::string> &values) {
-            for (auto v: values) {
-                AddParam(v.first, v.second);
-            }
-            return *this;
-        }
-
-        //---------------------- API-key and Signature  ----------------------
-
-        /**
-         * Add a HTTP Header field with given api-key
-         * @param api_key the api_key assigned by the exchange site
-         */
-        RestRequest &ApiKey(const std::string &api_key);
-
-        /** 
-         * Sign request with MD5 or SHA256 signature (depends on server)
-         * MUST be called after all setters
-         * @param secret_key the secret key assigned by the exchange site
-         */
-        RestRequest &Sign(const std::string &secret_key);
-
-    };
 
     /**
      * Implement HttpRestClient
@@ -277,22 +58,18 @@ namespace exapi {
         std::shared_ptr<sslstream_t>                            m_ssl;
         std::shared_ptr<std::thread>                            m_worker;
         bool                                                    is_start;
+        bool                                                    is_open;
+        bool                                                    is_pending;
 
+        std::string                                             m_proxy;
         std::string                                             m_host;
         std::string                                             m_port;
 
-        std::shared_ptr<RestRequest>                            m_session;
+        //beast::flat_buffer                                    m_rdbuf
+        beast::multi_buffer                                     m_rdbuf;
 
     protected:
-        void on_connect(error_code ec) {
-            if (ec) {
-                LOGFILE(LOG_ERROR, "on_connect - %s", ec.message().c_str());
-                return;
-            }
-
-            // Perform the ssl handshake
-            m_ssl->handshake(ssl::stream_base::client, ec);
-
+        void on_handshake(error_code ec) {
             if (ec) {
                 LOGFILE(LOG_ERROR, "ssl handshake - %s", ec.message().c_str());
                 return;
@@ -303,17 +80,102 @@ namespace exapi {
             // TODO: set socketopt - SO_RCVTIMEO and SO_SNDTIMEO
             // see https://stackoverflow.com/questions/20188718/configuring-tcp-keep-alive-with-boostasio
 
-            // write(m_session->m_request); // send request
+            // call_async(session); // get session from queue and send request
+            is_open = true;
+        }
+
+        void on_connect(error_code ec) {
+            if (ec) {
+                LOGFILE(LOG_ERROR, "on_connect - %s", ec.message().c_str());
+                return;
+            }
+
+            // Preform socks4/socks5 proxy handshake
+            if (!m_proxy.empty()) {
+                tcp::socket &socket = m_ssl->next_layer();
+
+                Socks5::handshake(socket, m_host, m_port, ec);
+                if (ec) {
+                    LOGFILE(LOG_ERROR, "socks5 handshake - %s", ec.message().c_str());
+                    return;
+                }
+                TRACE(7, "socks5 handshaked");
+            }
+
+            // Perform the ssl handshake
+            m_ssl->async_handshake(ssl::stream_base::client, 
+                std::bind(&RestClientImpl::on_handshake, this, std::placeholders::_1)
+            );
         }
 
         void on_close(error_code ec) {
-            if (ec) {
+            is_open = false;
+            if (ec == boost::asio::error::eof) {
+                // Rationale:
+                // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
+                ec.assign(0, ec.category());
+            } else if (ec) {
                 LOGFILE(LOG_ERROR, "on_close - %s", ec.message().c_str());
                 return;
             }
 
-            LOGFILE(LOG_INFO, "server closed connection");
+            LOGFILE(LOG_INFO, "'%s' connection closed", m_host.data()); // closed gracefully
+            
             // TODO re-connect
+        }
+
+        /**
+         * Clear the buffer
+         */
+        void consume() {
+            m_rdbuf.consume(m_rdbuf.size());
+        }
+
+        static void 
+        on_read(std::shared_ptr<RestRequest> &session, error_code ec, size_t bytes_read) {
+            HttpRestClient *client = session->m_client;
+
+            boost::ignore_unused(bytes_read);
+
+            if (ec) {
+                if (boost::system::errc::operation_canceled != ec) {
+                    LOGFILE(LOG_WARN, "on_read - %s", ec.message().c_str());
+                }
+                return;
+            }
+            TRACE(7, "on_read");
+
+            if (nullptr != session->m_callback) {
+                (*session->m_callback)(session->m_request, session->m_response);
+            }
+
+            client->m_impl->consume();
+        }
+
+        static void 
+        on_write(std::shared_ptr<RestRequest> &session, error_code ec, size_t bytes_transferred) {
+            HttpRestClient *client = session->m_client;
+
+            client->m_impl->is_pending = false;
+
+            boost::ignore_unused(bytes_transferred);
+
+            if (ec) {
+                if (boost::system::errc::operation_canceled != ec) {
+                    LOGFILE(LOG_WARN, "on_write - %s", ec.message().c_str());
+                }
+                return;
+            }
+            TRACE(7, "on_write");
+
+            client->m_impl->read_async(session);
+        }
+
+        void read_async(std::shared_ptr<RestRequest> &session) {
+            http::async_read(*m_ssl, m_rdbuf, *session->m_response,
+                std::bind(&RestClientImpl::on_read, session, 
+                          std::placeholders::_1, std::placeholders::_2)
+            );
         }
 
         void parse_uri(const std::string &url) {
@@ -323,7 +185,8 @@ namespace exapi {
                 std::string proto = match[1];    // we should always use https
                 std::string port  = match[3];
                 if (port.empty()) {
-                    m_port = !proto.compare("https") ? "443" : "80";
+                    // TRACE(7, "proto: '%s'", proto.c_str());
+                    m_port = !proto.compare("https:") ? "443" : "80";
                 } else {
                     m_port = port.substr(1);
                 }
@@ -337,15 +200,20 @@ namespace exapi {
         }
 
     public:
-        RestClientImpl() : m_ioc(), is_start(false) {}
+        RestClientImpl() : 
+            m_ioc(), is_start(false), is_open(false), is_pending(false) {}
         
-        RestClientImpl(const std::string &url) : RestClientImpl() {
-            parse_uri(url);
-        }
-
         ~RestClientImpl() {}
 
-        int connect(const std::string &url, const std::string *proxy) {
+        /**
+         * set Socks5 Proxy address
+         */
+        const std::string & set_proxy(const std::string &proxy) {
+            m_proxy = proxy;
+            return m_proxy;
+        }
+
+        int connect(const std::string &url) {
             error_code ec;
 
             parse_uri(url);
@@ -370,9 +238,18 @@ namespace exapi {
                 return -ec.value();
             }
 
-            // we resolve domain synchronizely since it wont change much
             tcp::resolver resolver(m_ioc);
-            auto result = resolver.resolve(m_host, m_port, ec);
+            tcp::resolver::results_type result;
+
+            if (m_proxy.empty()) {
+                // we resolve domain synchronizely since it wont change much
+                result = resolver.resolve(m_host, m_port, ec);
+            } else {
+                std::vector<std::string> fields;
+                boost::split(fields, m_proxy, boost::is_any_of(":"));
+                LOGFILE(LOG_INFO, "via Socks5 proxy '%s:%s'", fields[0].c_str(), fields[1].c_str());
+                result = resolver.resolve(fields[0], fields[1], ec);
+            }
 
             if (ec) {
                 LOGFILE(LOG_ERROR, "tcp::resolver::resolve: %s", ec.message().c_str());
@@ -393,7 +270,81 @@ namespace exapi {
                 std::bind(&RestClientImpl::on_close, this, std::placeholders::_1)
             );
         }
-  
+
+        void start() {
+            is_start = true;
+            m_worker = std::make_shared<std::thread>([this]() {
+                LOGFILE(LOG_INFO, "restclient worker starting...");
+
+                while (this->is_start) {
+                    size_t n = this->m_ioc.run();
+                    TRACE(7, "- process_io %d -", n);
+                    // if (0 == n) break; // no socket 
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                }
+
+                LOGFILE(LOG_INFO, "restclient worker exiting...");
+            });
+        }
+
+        void stop() {
+            is_start = false;
+
+            close();
+
+            if (nullptr != m_worker && m_worker->joinable()) {
+                m_worker->join();
+            }
+        }
+
+        void call_sync(std::shared_ptr<RestRequest> &session) {
+            request_t req = session->m_request;
+
+            TRACE(7, "<<< %s %s\n%s\n<<<",
+                  to_string(req->method()).data(),  req->target().data(),
+                  req->body().data());
+
+            (void)http::write(*m_ssl, *req);
+            (void)http::read(*m_ssl, m_rdbuf, *session->m_response);
+            // consume();
+        }
+
+        void call_async(std::shared_ptr<RestRequest> &session) {
+            // wait previous callback
+            const int wait_time = 1;
+            int wait = 0, max_wait = 3000;
+            while (is_pending && wait < max_wait) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+                wait += wait_time;
+            }
+            if (is_pending) {
+                LOGFILE(LOG_WARN, "call_async timeout");
+                return;
+            }
+
+            request_t req = session->m_request;
+
+            TRACE(7, "<<< %s %s\n%s\n<<<",
+                  to_string(req->method()).data(),  req->target().data(),
+                  req->body().data());
+
+#if 0
+            // TO FIX
+            http::async_write(*m_ssl, *req, 
+                std::bind(&RestClientImpl::on_write, session, // session->shared_from_this(), 
+                          std::placeholders::_1, std::placeholders::_2)
+            );
+            is_pending = true;
+#else
+            (void)http::write(*m_ssl, *req);
+            (void)http::read(*m_ssl, m_rdbuf, *session->m_response);
+
+            if (nullptr != session->m_callback) {
+                (*session->m_callback)(req, session->m_response);
+            }
+#endif
+        }
+
     };   // RestClientImpl
 
 } // namespace exapi
@@ -405,34 +356,80 @@ namespace exapi {
 
 using namespace exapi;
 
-HttpRestClient::HttpRestClient(const std::string &url)
-    : m_impl(new RestClientImpl(url))
+// C++11 has no std::make_unique which is supported by C++14
+template<typename T, typename... Ts>
+std::unique_ptr<T> make_unique(Ts&&... params)
+{
+    return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
+
+HttpRestClient::HttpRestClient()
+    : m_impl(make_unique<RestClientImpl>())
 {
     // NOTHING
 }
 
-int HttpRestClient::connect(const std::string &url, const std::string *proxy)
+int HttpRestClient::connect(const std::string &url, const char *proxy)
 {
-    return m_impl->connect(url, proxy);
+    if (nullptr != proxy) {
+        m_impl->set_proxy(proxy);
+    }
+    return m_impl->connect(url);
 }
 
 void HttpRestClient::close()
 {
-    m_impl->close();
+    // m_impl->close();
+    m_impl->stop();
+}
+
+bool HttpRestClient::is_open() const
+{
+    return m_impl->is_open;
 }
 
 std::shared_ptr<RestRequest> 
 HttpRestClient::GetBuilder(HTTP_METHOD method, const char *path)
 {
-    const char *host = m_impl->m_host.c_str(); // domain name
     std::shared_ptr<RestRequest> res = 
-        RestRequest::CreateBuilder(host, HTTP_PROTOCOL_HTTPS, method, path);
+        RestRequest::CreateBuilder(nullptr, HTTP_PROTOCOL_HTTPS, method, path);
     
-    if (res->m_ssl == nullptr) {
-        res->m_ssl = m_impl->m_ssl; // resuse stream
+    res->SetClient(this);
+    res->SetHost(m_impl->m_host);
+    
+    return res;
+}
+
+client_map_t HttpRestClient::m_cli_map;
+
+std::shared_ptr<HttpRestClient>
+HttpRestClient::GetInstance(const std::string &url)
+{
+    std::shared_ptr<HttpRestClient> client;
+
+    auto it = m_cli_map.find(url);
+    if (it == m_cli_map.end()) {
+        client = std::make_shared<HttpRestClient>();
+        m_cli_map[url] = client;
+        client->connect(url, nullptr); // proxy
+        // client->connect(url, "localhost:21080");
+        client->m_impl->start();
+        //client->m_impl->m_ioc.run();
+    } else {
+        client = it->second;
     }
 
-    return res;
+    return client;
+}
+
+void HttpRestClient::DisposeInstance(const std::string &url)
+{
+    auto it = m_cli_map.find(url);
+    if (it != m_cli_map.end()) {
+        std::shared_ptr<HttpRestClient> client = it->second;
+        client->m_impl->stop();
+        // m_cli_map.erase(it);
+    }
 }
 
 /*------------------------ RestRequest methods -----------------------------*/
@@ -475,23 +472,21 @@ void RestRequest::ReprarePayload()
 std::shared_ptr<RestRequest> 
 RestRequest::CreateBuilder(const char *url, HTTP_PROTOCOL protocol, HTTP_METHOD method, const char *path) {
     
-    auto req = std::make_shared<RestRequest>();
+    if (nullptr != url) {
+        return HttpRestClient::GetBuilder(url, method, path);
+    } else {    // assigned in client->GetBuilder()
+        auto req = std::make_shared<RestRequest>();
+        req->m_request  = std::make_shared< http::request<http::string_body> >();
+        req->m_response = std::make_shared< http::response<http::string_body> >();
 
-    // TODO
-    // auto impl = RestClientImpl::instance(url, protocol);
-    // req->m_ssl = impl->m_ssl;
+        req->m_request->keep_alive(true);
 
-    req->m_request  = std::make_shared< http::request<http::string_body> >();
-    req->m_response = std::make_shared< http::response<http::string_body> >();
+        req->SetVersion(11)     // HTTP 1.1
+            .SetMethod(HttpRestClient::to_string(method))
+            .SetPath(path);
 
-    req->m_request->keep_alive(true);
-
-    req->SetHost(url)
-        .SetVersion(1.1)    // HTTP 1.1
-        .SetMethod(HttpRestClient::to_string(method))
-        .SetPath(path);
-
-    return req;
+        return req;
+    }
 }
 
 std::string
@@ -501,12 +496,9 @@ RestRequest::SendSync(std::shared_ptr<RestRequest> &req) {
     // LOGFILE(LOG_DEBUG, "SendSync: %s '%s%s'", );
 
     try {
-        TRACE(7, "<<<\n%s\n<<<", "");
-
         req->ReprarePayload();
-        http::write(*req->m_ssl, *req->m_request);
+        req->GetClient()->m_impl->call_sync(req);
 
-        http::read(*req->m_ssl, req->m_rdbuf, *req->m_response);
         (void)ParseReponse(req->m_response, body);
 
     } catch (std::system_error ex) {
@@ -521,21 +513,11 @@ RestRequest::SendAsync(std::shared_ptr<RestRequest> &req,
     const std::function<void (const request_t, const response_t)> &callback)
 {
     // LOGFILE(LOG_DEBUG, "SendAsync: %s '%s%s'", );
+    req->m_callback  = &callback;
+    
+    req->ReprarePayload();
 
-    try {
-        // TRACE(7, "<<<\n%s\n<<<", "");
-
-        req->m_callback  = &callback;
-        
-        req->ReprarePayload();
-        http::async_write(*req->m_ssl, *req->m_request, 
-            std::bind(&RestRequest::on_write, *req, 
-                      std::placeholders::_1, std::placeholders::_2)
-        );
-
-    } catch (std::system_error ex) {
-        LOGFILE(LOG_ERROR, "SendAsync: throws exception '%s'", ex.what()); 
-    }
+    req->GetClient()->m_impl->call_async(req);
 
     return 0;
 }

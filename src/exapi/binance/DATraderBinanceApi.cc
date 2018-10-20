@@ -15,7 +15,7 @@
 #include "BinanceApi.h"
 #include "JsonUtils.h"
 #include "trade/DATraderBinanceApi.h"
-#include "detail/RestClientImpl.ipp"
+#include "detail/RestRequestImpl.h"
 using namespace exapi;
 
 /**
@@ -40,14 +40,18 @@ public:
     //----------------- Overrides DATraderBinanceApi ---------------------
 
     virtual void Dispose() override {
+        DisConnServer(nullptr);
         delete this;
     }
 
     virtual void Init() override {
+        // TODO
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     virtual int Join() override {
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        // TODO
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         return 0;
     }
 
@@ -59,10 +63,31 @@ public:
         if (m_spi == nullptr) {
             assert(0);
         }
-        return 0;
+        if (nullptr != slist) {
+            m_domain = slist[0];    // TODO: try fastest server
+        }
+
+        auto client = HttpRestClient::GetInstance(m_domain);
+
+        const int wait_time = 5;
+        int wait = 0, max_wait = 5000;
+
+        while (!client->is_open() && wait < max_wait) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+            wait += wait_time;
+        }
+
+        if (client->is_open()) {
+            LOGFILE(LOG_INFO, "'%s' connected in %d ms", m_domain, wait);
+            return 0;
+        }
+        
+        return -ETIMEDOUT;
     }
 
     virtual int DisConnServer(const char *addr) override {
+        std::string server((addr == nullptr) ? m_domain : addr);
+        HttpRestClient::DisposeInstance(server);
         return 0;
     }
     

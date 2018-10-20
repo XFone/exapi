@@ -21,6 +21,8 @@
 #include <openssl/hmac.h>
 #endif
 
+#include "detail/RestRequestImpl.h"
+
 #define DEF_HTTPREST_CLIENT
 #include "detail/RestClientImpl.ipp"
 
@@ -79,9 +81,8 @@ RestRequest::ParseReponse(const response_t &rsp, std::string &body)
     }
 #endif
 
-    TRACE(7, ">>>\n%s\n>>>", "");
-
     body = rsp->body();
+    TRACE(7, ">>>\n%s\n>>>", body.c_str());
 
     TRACE_IF(8, {
         _trace_impl(8, "   Body | Length: %d", body.size());

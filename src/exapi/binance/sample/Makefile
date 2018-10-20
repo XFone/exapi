@@ -48,9 +48,11 @@ all::
 	@echo "---------------------------------------------------------------"
 
 # Test
+CONFIG_FILE = binance.conf
+
 test: all
 	@echo "🌞  Testing..."
-	@$(LD_PREFIX) $(BINDIR)/$(TARGET_PRG) -t 7 -v 7 2>&1
+	@$(LD_PREFIX) $(BINDIR)/$(TARGET_PRG) -t 7 -v 7 -c $(CONFIG_FILE) 2>&1
 
 # Makefile rules post processing
 include $(BUILD)/Makefile.post

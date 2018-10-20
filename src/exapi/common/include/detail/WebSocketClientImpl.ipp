@@ -182,19 +182,6 @@ namespace exapi {
                   get_key().data(), bytes_transferred);
         }
 
-    public:
-        WebSocketClientImpl() 
-            : m_intf(NULL), m_ioc(), is_start(false) {
-            m_wss_key = generate_key();
-            // m_proxy = "localhost:21080";
-        }
-        
-        ~WebSocketClientImpl() {}
-
-        const std::string & get_key() {
-            return m_wss_key;
-        }
-
         void parse_uri(const std::string &url) {
             boost::smatch match;
             static const boost::regex pattern("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
@@ -212,6 +199,19 @@ namespace exapi {
             } else {
                 assert(0);
             }
+        }
+        
+    public:
+        WebSocketClientImpl() 
+            : m_intf(NULL), m_ioc(), is_start(false) {
+            m_wss_key = generate_key();
+            // m_proxy = "localhost:21080";
+        }
+        
+        ~WebSocketClientImpl() {}
+
+        const std::string & get_key() {
+            return m_wss_key;
         }
 
         const std::string & set_proxy(const std::string &proxy) {
