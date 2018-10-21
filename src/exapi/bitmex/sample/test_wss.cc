@@ -9,9 +9,6 @@
  *
  */
 
-#include "Base.h"
-#include "osdeps/osutil.h"
-
 #include <cstdio>
 #include <system_error>
 
@@ -58,7 +55,7 @@ void test_bitmex_websocket_public()
 
         api.set_message_callback(on_message);
 
-        api.start();                            // start work thread
+        api.start(my_proxy.c_str());                      // start work thread
 
         sleep(1);
 

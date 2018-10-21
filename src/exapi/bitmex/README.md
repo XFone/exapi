@@ -48,7 +48,7 @@ Code 429 - Retry-After
 
     - **json2c/json_decode.cc**  is auto-generated from _include/BitmexApiDef.h_ by xJSON's c-parser tool
 
-2. Use [Boost.Beast](https://github.com/boostorg/beast) for HTTP and WebSocket handling, **restbed** library will be removed.
+2. Use [Boost.Beast](https://github.com/boostorg/beast) for HTTP and WebSocket handling, **restbed** library will be removed. - done.
 
 ### 2.1 REST APIs
 

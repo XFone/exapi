@@ -51,7 +51,11 @@ namespace exapi {
 
         virtual ~WebSocketClient();
 
-        void start();
+        /**
+         * Start connect and process messages
+         * @param proxy_url proxy host and port, default is NULL
+         */
+        void start(const char *proxy_url = nullptr);
 
         void stop();
 

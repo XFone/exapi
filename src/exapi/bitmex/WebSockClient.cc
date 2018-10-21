@@ -18,11 +18,15 @@
 
 /*---------------------------- WebSocketClient -----------------------------*/
 
-void WebSocketClient::start()
+void WebSocketClient::start(const char *proxy_url)
 {
     int ret;
 
     LOGFILE(LOG_DEBUG, "server '%s'...", m_url.c_str());
+
+    if (proxy_url != nullptr && proxy_url[0] != '\0') {
+        m_client->set_proxy(proxy_url);
+    }
 
     if ((ret = m_client->connect(m_url)) != 0) {
         m_client->stop();

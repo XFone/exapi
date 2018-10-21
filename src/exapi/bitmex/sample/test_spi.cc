@@ -9,8 +9,8 @@
  *
  */
 
-#include "JsonUtils.h"              // for JsonUtils::from_datetime
 #include "ReadConf.ipp"             // read apiKey from config file
+#include "JsonUtils.h"              // for JsonUtils::from_datetime
 
 #include "BitmexApi.h"              // for BITMEX_REST_TESTNET
 #include "MyQuoteBitmexSpi.h"
@@ -22,51 +22,65 @@ void test_bitmex_quote_spi()
     DAQuoteBitmexApi *api = DAQuoteBitmexApi::CreateApi(my_apikey.c_str(), my_secret.c_str());
     MyDAQuoteBitmexSpi spi;
 
-    const char *slist[] = { BITMEX_REST_TESTNET, "\0" };
-    api->ConnServer(slist, &spi);
-    api->Init();
+    try {
+        const char *slist[] = {
+            BITMEX_REST_TESTNET,    // https
+            my_proxy.c_str(),       // socks
+            nullptr                 // end of list
+        };
+        api->ConnServer(slist, &spi);
+        api->Init();
 
-    //------ Quote Data ------
-    //api->QueryOrderBookLevel2("XBT");
+        //------ Quote Data ------
+        //api->QueryOrderBookLevel2("XBT");
 
-    QueryFilterParams params = {
-        .symbol     = "", //"ETCBTC",
-        .filter     = nullptr,
-        .columns    = nullptr, 
-        .count      = 100,
-        .start      = 0,
-        .reverse    = false,
-        .startTime  = JsonUtils::from_datetime("2018-08-01T12:00:00"), // BUG in gcc, strptime not handle %Z
-        .endTime    = JsonUtils::from_datetime("2018-08-01T12:30:00")  // BUG in gcc, strptime not handle %Z
-    };
+        QueryFilterParams params = {
+            .symbol     = "", //"ETCBTC",
+            .filter     = nullptr,
+            .columns    = nullptr, 
+            .count      = 100,
+            .start      = 0,
+            .reverse    = false,
+            .startTime  = JsonUtils::from_datetime("2018-08-01T12:00:00"), // BUG in gcc, strptime not handle %Z
+            .endTime    = JsonUtils::from_datetime("2018-08-01T12:30:00")  // BUG in gcc, strptime not handle %Z
+        };
 
-    //api->QueryQuotes(params);                      // got 403 Forbidden
-    //api->QueryQuotesBucketed("1m", false, params); // got 403 Forbidden
+        //api->QueryQuotes(params);                      // got 403 Forbidden
+        //api->QueryQuotesBucketed("1m", false, params); // got 403 Forbidden
 
-    //------- Funding --------
-    api->QueryFundingHistory(params);
-    //api->QueryInsuranceHistory(params);
+        //------- Funding --------
+        api->QueryFundingHistory(params);
+        //api->QueryInsuranceHistory(params);
 
-    //------- Trades Data ----
-    //api->QueryTrades(params);
-    //api->QueryTradesBucketed("1m", false, params);
+        //------- Trades Data ----
+        //api->QueryTrades(params);
+        //api->QueryTradesBucketed("1m", false, params);
 
-    //------ Extra Data ------
-    //api->GetAnnouncement();
-    //api->GetAnnouncementUrgent();
-    //api->GetSchema();
-    //api->GetSchemaWebsocket();
-    //api->GetStats();
-    //api->GetStatsHistory();
-    //api->GetStatsHistoryUsd();
-    
-    api->Join();
-    api->Dispose();
+        //------ Extra Data ------
+        //api->GetAnnouncement();
+        //api->GetAnnouncementUrgent();
+        //api->GetSchema();
+        //api->GetSchemaWebsocket();
+        //api->GetStats();
+        //api->GetStatsHistory();
+        //api->GetStatsHistoryUsd();
+        
+        api->Join();
+        api->Dispose();
+
+    } catch (exception &ex) {
+        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", type_name(ex).data(), ex.what()); 
+    }
 }
 
 int main(int argc, char *argv[])
 {
     int res;
+
+#if !(_WIN32 || _WIN64)
+    // catch segfault and print backtrace to stderr
+    catch_segfault_cpp(nullptr);
+#endif
 
     // this auto parsing -t <trace-level> and -v <log-level> arguments
     if ((res = parse_args(argc, argv, "c:", checkopt)) < 0 ||

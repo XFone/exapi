@@ -64,11 +64,16 @@ namespace exapi {
 
         HttpRestClient();
 
+        static const char *
+        get_fastest_server(const char *slist[], const char **pproxy);
+
         int connect(const std::string &url, const char *proxy = nullptr);
         
         void close();
 
         bool is_open() const;
+
+        int wait_connect(int wait_ms, int max_wait);
 
         std::shared_ptr<RestRequest> 
         GetBuilder(HTTP_METHOD method, const char *path);
@@ -81,8 +86,18 @@ namespace exapi {
             return GetInstance(url)->GetBuilder(method, path);
         }
 
-        static std::shared_ptr<HttpRestClient> GetInstance(const std::string &url);
+        /**
+         * Get a HttpRestClient instance
+         * @param url server url
+         * @param proxy remote socks5 proxy server
+         */
+        static std::shared_ptr<HttpRestClient> 
+        GetInstance(const std::string &url, const char *proxy = nullptr);
 
+        /**
+         * Release a HttpRestClient instance resource
+         * @param url server url
+         */
         static void DisposeInstance(const std::string &url);
 
         /**

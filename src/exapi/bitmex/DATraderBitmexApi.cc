@@ -15,7 +15,8 @@
 #include "BitmexApi.h"
 #include "JsonUtils.h"
 #include "trade/DATraderBitmexApi.h"
-#include "detail/RestClientImpl_restbed.ipp"
+#include "detail/RestClientImpl.ipp"
+
 using namespace exapi;
 
 /**
@@ -40,14 +41,18 @@ public:
     //----------------- Overrides DATraderBitmexApi ---------------------
 
     virtual void Dispose() override {
+        DisConnServer(nullptr);
         delete this;
     }
 
     virtual void Init() override {
+        // TODO
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     virtual int Join() override {
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        // TODO
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         return 0;
     }
 
@@ -59,10 +64,18 @@ public:
         if (m_spi == nullptr) {
             assert(0);
         }
-        return 0;
+
+        const char *proxy = nullptr;
+        m_domain = HttpRestClient::get_fastest_server(slist, &proxy);
+
+        auto client = HttpRestClient::GetInstance(m_domain, proxy);
+
+        return client->wait_connect(5, 5000);
     }
 
     virtual int DisConnServer(const char *addr) override {
+        std::string server((addr == nullptr) ? m_domain : addr);
+        HttpRestClient::DisposeInstance(server);
         return 0;
     }
     

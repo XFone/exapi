@@ -20,7 +20,8 @@
 #include "JsonUtils.h"
 #include "BitmexApiDef.h"
 #include "quote/DAQuoteBitmexApi.h"
-#include "detail/RestClientImpl_restbed.ipp"
+#include "detail/RestClientImpl.ipp"
+
 using namespace exapi;
 
 #define _BITMEX_(api_type)         (int)(QuoteApiType::EX_TYPE_BITMEX + api_type)
@@ -47,15 +48,18 @@ public:
     //------------------- overrides DAQuoteBitmexApi ----------------------
 
     virtual void Dispose() override {
+        DisConnServer(nullptr);
         delete this;
     }
 
     virtual void Init() override {
+        // TODO
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     virtual int Join() override {
         // TODO
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         return 0;
     }
 
@@ -67,14 +71,18 @@ public:
         if (m_spi == nullptr) {
             assert(0);
         }
-        if (nullptr != slist) {
-            m_domain = slist[0];    // TODO: try fastest server
-        }
-        return 0;
+
+        const char *proxy = nullptr;
+        m_domain = HttpRestClient::get_fastest_server(slist, &proxy);
+
+        auto client = HttpRestClient::GetInstance(m_domain, proxy);
+
+        return client->wait_connect(5, 5000);
     }
 
     virtual int DisConnServer(const char *addr) override {
-        //TODO
+        std::string server((addr == nullptr) ? m_domain : addr);
+        HttpRestClient::DisposeInstance(server);
         return 0;
     }
 

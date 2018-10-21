@@ -69,26 +69,13 @@ public:
         if (m_spi == nullptr) {
             assert(0);
         }
-        if (nullptr != slist) {
-            m_domain = slist[0];    // TODO: try fastest server
-        }
 
-        auto client = HttpRestClient::GetInstance(m_domain);
+        const char *proxy = nullptr;
+        m_domain = HttpRestClient::get_fastest_server(slist, &proxy);
 
-        const int wait_time = 5;
-        int wait = 0, max_wait = 5000;
+        auto client = HttpRestClient::GetInstance(m_domain, proxy);
 
-        while (!client->is_open() && wait < max_wait) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
-            wait += wait_time;
-        }
-
-        if (client->is_open()) {
-            LOGFILE(LOG_INFO, "'%s' connected in %d ms", m_domain, wait);
-            return 0;
-        }
-        
-        return -ETIMEDOUT;
+        return client->wait_connect(5, 5000);
     }
 
     virtual int DisConnServer(const char *addr) override {

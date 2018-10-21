@@ -12,6 +12,7 @@
 #include "Base.h"
 #include "Log.h"
 #include "ConConf.h"
+#include "osdeps/osutil.h"
 
 #include <cstdlib>
 #include <string>
@@ -19,8 +20,9 @@
 #include <fstream>
 using namespace std;
 
-string my_apikey("");
-string my_secret("");
+string my_apikey;
+string my_secret;
+string my_proxy;        // socks5 proxy
 
 /** 
  * Read command line options
@@ -34,7 +36,7 @@ int checkopt(int opt, char *parg)
         read_config_file(parg, [](const char *key, const char *vals[]) {
             if (!strcmp(key, "ApiKey")) {
                 my_apikey = vals[0];
-                cout << "Read ApiKey " << my_apikey << endl;
+                cout << "Read ApiKey: " << my_apikey << endl;
                 return;
             } 
             if (!strcmp(key, "Secret")) {
@@ -45,13 +47,18 @@ int checkopt(int opt, char *parg)
                     if (is.is_open()) {
                         is >> my_secret;   // read from keyfile
                         is.close();
-                        cout << "Read Secret ('" << secret
+                        cout << "Read Secret: ('" << secret
                              << "') " << my_secret.substr(0, 2) << "..." << endl;
                     }
                 } else {
                     my_secret = secret;
-                    cout << "Read Secret " << my_secret.substr(0, 2) << "..." << endl;
+                    cout << "Read Secret: " << my_secret.substr(0, 2) << "..." << endl;
                 }
+                return;
+            }
+            if (!strcmp(key, "Proxy")) {
+                my_proxy = vals[0];
+                cout << "Read Proxy:  " << my_proxy << endl;
                 return;
             }
         });

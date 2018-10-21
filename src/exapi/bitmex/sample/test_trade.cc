@@ -23,15 +23,23 @@ void test_bitmex_trader_spi()
     DATraderBitmexApi *api = DATraderBitmexApi::CreateApi(my_apikey.c_str(), my_secret.c_str());
     MyDATraderBitmexSpi spi;
 
-    const char *slist[] = { BITMEX_REST_TESTNET, NULL };
-    api->ConnServer(slist, &spi);
-    api->Init();
+    try {
+        const char *slist[] = { 
+            BITMEX_REST_TESTNET,    // https
+            my_proxy.c_str(),       // socks
+            nullptr                 // end of list
+        };
+        api->ConnServer(slist, &spi);
+        api->Init();
 
-    //------ ApiKey ------
+        //------ ApiKey ------
 
-    
-    api->Join();
-    api->Dispose();
+        api->Join();
+        api->Dispose();
+        
+    } catch (exception &ex) {
+        LOGFILE(LOG_ERROR, "exception caught - %s('%s')", type_name(ex).data(), ex.what()); 
+    }
 }
 
 int main(int argc, char *argv[])

@@ -24,7 +24,6 @@
 #include <thread>
 #include <system_error>
 
-#include <boost/regex.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
@@ -37,6 +36,7 @@
 #include "RestRequestImpl.h"
 #include "HttpRestClient.h"
 #include "Socks5.h"
+#include "UrlUtils.h"
 
 using error_code    = boost::system::error_code;
 using tcp           = boost::asio::ip::tcp;         // from <boost/asio/ip/tcp.hpp>
@@ -178,27 +178,6 @@ namespace exapi {
             );
         }
 
-        void parse_uri(const std::string &url) {
-            boost::smatch match;
-            static const boost::regex pattern("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
-            if (regex_search(url, match, pattern)) {
-                std::string proto = match[1];    // we should always use https
-                std::string port  = match[3];
-                if (port.empty()) {
-                    // TRACE(7, "proto: '%s'", proto.c_str());
-                    m_port = !proto.compare("https:") ? "443" : "80";
-                } else {
-                    m_port = port.substr(1);
-                }
-                m_host = match[2];
-                std::string m_path = match[4];
-                TRACE(7, "host: '%s' port: '%s' path: '%s'", 
-                      m_host.c_str(), m_port.c_str(), m_path.c_str());
-            } else {
-                assert(0);
-            }
-        }
-
     public:
         RestClientImpl() : 
             m_ioc(), is_start(false), is_open(false), is_pending(false) {}
@@ -216,7 +195,7 @@ namespace exapi {
         int connect(const std::string &url) {
             error_code ec;
 
-            parse_uri(url);
+            UrlUtils::parse_uri(url, m_host, m_port);
 
             // setup ssl
             ssl::context ssl_ctx(
@@ -239,18 +218,18 @@ namespace exapi {
             }
 
             tcp::resolver resolver(m_ioc);
-            tcp::resolver::results_type result;
 
+            std::string host, port;
             if (m_proxy.empty()) {
                 // we resolve domain synchronizely since it wont change much
-                result = resolver.resolve(m_host, m_port, ec);
+                host = m_host; 
+                port = m_port;
             } else {
-                std::vector<std::string> fields;
-                boost::split(fields, m_proxy, boost::is_any_of(":"));
-                LOGFILE(LOG_INFO, "via Socks5 proxy '%s:%s'", fields[0].c_str(), fields[1].c_str());
-                result = resolver.resolve(fields[0], fields[1], ec);
+                UrlUtils::parse_uri(m_proxy, host, port);
+                LOGFILE(LOG_INFO, "via Socks5 proxy '%s:%s'", host.c_str(), port.c_str());
             }
 
+            auto result = resolver.resolve(host, port, ec);
             if (ec) {
                 LOGFILE(LOG_ERROR, "tcp::resolver::resolve: %s", ec.message().c_str());
                 return -ec.value();
@@ -369,6 +348,38 @@ HttpRestClient::HttpRestClient()
     // NOTHING
 }
 
+const char *
+HttpRestClient::get_fastest_server(const char *slist[], const char **pproxy)
+{
+    const char **ps = slist;
+    const char *server = nullptr;
+
+    // TODO find fastest rest server from list
+    while (*ps != nullptr && **ps != '\0') {
+        std::string url(*ps);
+        if (url.find("http") != std::string::npos) { // just find the first ocuring
+            server = *ps;
+            break;
+        }
+        ps++;
+    }
+
+    // find proxy server
+    if (pproxy != nullptr) {
+        ps = slist;
+        while (*ps != nullptr && **ps != '\0') {
+            std::string url(*ps);
+            if (url.find("socks") != std::string::npos) {
+                *pproxy = *ps;
+                break;
+            }
+            ps++;
+        }
+    }
+
+    return server;
+}
+
 int HttpRestClient::connect(const std::string &url, const char *proxy)
 {
     if (nullptr != proxy) {
@@ -388,6 +399,29 @@ bool HttpRestClient::is_open() const
     return m_impl->is_open;
 }
 
+int HttpRestClient::wait_connect(int wait_ms, int max_wait)
+{
+    int result = 0;
+    int wait = 0;
+
+    while (!this->is_open() && wait < max_wait) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(wait_ms));
+        wait += wait_ms;
+    }
+
+    if (this->is_open()) {
+        LOGFILE(LOG_INFO, "'%s:%s' connected in %d ms", 
+                m_impl->m_host.c_str(), m_impl->m_port.c_str(), wait);
+    } else {
+        LOGFILE(LOG_WARN, "'%s:%s' connect timeout", 
+                m_impl->m_host.c_str(), m_impl->m_port.c_str());
+        result = -ETIMEDOUT;
+    }
+    
+    return result;
+}
+
+
 std::shared_ptr<RestRequest> 
 HttpRestClient::GetBuilder(HTTP_METHOD method, const char *path)
 {
@@ -403,7 +437,7 @@ HttpRestClient::GetBuilder(HTTP_METHOD method, const char *path)
 client_map_t HttpRestClient::m_cli_map;
 
 std::shared_ptr<HttpRestClient>
-HttpRestClient::GetInstance(const std::string &url)
+HttpRestClient::GetInstance(const std::string &url, const char *proxy)
 {
     std::shared_ptr<HttpRestClient> client;
 
@@ -411,8 +445,7 @@ HttpRestClient::GetInstance(const std::string &url)
     if (it == m_cli_map.end()) {
         client = std::make_shared<HttpRestClient>();
         m_cli_map[url] = client;
-        client->connect(url, nullptr); // proxy
-        // client->connect(url, "localhost:21080");
+        client->connect(url, proxy); // ssh-socks5 proxy (e.g., "localhost:21080")
         client->m_impl->start();
         //client->m_impl->m_ioc.run();
     } else {
@@ -441,7 +474,7 @@ void RestRequest::ReprarePayload()
     if (m_request->method() == http::verb::get) {
         is_path_parameter = true;
     } else {
-        //
+        // TODO
     }
 
     if (is_path_parameter) {

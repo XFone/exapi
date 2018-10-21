@@ -23,7 +23,6 @@
 #include <system_error>
 #include <uuid/uuid.h>
 
-#include <boost/regex.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -34,6 +33,7 @@
 
 #include "WebSockClient.h"
 #include "Socks5.h"
+#include "UrlUtils.h"
 
 using error_code    = boost::system::error_code;
 using tcp           = boost::asio::ip::tcp;         // from <boost/asio/ip/tcp.hpp>
@@ -182,30 +182,11 @@ namespace exapi {
                   get_key().data(), bytes_transferred);
         }
 
-        void parse_uri(const std::string &url) {
-            boost::smatch match;
-            static const boost::regex pattern("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
-            if (regex_search(url, match, pattern)) {
-                m_host = match[2];
-                std::string port = match[3];
-                if (port.empty()) {
-                    m_port = "443";         // always use https
-                } else {
-                    m_port = port.substr(1);
-                }
-                m_path = match[4];
-                TRACE(7, "host: '%s' port: '%s' path: '%s'", 
-                      m_host.c_str(), m_port.c_str(), m_path.c_str());
-            } else {
-                assert(0);
-            }
-        }
         
     public:
         WebSocketClientImpl() 
             : m_intf(NULL), m_ioc(), is_start(false) {
             m_wss_key = generate_key();
-            // m_proxy = "localhost:21080";
         }
         
         ~WebSocketClientImpl() {}
@@ -214,6 +195,9 @@ namespace exapi {
             return m_wss_key;
         }
 
+        /**
+         * Set Socks5 proxy (e.g., "localhost:21080")
+         */
         const std::string & set_proxy(const std::string &proxy) {
             m_proxy = proxy;
             return m_proxy;
@@ -231,7 +215,7 @@ namespace exapi {
                 //ssl::context::sslv23
             );
 
-            parse_uri(url);
+            UrlUtils::parse_uri(url, m_host, m_port, m_path);
 
             // This holds the root certificate used for verification
             // ssl_ctx.add_certificate_authority(boost::asio::buffer(cert.data(), cert.size()), ec);
@@ -253,16 +237,17 @@ namespace exapi {
 
             // m_ws->control_callback(on_control);
 
-            tcp::resolver::results_type result;
+            std::string host, port;
             if (m_proxy.empty()) {
-                result = resolver.resolve(m_host, m_port, ec);
+                // we resolve domain synchronizely since it wont change much
+                host = m_host; 
+                port = m_port;
             } else {
-                std::vector<std::string> fields;
-                boost::split(fields, m_proxy, boost::is_any_of(":"));
-                LOGFILE(LOG_INFO, "via Socks5 proxy '%s:%s'", fields[0].c_str(), fields[1].c_str());
-                result = resolver.resolve(fields[0], fields[1], ec);
+                UrlUtils::parse_uri(m_proxy, host, port);
+                LOGFILE(LOG_INFO, "via Socks5 proxy '%s:%s'", host.c_str(), port.c_str());
             }
 
+            tcp::resolver::results_type result = resolver.resolve(host, port, ec);
             if (ec) {
                 LOGFILE(LOG_ERROR, "tcp::resolver::resolve: %s", ec.message().c_str());
                 return -ec.value();
